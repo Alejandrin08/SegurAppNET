@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "./Carousel.css";
 
-function Carousel({ items = [] }) {
+function Carousel({ items = [], onSelectPractice }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const trackRef = useRef(null);
@@ -67,6 +67,18 @@ function Carousel({ items = [] }) {
     return `translateX(-${currentIndex * cardWidthWithGap}px)`;
   };
 
+  const handleShowDetails = (practice) => {
+    if (onSelectPractice) {
+      onSelectPractice(practice);
+    }
+
+    const modalElement = document.getElementById("goodPracticeModal");
+    if (modalElement) {
+      const modal = new window.bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  };
+
   return (
     <div className="carousel-container">
       {showArrows && (
@@ -110,9 +122,7 @@ function Carousel({ items = [] }) {
 
             <button
               className="carousel-button"
-              type="button"
-              data-toggle="modal"
-              data-target="#goodPractice"
+              onClick={() => handleShowDetails(item)}
             >
               Detalles
             </button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./SecurityMechanismTemplate.css";
 import { BsInfoCircleFill } from "react-icons/bs";
 import CodeBlock from "../CodeBlock/CodeBlock";
@@ -18,6 +18,13 @@ function SecurityMechanismTemplate({
 }) {
   const [showPractices, setShowPractices] = useState(false);
   const [showThreats, setShowThreats] = useState(false);
+  const [selectedPractice, setSelectedPractice] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.bootstrap) {
+      import("bootstrap/dist/js/bootstrap.bundle.min");
+    }
+  }, []);
 
   return (
     <div className="security-mechanism">
@@ -92,11 +99,15 @@ function SecurityMechanismTemplate({
         </div>
         {showPractices && (
           <div className="cards card-concept">
-            <Carousel items={goodPractices} />
-            <Modal />
+            <Carousel
+              items={goodPractices}
+              onSelectPractice={(practice) => setSelectedPractice(practice)}
+            />
           </div>
         )}
       </section>
+
+      {selectedPractice && <Modal goodPractice={selectedPractice} />}
 
       <div className="horizontal-line"></div>
       <section className="section" id="section-threats">

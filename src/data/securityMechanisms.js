@@ -24,55 +24,295 @@ public async Task<ResponseViewModel> Index(AutenticacionViewModel autenticacion)
   goodPractices: [
     {
       title: "Políticas de roles directamente",
-      description:
-        "Proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basada en reclamaciones.",
+      description: "Proporciona un marco sólido para gestionar usuarios...",
       threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación de políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
     },
     {
       title: "Políticas de roles directamente",
-      description:
-        "Proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basada en reclamaciones.",
-      threats: ["Acceso no autorizado"],
+      description: "Proporciona un marco sólido para gestionar usuarios...",
+      threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación dedsadasda políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+            postCodeText:
+              "Este código inicializa los roles básicos del sistema.",
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
     },
     {
       title: "Políticas de roles directamente",
-      description:
-        "Proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basada en reclamaciones.",
-      threats: [
-        "Acceso no autorizado",
-        "Escalada de privilegios",
-        "Manipulación de URL",
-      ],
+      description: "Proporciona un marco sólido para gestionar usuarios...",
+      threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación de políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+            postCodeText:
+              "Este código inicializa los roles básicos del sistema.",
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
     },
     {
       title: "Políticas de roles directamente",
-      description:
-        "Proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basada en reclamaciones.",
-      threats: [
-        "Acceso no autorizado",
-        "Escalada de privilegios",
-        "Manipulación de URL",
-      ],
+      description: "Proporciona un marco sólido para gestionar usuarios...",
+      threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación de políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+            postCodeText:
+              "Este código inicializa los roles básicos del sistema.",
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
     },
     {
       title: "Políticas de roles directamente",
-      description:
-        "Proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basada en reclamaciones.",
-      threats: [
-        "Acceso no autorizado",
-        "Escalada de privilegios",
-        "Manipulación de URL",
-      ],
+      description: "Proporciona un marco sólido para gestionar usuarios...",
+      threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación de políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+            postCodeText:
+              "Este código inicializa los roles básicos del sistema.",
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
     },
     {
       title: "Políticas de roles directamente",
-      description:
-        "Proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basada en reclamaciones.",
-      threats: [
-        "Acceso no autorizado",
-        "Escalada de privilegios",
-        "Manipulación de URL",
-      ],
+      description: "Proporciona un marco sólido para gestionar usuarios...",
+      threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación de políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+            postCodeText:
+              "Este código inicializa los roles básicos del sistema.",
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
+    },
+    {
+      title: "Políticas de roles directamente",
+      description: "Proporciona un marco sólido para gestionar usuarios...",
+      threats: ["Acceso no autorizado", "Escalada de privilegios"],
+      modalContent: {
+        title: "Implementación de políticas de roles",
+        practices: [
+          {
+            title: "Configuración básica",
+            description: "Primero, configura los roles en tu aplicación...",
+            code: `[HttpPost]
+public async Task<IActionResult> ConfigureRoles() {
+  // Código de configuración
+}`,
+            postCodeText:
+              "Este código inicializa los roles básicos del sistema.",
+          },
+          {
+            title: "Asignación de roles",
+            description: "Proceso para asignar roles a los usuarios...",
+            code: `public async Task AssignRole(string userId, string role) {
+  // Código de asignación
+}`,
+            postCodeText:
+              "Asegúrate de validar los permisos antes de asignar roles.",
+          },
+        ],
+        rubric: {
+          dynamicCells: [
+            'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones',
+            "Solo algunas acciones clave usan el atributo de roles",
+            "No se usa el atributo de roles",
+            "Los roles coinciden con funciones específicas del sistema",
+            "Se aplican roles donde no son necesarios",
+            "Los roles se aplican de forma arbitraria",
+            "Impide el acceso no autorizado a funciones críticas",
+            "Algunas acciones están protegidas",
+            "Todas las acciones están accesibles",
+          ],
+        },
+      },
     },
   ],
   threats: [

@@ -1,19 +1,7 @@
 import "./Rubric.css";
 import { useEffect, useRef } from "react";
 
-const Rubric = () => {
-  const dynamicCells = [
-    'Se utiliza el atributo [Authorize(Roles = "...")] en todas las acciones/controladores que requieren control de acceso.',
-    "Solo algunas acciones/controladores clave usan el atributo de roles.",
-    "No se usa el atributo de roles en ningún controlador o acción.",
-    "Los roles son diferenciados y coinciden con funciones específicas del sistema (ej. Admin, Usuario).",
-    "Se aplican roles, pero en casos donde no son necesarios o de forma redundante.",
-    "Los roles se aplican de forma arbitraria o irrelevante.",
-    "Impide el acceso no autorizado a funciones críticas o que no corresponden al rol asignado.",
-    "Algunas acciones están protegidas, pero otras sensibles pueden accederse sin rol.",
-    "Todas las acciones están accesibles independientemente del rol asignado.",
-  ];
-
+const Rubric = ({ dynamicCells = [] }) => {
   const rowRefs = useRef([]);
   const stripeRefs = useRef([]);
   const gridRef = useRef(null);
@@ -40,8 +28,6 @@ const Rubric = () => {
         });
 
         const rowTop = rowCells[0].offsetTop;
-        const wrapperTop = wrapperRef.current.offsetTop;
-
         const stripe = stripeRefs.current[rowIndex];
         stripe.style.height = `${maxHeight}px`;
         stripe.style.top = `${rowTop}px`;
@@ -66,7 +52,7 @@ const Rubric = () => {
       observer.disconnect();
       window.removeEventListener("resize", updateStripes);
     };
-  }, []);
+  }, [dynamicCells]);
 
   return (
     <div className="rubric-container">

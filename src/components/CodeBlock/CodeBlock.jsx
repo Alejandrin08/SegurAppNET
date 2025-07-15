@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./CodeBlock.css"; 
+import "./CodeBlock.css";
 
 const CodeBlock = ({ code, height = "200px" }) => {
   const [isCopied, setIsCopied] = useState(false);
