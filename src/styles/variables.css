@@ -1,0 +1,76 @@
+:root {
+  --color-primary: #075985;
+  --color-primary-light: #e0f2fe;
+  --color-blue-light: #6E94E6;
+  --color-secondary: #1c9dea;
+  --color-text: #2d6382;
+  --color-text-light: #84cde8;
+  --color-purple: #9761dd;
+  --color-purple-secundary: #8f50bc;
+  --color-purple-tertiary: #5b21b6;
+  --color-purple-quartenary: #8630D1;
+  --color-purple-light: #ede9fe;
+  --color-footer-bg: #056194;
+  --color-footer-text: white;
+  --color-footer-accent: #84cde8;
+  --color-footer-divider: rgba(255, 255, 255, 0.3);
+  --color-footer-copyright: rgba(255, 255, 255, 0.7);
+  --color-menu-text: #2d6382;
+  --color-menu-hover: #f5f5f5;
+  --color-menu-selected-bg: #e3f2fd;
+  --color-menu-header: #175274;
+  --color-menu-hover-text: #075985;
+  --color-menu-selected-border: #056194;
+  --color-security-mechanism: #0284c7;
+  --color-security-mechanism-stroke: #fef9c3;
+  --color-yellow: #956335;
+
+  --bg-white: #ffffff;
+  --bg-blue-light: #f6fbff;
+  --bg-purple-light: #f9f8ff;
+  --bg-purple-light-secondary: #FAF5FF;
+  --bg-info: #eff6ff;
+  --bg-horizontal-line: #bce6fd;
+  --bg-black: #2D2D2D;
+  --bg-green-light: #DCFCE7;
+
+  --icon-blue: #6286fe;
+  --icon-green: #00ba00;
+
+  --font-size-base: 1rem;
+  --font-size-h1: 2rem;
+  --font-size-h2: 1.75rem;
+  --font-size-h3: 1.15rem;
+  --font-size-small: 0.85rem;
+  --footer-icon-size: 3rem;
+  --footer-bullet-size: 1.2rem;
+  --menu-font-size: 1rem;
+  --menu-font-size-sm: 0.9rem;
+  --menu-padding: 0.5rem;
+  --menu-border-radius: 4px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+
+  --border-radius: 8px;
+  --border-color: #afcee4;
+  --border-color-card-blue: #60a5fa;
+  --border-color-card-purple: #c084fc;
+
+  --header-bg-color: #056194;
+  --header-text-color: white;
+  --header-padding-y: 15px;
+  --header-padding-x: 20px;
+  --header-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --header-z-index: 1000;
+  --header-icon-size: 2.5rem;
+  --header-gap: 10px;
+}

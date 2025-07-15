@@ -1,0 +1,152 @@
+@import "../../styles/variables.css";
+
+.security-mechanism {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.horizontal-line {
+  width: 100%;
+  height: 5px;
+  min-height: 5px;
+  max-height: 5px;
+  background-color: var(--bg-horizontal-line);
+  flex-shrink: 0;
+  margin-top: 50px;
+  margin-bottom: var(--spacing-md);
+}
+
+.cards {
+  flex-grow: 1;
+  padding: var(--spacing-md) var(--spacing-md) 0;
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.card-concept {
+  box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.19);
+}
+
+.parent-security {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto auto auto;
+  gap: 8px;
+  column-gap: var(--spacing-lg);
+  width: 100%;
+  overflow: hidden;
+}
+
+.facts-container {
+  grid-area: 3 / 1 / 4 / 3;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+
+.facts-container.single-fact {
+  grid-template-columns: 1fr;
+}
+
+.fact-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-sm);
+  max-width: 100%;
+  min-height: 0;
+}
+
+.fact-blue {
+  border-left: 5px solid var(--border-color-card-blue);
+  background-color: var(--bg-info);
+  color: var(--color-blue-light) !important;
+}
+
+.fact-blue p {
+  color: var(--color-blue-light) !important;
+}
+
+.fact-purple {
+  border-left: 5px solid var(--border-color-card-purple);
+  background-color: var(--bg-purple-light-secondary);
+  color: var(--color-purple-quartenary) !important;
+}
+
+.fact-purple p {
+  color: var(--color-purple-quartenary) !important;
+}
+
+.div1-security {
+  grid-area: 1 / 1 / 2 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.div2-security {
+  grid-area: 2 / 1 / 3 / 3;
+}
+.div4-security {
+  grid-column: 1 / 3;
+  grid-row: 4;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  margin-top: var(--spacing-sm);
+  overflow: hidden;
+}
+
+.div4-security > * {
+  width: 100%;
+}
+
+.card-header-security {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.icons-cards {
+  font-size: var(--spacing-lg);
+  flex-shrink: 0;
+  margin-top: 0.5rem;
+}
+
+.icon-size {
+  font-size: var(--spacing-lg);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.card-header-security p {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.fact-card img {
+  max-width: 50%;
+  height: auto;
+  margin-top: auto;
+  align-self: center;
+  padding-top: var(--spacing-md);
+}
+
+#section-good-practices {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+#section-threats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}

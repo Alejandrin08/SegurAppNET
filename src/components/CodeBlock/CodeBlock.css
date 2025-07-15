@@ -1,0 +1,42 @@
+@import "../../styles/variables.css";
+
+.rectangle-black {
+  position: relative;
+  display: block;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  width: 100%;
+  color: var(--color-footer-text);
+  background-color: var(--bg-black);
+  overflow-y: auto;
+  font-family: "Courier New", monospace;
+  white-space: pre;
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.copy-button:active {
+  transform: scale(0.95);
+}
+
+.copy-button.copied {
+  background: #4caf50;
+}

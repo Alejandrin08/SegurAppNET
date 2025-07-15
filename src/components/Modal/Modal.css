@@ -1,0 +1,93 @@
+@import "../../styles/variables.css";
+
+.custom-modal-content {
+  border: 2px solid #056194;
+  background-color: #ffffff;
+  border-radius: 8px;
+}
+
+.custom-modal-header {
+  background-color: #2d6382;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  height: 5rem;
+}
+
+.custom-modal-body {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.custom-modal-footer {
+  background-color: #e0f2fe !important;
+  border-top: none;
+  height: 5rem;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.close-button:hover {
+  transform: scale(1.1);
+}
+
+.icon-close {
+  color: #ff4d4f;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.icon-close:hover {
+  color: #ff7875;
+}
+
+.goodpractice-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.goodpractice-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.line-goodpractice {
+  width: 90vh;
+  height: 2px;
+  background: #e6e8ec;
+  margin: var(--spacing-xs) auto;
+}
+
+.rubric-section {
+  width: 100%;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rubric-section h2 {
+  margin-bottom: 1rem;
+  color: #2d6382;
+}

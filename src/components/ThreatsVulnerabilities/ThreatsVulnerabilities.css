@@ -1,0 +1,73 @@
+@import "../../styles/variables.css";
+
+.timeline-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding-left: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.vertical-line-threat {
+  position: absolute;
+  top: 0;
+  left: calc(var(--spacing-lg) + 25px - 2.5px);
+  width: 5px;
+  background-color: var(--bg-horizontal-line);
+  z-index: 0;
+}
+
+.circle-threat {
+  z-index: 1;
+  position: relative;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  width: 50px;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.timeline-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  position: relative;
+  z-index: 1;
+}
+
+.rectangle-good-practice {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  width: 180px;
+  height: min-content;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.good-practice-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.title-purple {
+  color: #7c3aed !important;
+}
+
+.title-dark-blue {
+  color: #0284c7 !important;
+}
+
+.title-dark-yellow {
+  color: #854d0e !important;
+}
+
+.title-dark-green {
+  color: #00ba00 !important;
+}
