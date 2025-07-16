@@ -66,6 +66,49 @@
   color: var(--color-primary);
 }
 
+.container-big-card-appendices {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.grid-security-mechanism {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+@media (max-width: var(--breakpoint-desktop)) {
+  .grid-security-mechanism {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: var(--breakpoint-tablet)) {
+  .grid-security-mechanism {
+    grid-template-columns: 1fr;
+  }
+
+  .rectangle {
+    white-space: normal;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .container-big-card-appendices {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: var(--breakpoint-mobile)) {
+  .rectangle-blue-appendices {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
 .letters-row {
   display: flex;
   justify-content: space-between;
@@ -178,13 +221,6 @@
   width: 100%;
   margin-top: var(--spacing-md);
   display: flex;
-}
-
-.container-big-card-appendices {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
 }
 
 .big-card {
@@ -320,14 +356,6 @@
 .circle-purple {
   background-color: #7c3aed;
   color: #8f50bc;
-}
-
-.grid-security-mechanism {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-xs);
-  width: 100%;
-  margin-top: var(--spacing-lg);
 }
 
 .pair {

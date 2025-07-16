@@ -16,6 +16,7 @@
   width: 5px;
   background-color: var(--bg-horizontal-line);
   z-index: 0;
+  height: 100%;
 }
 
 .circle-threat {
@@ -28,7 +29,7 @@
   height: 50px;
   width: 50px;
   flex-shrink: 0;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .timeline-row {
@@ -41,10 +42,10 @@
 
 .rectangle-good-practice {
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-small);
   width: 180px;
-  height: min-content;
+  min-height: min-content;
   word-wrap: break-word;
   text-align: center;
 }
@@ -57,17 +58,91 @@
 }
 
 .title-purple {
-  color: #7c3aed !important;
+  color: var(--color-purple-tertiary) !important;
 }
 
 .title-dark-blue {
-  color: #0284c7 !important;
+  color: var(--color-security-mechanism) !important;
 }
 
 .title-dark-yellow {
-  color: #854d0e !important;
+  color: var(--color-yellow) !important;
 }
 
 .title-dark-green {
-  color: #00ba00 !important;
+  color: var(--icon-green) !important;
+}
+
+@media (max-width: var(--breakpoint-tablet)) {
+  .timeline-container {
+    padding-left: var(--spacing-md);
+  }
+
+  .vertical-line-threat {
+    left: calc(var(--spacing-md) + 20px - 2.5px);
+  }
+
+  .circle-threat {
+    height: 40px;
+    width: 40px;
+    font-size: var(--font-size-small);
+  }
+
+  .timeline-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .rectangle-good-practice {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .good-practice-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: var(--breakpoint-mobile)) {
+  .timeline-container {
+    padding-left: var(--spacing-sm);
+  }
+
+  .vertical-line-threat {
+    left: calc(var(--spacing-sm) + 15px - 2.5px);
+  }
+
+  .circle-threat {
+    height: 35px;
+    width: 35px;
+  }
+
+  .rectangle-good-practice {
+    font-size: 0.75rem;
+    padding: var(--spacing-xs);
+  }
+}
+
+.circle-purple {
+  background-color: var(--color-purple-tertiary);
+  color: var(--color-purple-tertiary);
+  border: 2px solid var(--color-purple);
+}
+
+.circle-blue {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 2px solid var(--color-security-mechanism);
+}
+
+.circle-yellow {
+  background-color: #fef9c3;
+  color: var(--color-yellow);
+  border: 2px solid #fef08a;
+}
+
+.circle-green {
+  background-color: var(--bg-green-light);
+  color: var(--icon-green);
+  border: 2px solid #86efac;
 }

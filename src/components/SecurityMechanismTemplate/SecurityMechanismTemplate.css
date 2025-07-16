@@ -3,6 +3,8 @@
 .security-mechanism {
   max-width: 100%;
   margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  overflow-x: hidden;
 }
 
 .horizontal-line {
@@ -12,8 +14,7 @@
   max-height: 5px;
   background-color: var(--bg-horizontal-line);
   flex-shrink: 0;
-  margin-top: 50px;
-  margin-bottom: var(--spacing-md);
+  margin: 50px 0 var(--spacing-md) 0;
 }
 
 .cards {
@@ -23,6 +24,8 @@
   display: flex;
   flex-direction: column;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card-concept {
@@ -137,7 +140,10 @@
 
 #section-good-practices {
   display: flex;
+  width: 100%;
+  max-width: 100%;
   flex-direction: column;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-md);
@@ -145,8 +151,80 @@
 
 #section-threats {
   display: flex;
+  max-width: 100%;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   gap: var(--spacing-md);
+}
+
+@media (max-width: 992px) {
+  .parent-security {
+    column-gap: var(--spacing-md);
+  }
+
+  .facts-container {
+    gap: var(--spacing-sm);
+  }
+
+  .card-header-security {
+    gap: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 768px) {
+  .parent-security {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .div1-security,
+  .div2-security,
+  .div4-security,
+  .facts-container {
+    grid-column: 1;
+  }
+
+  .facts-container {
+    grid-template-columns: 1fr;
+    grid-area: auto;
+  }
+
+  .fact-card img {
+    max-width: 70%;
+  }
+
+  .horizontal-line {
+    margin-top: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .security-mechanism {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .cards {
+    padding: var(--spacing-sm) var(--spacing-sm) 0;
+  }
+
+  .card-header-security {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .icons-cards,
+  .icon-size {
+    font-size: var(--spacing-md);
+  }
+
+  .fact-card {
+    padding: var(--spacing-xs);
+  }
+
+  .fact-card img {
+    max-width: 100%;
+  }
 }

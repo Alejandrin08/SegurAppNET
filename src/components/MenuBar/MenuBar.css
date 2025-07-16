@@ -1,11 +1,15 @@
 @import "../../styles/variables.css";
 
 .menu-nav {
-  font-family: inherit !important; 
+  font-family: inherit !important;
   background-color: var(--bg-white) !important;
   height: 100%;
-  width: 100%;
+  width: 350px;
+  min-width: 350px;
   padding-top: var(--spacing-lg);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 100;
 }
 
 .menu-nav h2 {
@@ -42,7 +46,7 @@
 .menu-list {
   list-style: none;
   margin: var(--spacing-xs) 0;
-  padding-left: var(--spacing-lg);
+  padding-left: var(--spacing-md);
 }
 
 .menu-list li {
@@ -107,6 +111,7 @@
   transition: color 0.2s ease;
   padding-left: var(--spacing-sm);
   margin-left: calc(-1 * var(--spacing-sm));
+  font-size: var(--menu-font-size-sm);
 }
 
 .menu-link:hover {
@@ -121,4 +126,63 @@
 .icon-menubar {
   font-size: var(--menu-font-size);
   color: inherit;
+}
+
+@media (max-width: 992px) {
+  .menu-nav {
+    width: 30%;
+    min-width: 250px;
+    padding-top: var(--spacing-md);
+  }
+
+  .menu-list {
+    padding-left: var(--spacing-sm);
+  }
+
+  .menu-link {
+    padding-left: var(--spacing-xs);
+    margin-left: calc(-1 * var(--spacing-xs));
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-nav {
+    width: 30%;
+    min-width: 200px;
+    padding: var(--spacing-sm) var(--spacing-xs) 0;
+  }
+
+  .menu-header {
+    padding: calc(var(--menu-padding) * 0.8);
+    font-size: var(--menu-font-size-sm);
+  }
+
+  .menu-list li {
+    padding: calc(var(--spacing-xs) * 0.8) 0;
+  }
+
+  .menu-section-ultimate {
+    padding-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-nav {
+    width: 30%;
+    min-width: unset;
+    position: fixed;
+    left: -100%;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .menu-link {
+    font-size: 0.8rem;
+  }
+
+  .icon-menubar {
+    font-size: var(--menu-font-size-sm);
+  }
 }

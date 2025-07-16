@@ -5,7 +5,7 @@
   width: 100%;
   max-width: 1000px;
   margin: auto;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -22,14 +22,14 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  flex: 0 0 calc((100% - 2rem) / 3);
+  flex: 0 0 calc((100% - var(--spacing-sm) * 2) / 3);
   min-width: 0;
   min-height: 350px;
   background-color: var(--bg-green-light);
   padding: var(--spacing-md);
   border-radius: var(--border-radius);
   text-align: center;
-  border-color: var(--border-color);
+  border: 1px solid var(--border-color);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -43,7 +43,7 @@
   margin-top: var(--spacing-sm);
   background-color: var(--color-primary-light);
   color: var(--color-primary);
-  border-color: var(--border-color);
+  border: 1px solid var(--border-color);
   padding: 0.6rem 1.2rem;
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -115,4 +115,43 @@
   flex-direction: column;
   gap: 8px;
   margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .carousel-card {
+    flex: 0 0 calc((100% - var(--spacing-sm)) / 2);
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 600px) {
+  .carousel-container {
+    padding: var(--spacing-sm) var(--spacing-sm);
+  }
+
+  .carousel-card {
+    flex: 0 0 100%;
+    min-height: 300px;
+  }
+
+  .arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 1.5rem;
+  }
+
+  .carousel-button {
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .carousel-card {
+    min-height: 280px;
+    padding: var(--spacing-sm);
+  }
+
+  .threats-container {
+    gap: 6px;
+  }
 }

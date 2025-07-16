@@ -1,19 +1,19 @@
+@import "../../styles/variables.css";
+
 .rubric-container {
-  height: 80%;
-  width: 90%;
-  margin: 2rem auto;
-  padding: 1rem;
-  border-radius: 8px;
+  width: 100%;
+  margin: var(--spacing-lg) auto;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  background-color: #f2f2f2;
+  background-color: var(--bg-white);
 }
 
 .rubric-wrapper {
   position: relative;
   width: 100%;
-  height: 100%;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
 }
 
 .horizontal-stripes {
@@ -110,4 +110,32 @@
   color: #2d6382;
   margin: 0;
   width: 100%;
+}
+
+@media (max-width: var(--breakpoint-tablet)) {
+  .rubric-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .rubric-cell {
+    padding: var(--spacing-sm);
+  }
+
+  .first-col .cell-content,
+  .last-col .cell-content {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: var(--breakpoint-mobile)) {
+  .rubric-container {
+    margin: var(--spacing-md) auto;
+    padding: var(--spacing-sm);
+  }
+
+  .cell-content h3 {
+    font-size: var(--font-size-h3-mobile);
+  }
 }

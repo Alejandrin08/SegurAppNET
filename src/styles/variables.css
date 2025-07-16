@@ -1,14 +1,14 @@
 :root {
   --color-primary: #075985;
   --color-primary-light: #e0f2fe;
-  --color-blue-light: #6E94E6;
+  --color-blue-light: #6e94e6;
   --color-secondary: #1c9dea;
   --color-text: #2d6382;
   --color-text-light: #84cde8;
   --color-purple: #9761dd;
   --color-purple-secundary: #8f50bc;
   --color-purple-tertiary: #5b21b6;
-  --color-purple-quartenary: #8630D1;
+  --color-purple-quartenary: #8630d1;
   --color-purple-light: #ede9fe;
   --color-footer-bg: #056194;
   --color-footer-text: white;
@@ -28,11 +28,11 @@
   --bg-white: #ffffff;
   --bg-blue-light: #f6fbff;
   --bg-purple-light: #f9f8ff;
-  --bg-purple-light-secondary: #FAF5FF;
+  --bg-purple-light-secondary: #faf5ff;
   --bg-info: #eff6ff;
   --bg-horizontal-line: #bce6fd;
-  --bg-black: #2D2D2D;
-  --bg-green-light: #DCFCE7;
+  --bg-black: #2d2d2d;
+  --bg-green-light: #dcfce7;
 
   --icon-blue: #6286fe;
   --icon-green: #00ba00;
@@ -73,4 +73,25 @@
   --header-z-index: 1000;
   --header-icon-size: 2.5rem;
   --header-gap: 10px;
+
+  --modal-border-color: #056194;
+  --modal-header-bg: #2d6382;
+  --modal-header-height: 5rem;
+  --modal-footer-bg: #e0f2fe;
+  --modal-close-color: #ff4d4f;
+  --modal-close-hover: #ff7875;
+  --modal-line-color: #e6e8ec;
+
+  --breakpoint-mobile: 576px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 992px;
+
+  --font-size-h1-mobile: 1.5rem;
+  --font-size-h2-mobile: 1.25rem;
+  --font-size-h3-mobile: 1rem;
+
+  --shadow-sm: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 4px 4px 12px rgba(0, 0, 0, 0.15);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
 }
