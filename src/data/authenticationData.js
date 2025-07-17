@@ -1,3 +1,6 @@
+import jwtImg from "../assets/jwt.png";
+import authImg from "../assets/auth.png";
+
 export const authenticationData = {
   securityMechanismTitle: "Autenticación",
   definition:
@@ -6,12 +9,12 @@ export const authenticationData = {
     {
       description:
         "Los JSON web tokens (JWT) son el estándar moderno de autenticación. Cuando los usuarios se autentican correctamente, el servidor genera un token firmado que contiene sus reclamaciones y que se utiliza para las solicitudes posteriores.",
-      image: "src/assets/jwt.png",
+      image: jwtImg,
     },
     {
       description:
         "Las reclamaciones proporcionan una forma de representar la identidad del usuario más allá del nombre de usuario/contraseña, permitiendo añadir más información detallada de un usuario.",
-      image: "src/assets/auth.png",
+      image: authImg,
     },
   ],
   implementationDescription:

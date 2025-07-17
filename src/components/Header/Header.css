@@ -8,7 +8,7 @@ header {
   background-color: var(--header-bg-color) !important;
   padding: var(--header-padding-y) 0 !important;
   box-shadow: var(--header-shadow) !important;
-  z-index: 1000 !important;
+  z-index: 1040 !important;
 }
 
 .header-content {

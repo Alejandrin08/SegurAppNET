@@ -10,7 +10,7 @@
   top: 20px;
   left: 0;
   height: 100vh;
-  z-index: 100;
+  z-index: 1001 !important;
   border-right: 1px solid var(--border-color);
   padding-bottom: var(--spacing-lg);
   overflow-y: auto;
@@ -175,6 +175,10 @@ body.modal-open .menu-toggle {
   }
 }
 
+.menu-nav * {
+  pointer-events: auto;
+}
+
 @media (max-width: 768px) {
   .menu-nav {
     position: fixed;
@@ -196,14 +200,15 @@ body.modal-open .menu-toggle {
   }
 
   .menu-overlay {
-    display: none;
+    display: none !important;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
+    z-index: 1000;
+    pointer-events: auto;
     backdrop-filter: blur(2px);
   }
 
@@ -215,7 +220,7 @@ body.modal-open .menu-toggle {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
+    z-index: 1000;
   }
 
   body.menu-open {
