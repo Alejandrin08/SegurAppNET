@@ -1,5 +1,5 @@
 import SecurityMechanismTemplate from "../../components/SecurityMechanismTemplate/SecurityMechanismTemplate";
-import { dataProtectionData } from "../../data/securityMechanisms";
+import { dataProtectionData } from "../../data/dataProtectionData";
 
 function DataProtection() {
   return (

@@ -11,9 +11,7 @@ function App() {
       <ScrollToTop />
       <Header />
       <div className="content-wrapper">
-        <div className="menu-container">
-          <MenuBar />
-        </div>
+        <MenuBar />
         <div className="main-content">
           <Outlet />
         </div>

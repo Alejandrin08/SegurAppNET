@@ -1,5 +1,5 @@
 import SecurityMechanismTemplate from "../../components/SecurityMechanismTemplate/SecurityMechanismTemplate";
-import { antiForgeryTokensData } from "../../data/securityMechanisms";
+import { antiForgeryTokensData } from "../../data/antiForgeryTokensData";
 
 function AntiForgeryTokens() {
   return (
@@ -7,7 +7,9 @@ function AntiForgeryTokens() {
       securityMechanismTitle={antiForgeryTokensData.securityMechanismTitle}
       definition={antiForgeryTokensData.definition}
       interestingFacts={antiForgeryTokensData.interestingFacts}
-      implementationDescription={antiForgeryTokensData.implementationDescription}
+      implementationDescription={
+        antiForgeryTokensData.implementationDescription
+      }
       implementationCode={antiForgeryTokensData.implementationCode}
       goodPractices={antiForgeryTokensData.goodPractices}
       threats={antiForgeryTokensData.threats}

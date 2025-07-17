@@ -6,6 +6,13 @@ import Rubric from "../Rubric/Rubric";
 function Modal({ goodPractice }) {
   const { title, practices = [], rubric } = goodPractice?.modalContent || {};
 
+  const closeModal = () => {
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("goodPracticeModal")
+    );
+    modal.hide();
+  };
+
   return (
     <div
       className="modal fade"
@@ -29,7 +36,7 @@ function Modal({ goodPractice }) {
             <button
               type="button"
               className="close-button"
-              data-bs-dismiss="modal"
+              onClick={closeModal}
               aria-label="Close"
             >
               <RiCloseCircleLine className="icon-close" />

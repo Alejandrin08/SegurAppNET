@@ -1,12 +1,28 @@
-# React + Vite
+# SegurAppNet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**SegurAppNet** es una guía interactiva que documenta de manera práctica y estructurada los mecanismos de seguridad que ofrece **ASP.NET Core**. Este sitio está diseñado para desarrolladores que desean comprender, aplicar y evaluar correctamente las prácticas de seguridad recomendadas en aplicaciones web desarrolladas con este framework.
 
-Currently, two official plugins are available:
+## ¿Qué ofrece SegurAppNet?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Descripción detallada de los **mecanismos de seguridad** disponibles en ASP.NET Core.
+- Guía paso a paso de **cómo implementarlos** correctamente.
+- Información sobre las **amenazas que busca mitigar cada mecanismo**.
+- Conjunto de **prácticas de seguridad recomendadas** asociadas a cada mecanismo, con instrucciones claras de implementación.
+- **Rúbrica de evaluación** para validar si un mecanismo ha sido implementado correctamente.
 
-## Expanding the ESLint configuration
+## ¿Cómo ejecutar el sitio?
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Para su desarrollo y visualización local, utiliza un entorno con soporte para React.
+
+### Requisitos
+
+- Node.js ≥ 18
+- npm
+
+### Comando de desarrollo
+
+Para iniciar el sitio en entorno de desarrollo:
+
+```bash
+npm run dev
+```

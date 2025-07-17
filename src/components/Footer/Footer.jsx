@@ -22,7 +22,7 @@ function Footer() {
       <div className="grid-item-3">
         <h2>Redes</h2>
         <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-          <FaGithub className="icon-footer"/>
+          <FaGithub className="icon-footer" />
         </a>
       </div>
       <div className="grid-item-4">

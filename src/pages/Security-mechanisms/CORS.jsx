@@ -1,5 +1,5 @@
 import SecurityMechanismTemplate from "../../components/SecurityMechanismTemplate/SecurityMechanismTemplate";
-import { corsData } from "../../data/securityMechanisms";
+import { corsData } from "../../data/corsData";
 
 function Cors() {
   return (

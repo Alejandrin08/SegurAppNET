@@ -6,9 +6,25 @@ header {
   left: 0 !important;
   width: 100% !important;
   background-color: var(--header-bg-color) !important;
-  padding: var(--header-padding-y) var(--header-padding-x) !important;
+  padding: var(--header-padding-y) 0 !important;
   box-shadow: var(--header-shadow) !important;
-  z-index: var(--header-z-index) !important;
+  z-index: 1000 !important;
+}
+
+.header-content {
+  display: flex !important;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xs) !important;
+}
+
+.header-logo-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--header-gap) !important;
+  cursor: pointer;
+  padding-left: var(--spacing-sm) !important;
+  margin-left: 0 !important;
 }
 
 header h1 {
@@ -22,15 +38,6 @@ header h1 {
   margin: 0 !important;
 }
 
-.header-content {
-  display: flex !important;
-  align-items: center !important;
-  gap: var(--header-gap) !important;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-}
-
 .header-icon {
   font-size: clamp(1.8rem, 5vw, var(--header-icon-size)) !important;
   color: var(--header-text-color) !important;
@@ -39,13 +46,15 @@ header h1 {
 
 @media (max-width: 768px) {
   header {
-    padding: calc(var(--header-padding-y) * 0.7)
-      calc(var(--header-padding-x) * 0.7) !important;
+    padding: calc(var(--header-padding-y) * 0.7) 0 !important;
   }
 
   .header-content {
-    gap: calc(var(--header-gap) * 0.7) !important;
-    padding: 0 var(--spacing-sm);
+    padding: 0 var(--spacing-xs) !important;
+  }
+
+  .header-logo-container {
+    padding-left: var(--spacing-xs) !important;
   }
 }
 

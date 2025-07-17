@@ -1,5 +1,5 @@
 import SecurityMechanismTemplate from "../../components/SecurityMechanismTemplate/SecurityMechanismTemplate";
-import { htmlEncoderData } from "../../data/securityMechanisms";
+import { htmlEncoderData } from "../../data/htmlEncoderData";
 
 function HtmlEncoder() {
   return (

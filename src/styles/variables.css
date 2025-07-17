@@ -82,9 +82,9 @@
   --modal-close-hover: #ff7875;
   --modal-line-color: #e6e8ec;
 
-  --breakpoint-mobile: 576px;
-  --breakpoint-tablet: 768px;
-  --breakpoint-desktop: 992px;
+  --breakpoint-mobile: 768px;
+  --breakpoint-tablet: 992px;
+  --breakpoint-desktop: 1200px;
 
   --font-size-h1-mobile: 1.5rem;
   --font-size-h2-mobile: 1.25rem;

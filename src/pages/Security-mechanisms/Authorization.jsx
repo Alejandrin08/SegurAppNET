@@ -1,5 +1,5 @@
 import SecurityMechanismTemplate from "../../components/SecurityMechanismTemplate/SecurityMechanismTemplate";
-import { authorizationData } from "../../data/securityMechanisms";
+import { authorizationData } from "../../data/authorizationData";
 
 function Authorization() {
   return (

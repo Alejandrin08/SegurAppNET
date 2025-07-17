@@ -1,5 +1,5 @@
 import SecurityMechanismTemplate from "../../components/SecurityMechanismTemplate/SecurityMechanismTemplate";
-import { httpsData } from "../../data/securityMechanisms";
+import { httpsData } from "../../data/httpsData";
 
 function Https() {
   return (

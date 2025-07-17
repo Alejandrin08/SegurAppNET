@@ -18,21 +18,25 @@ const Rubric = ({ dynamicCells = [] }) => {
         rowGroups.push(rows.slice(i, i + 4));
       }
 
-      rowGroups.forEach((rowCells, rowIndex) => {
-        if (!stripeRefs.current[rowIndex]) return;
+      setTimeout(() => {
+        rowGroups.forEach((rowCells, rowIndex) => {
+          if (!stripeRefs.current[rowIndex]) return;
 
-        let maxHeight = 0;
-        rowCells.forEach((cell) => {
-          const cellHeight = cell.offsetHeight;
-          if (cellHeight > maxHeight) maxHeight = cellHeight;
+          let maxHeight = 0;
+          rowCells.forEach((cell) => {
+            const cellHeight = cell.offsetHeight;
+            if (cellHeight > maxHeight) maxHeight = cellHeight;
+          });
+
+          const rowTop = rowCells[0].offsetTop;
+          const stripe = stripeRefs.current[rowIndex];
+
+          stripe.style.height = `${Math.max(maxHeight, 10)}px`;
+          stripe.style.top = `${rowTop}px`;
+          stripe.style.width = "100%";
+          stripe.style.display = "block";
         });
-
-        const rowTop = rowCells[0].offsetTop;
-        const stripe = stripeRefs.current[rowIndex];
-        stripe.style.height = `${maxHeight}px`;
-        stripe.style.top = `${rowTop}px`;
-        stripe.style.width = "100%";
-      });
+      }, 50);
     };
 
     const observer = new MutationObserver(updateStripes);
@@ -46,10 +50,12 @@ const Rubric = ({ dynamicCells = [] }) => {
     }
 
     updateStripes();
+    const initTimeout = setTimeout(updateStripes, 100);
     window.addEventListener("resize", updateStripes);
 
     return () => {
       observer.disconnect();
+      clearTimeout(initTimeout);
       window.removeEventListener("resize", updateStripes);
     };
   }, [dynamicCells]);
