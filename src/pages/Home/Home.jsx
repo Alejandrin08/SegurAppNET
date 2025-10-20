@@ -19,7 +19,7 @@ function Home() {
     if (location.hash) {
       const element = document.querySelector(location.hash);
       if (element) {
-        const yOffset = -100; 
+        const yOffset = -100;
         const y =
           element.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
@@ -173,6 +173,18 @@ function Home() {
               <div className="div5">
                 <h3>Entorno de desarrollo</h3>
                 <ul>
+                  <li>
+                    Clonar el repositorio de GitHub para realizar los
+                    laboratorios ubicado{" "}
+                    <a
+                      href="https://github.com/tu-repositorio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      aquí
+                    </a>
+                    .
+                  </li>
                   <li>Visual Studio o VS Code con NET SDK.</li>
                   <li>Base de datos compatible con Entity Framework Core</li>
                 </ul>

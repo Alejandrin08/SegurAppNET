@@ -20,21 +20,9 @@
 .horizontal-stripes {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
   height: 100%;
   pointer-events: none;
-}
-
-.horizontal-stripes::before {
-  content: "";
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
+  z-index: 3;
 }
 
 .horizontal-stripe {
@@ -44,7 +32,7 @@
   background-color: #afcee4;
   border-radius: 8px;
   opacity: 0.7;
-  height: 1px;
+  display: none;
   animation: stripe-appear 0.5s forwards;
 }
 
@@ -54,16 +42,17 @@
   }
 }
 
-.vertical-stripes {
+.vertical-stripes-background {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  bottom: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   pointer-events: none;
+  z-index: 1;
 }
 
 .vertical-stripe {
@@ -72,13 +61,30 @@
   opacity: 0.7;
 }
 
+.first-col-stripes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.first-col-stripe {
+  position: absolute;
+  background-color: #afcee4;
+  border-radius: 8px;
+  display: none;
+}
+
 .rubric-grid {
   position: relative;
   z-index: 10;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  grid-auto-rows: minmax(min-content, max-content);
+  grid-auto-rows: min-content;
 }
 
 .rubric-cell {
@@ -86,16 +92,6 @@
   display: flex;
   min-height: min-content;
   align-items: center;
-}
-
-.rubric-cell[data-row="1"] {
-  grid-row: 2;
-}
-.rubric-cell[data-row="2"] {
-  grid-row: 3;
-}
-.rubric-cell[data-row="3"] {
-  grid-row: 4;
 }
 
 .cell-content {
@@ -132,9 +128,31 @@
   width: 100%;
 }
 
-@media (max-width: var(--breakpoint-tablet)) {
+@media (max-width: 767px) {
+  .rubric-container {
+    overflow-x: auto;
+    padding: var(--spacing-sm);
+    box-shadow: none;
+    border: 1px solid #e0eaf3;
+    border-radius: var(--border-radius);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rubric-wrapper {
+    overflow: visible;
+    box-shadow: none;
+    background-color: transparent;
+  }
+
   .rubric-grid {
-    grid-template-columns: 1fr;
+    min-width: 650px;
+    grid-template-columns: 140px 160px 1fr 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .vertical-stripes-background {
+    min-width: 650px;
+    grid-template-columns: 140px 160px 1fr 1fr;
     gap: var(--spacing-sm);
   }
 
@@ -142,20 +160,17 @@
     padding: var(--spacing-sm);
   }
 
+  .cell-content,
   .first-col .cell-content,
   .last-col .cell-content {
-    justify-content: center;
-    text-align: center;
-  }
-}
-
-@media (max-width: var(--breakpoint-mobile)) {
-  .rubric-container {
-    margin: var(--spacing-md) auto;
-    padding: var(--spacing-sm);
+    justify-content: flex-start;
+    text-align: left;
   }
 
-  .cell-content h3 {
-    font-size: var(--font-size-h3-mobile);
+  .cell-content h3,
+  .cell-content p {
+    font-size: 0.875rem;
+    word-break: normal;
+    overflow-wrap: break-word;
   }
 }

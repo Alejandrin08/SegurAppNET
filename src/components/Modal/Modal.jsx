@@ -1,16 +1,21 @@
 import "./Modal.css";
 import { RiCloseCircleLine } from "react-icons/ri";
+import { BsLightbulbFill, BsExclamationTriangleFill } from "react-icons/bs";
 import CodeBlock from "../CodeBlock/CodeBlock";
 import Rubric from "../Rubric/Rubric";
 
 function Modal({ goodPractice }) {
+  const { recommendation, warning } = goodPractice || {};
   const { title, practices = [], rubric } = goodPractice?.modalContent || {};
 
   const closeModal = () => {
-    const modal = bootstrap.Modal.getInstance(
-      document.getElementById("goodPracticeModal")
-    );
-    modal.hide();
+    if (window.bootstrap) {
+      const modalElement = document.getElementById("goodPracticeModal");
+      const modal = window.bootstrap.Modal.getInstance(modalElement);
+      if (modal) {
+        modal.hide();
+      }
+    }
   };
 
   return (
@@ -43,6 +48,25 @@ function Modal({ goodPractice }) {
             </button>
           </div>
           <div className="modal-body custom-modal-body">
+            <div className="info-boxes-container">
+              {recommendation && (
+                <div className="info-box recommendation">
+                  <BsLightbulbFill className="info-box-icon" />
+                  <p>
+                    <strong>Recomendado para:</strong> {recommendation}
+                  </p>
+                </div>
+              )}
+              {warning && (
+                <div className="info-box warning">
+                  <BsExclamationTriangleFill className="info-box-icon" />
+                  <p>
+                    <strong>Advertencia:</strong> {warning}
+                  </p>
+                </div>
+              )}
+            </div>
+
             {practices.map((practice, index) => (
               <div key={index} className="goodpractice-container">
                 <div className="circle-threat circle-dark-blue">
@@ -50,20 +74,23 @@ function Modal({ goodPractice }) {
                 </div>
                 <div className="goodpractice-content">
                   <h3>{practice.title}</h3>
-                  {practice.description && <p>{practice.description}</p>}
-                  <div className="code-block-container">
-                    {practice.code && <CodeBlock code={practice.code} />}
+                  <div className="practice-details">
+                    {practice.description && <p>{practice.description}</p>}
+                    <div className="code-block-container">
+                      {practice.code && <CodeBlock code={practice.code} />}
+                    </div>
+                    {practice.postCodeText && <p>{practice.postCodeText}</p>}
                   </div>
-                  {practice.postCodeText && <p>{practice.postCodeText}</p>}
                   {index < practices.length - 1 && (
                     <div className="line-goodpractice"></div>
                   )}
                 </div>
               </div>
             ))}
+
             <div className="rubric-section">
               <h2>Rúbrica de evaluación</h2>
-              {rubric && <Rubric dynamicCells={rubric.dynamicCells} />}
+              {rubric && <Rubric data={rubric.rubricData} />}
             </div>
           </div>
           <div className="modal-footer custom-modal-footer"></div>

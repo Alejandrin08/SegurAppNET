@@ -74,11 +74,19 @@ function SecurityMechanismTemplate({
               </div>
             )}
 
-            <div className="div4-security">
-              <h3>¿Cómo implementarlo?</h3>
-              <p>{implementationDescription}</p>
-              <CodeBlock code={implementationCode} height="200px" />
-            </div>
+            {(implementationDescription || implementationCode) && (
+              <div className="div4-security">
+                <h3>¿Cómo implementarlo?</h3>
+
+                {implementationDescription && (
+                  <p>{implementationDescription}</p>
+                )}
+
+                {implementationCode && (
+                  <CodeBlock code={implementationCode} height="200px" />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -95,7 +103,7 @@ function SecurityMechanismTemplate({
           ) : (
             <MdExpandMore className="icon-size" />
           )}
-          <h2>Buenas prácticas</h2>
+          <h2>Prácticas recomendadas</h2>
         </div>
         {showPractices && (
           <div className="cards card-concept">

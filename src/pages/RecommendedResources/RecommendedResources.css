@@ -1,1 +1,165 @@
 @import "../../styles/variables.css";
+
+.resources-page {
+  padding: var(--spacing-md) 0;
+}
+
+.resources-intro {
+  max-width: 100ch;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+.resource-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.resource-section h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border-bottom: 2px solid var(--bg-horizontal-line);
+  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.resource-card {
+  background-color: var(--bg-white);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.resource-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.card-icon.postman {
+  color: #ff6c37;
+}
+.card-icon.owasp {
+  color: #e6002a;
+}
+.card-icon.docs {
+  color: var(--color-primary);
+}
+.card-icon.youtube {
+  color: #ff0000;
+}
+
+.resource-card h3 {
+  margin: 0;
+  color: var(--color-primary);
+}
+
+.resource-card p {
+  text-align: left !important;
+  flex-grow: 1;
+}
+
+.tool-features {
+  padding-left: var(--spacing-md);
+  margin: var(--spacing-sm) 0;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.tool-features li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.provider-title {
+  width: 100%;
+  text-align: center;
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.provider-icons {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 3rem;
+  width: 100%;
+  margin: var(--spacing-md) 0;
+  flex-grow: 1;
+}
+
+.provider-icons a {
+  color: var(--color-text);
+  transition: color var(--transition-normal), transform var(--transition-normal);
+}
+
+.provider-icons a:hover {
+  transform: scale(1.1);
+}
+
+.provider-icons .SiMicrosoftazure:hover {
+  color: #0078d4;
+}
+.provider-icons .SiAwsecretsmanager:hover {
+  color: #ff9900;
+}
+.provider-icons .SiHashicorp:hover {
+  color: #6950a1;
+}
+.provider-icons .FaGoogle:hover {
+  color: #db4437;
+}
+.provider-icons .FaMicrosoft:hover {
+  color: #00a4ef;
+}
+.provider-icons .FaGithub:hover {
+  color: #181717;
+}
+
+.resource-link {
+  display: inline-block;
+  margin-top: auto;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--border-radius);
+  text-align: center;
+  transition: background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+.resource-link:hover {
+  background-color: var(--color-primary);
+  color: var(--bg-white);
+}
+
+@media (max-width: var(--breakpoint-mobile)) {
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
+  .resources-intro {
+    font-size: 1rem;
+  }
+}

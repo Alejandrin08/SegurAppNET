@@ -41,10 +41,13 @@
 }
 
 .rectangle-good-practice {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-xs);
   border-radius: var(--border-radius);
   font-size: var(--font-size-small);
   width: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   min-height: min-content;
   word-wrap: break-word;
   text-align: center;

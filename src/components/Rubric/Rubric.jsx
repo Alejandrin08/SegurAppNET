@@ -1,45 +1,61 @@
 import "./Rubric.css";
-import { useEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useEffect } from "react";
 
-const Rubric = ({ dynamicCells = [] }) => {
-  const rowRefs = useRef([]);
-  const stripeRefs = useRef([]);
+const Rubric = ({ data = [] }) => {
   const gridRef = useRef(null);
   const wrapperRef = useRef(null);
+  const headerRefs = useRef([]);
 
-  useEffect(() => {
-    const updateStripes = () => {
-      if (!gridRef.current || !wrapperRef.current) return;
+  const hStripesContainerRef = useRef(null);
+  const hStripeElements = useRef([]);
+  const criterionCellElements = useRef([]);
 
-      const rows = Array.from(gridRef.current.children).slice(4);
-      const rowGroups = [];
+  const firstColStripeElements = useRef([]);
+  const rowHeaderRefs = useRef([]);
 
-      for (let i = 0; i < rows.length; i += 4) {
-        rowGroups.push(rows.slice(i, i + 4));
-      }
+  useLayoutEffect(() => {
+    const updateVisuals = () => {
+      requestAnimationFrame(() => {
+        if (
+          !gridRef.current ||
+          !headerRefs.current[1] ||
+          !hStripesContainerRef.current
+        )
+          return;
 
-      setTimeout(() => {
-        rowGroups.forEach((rowCells, rowIndex) => {
-          if (!stripeRefs.current[rowIndex]) return;
+        const gridRect = gridRef.current.getBoundingClientRect();
+        const secondColHeader = headerRefs.current[1];
+        const secondColRect = secondColHeader.getBoundingClientRect();
 
-          let maxHeight = 0;
-          rowCells.forEach((cell) => {
-            const cellHeight = cell.offsetHeight;
-            if (cellHeight > maxHeight) maxHeight = cellHeight;
-          });
+        const hStripesLeftOffset = secondColRect.left - gridRect.left;
+        const hStripesContainerWidth = gridRect.width - hStripesLeftOffset;
 
-          const rowTop = rowCells[0].offsetTop;
-          const stripe = stripeRefs.current[rowIndex];
+        hStripesContainerRef.current.style.left = `${hStripesLeftOffset}px`;
+        hStripesContainerRef.current.style.width = `${hStripesContainerWidth}px`;
 
-          stripe.style.height = `${Math.max(maxHeight, 10)}px`;
-          stripe.style.top = `${rowTop}px`;
-          stripe.style.width = "100%";
-          stripe.style.display = "block";
+        criterionCellElements.current.forEach((cell, index) => {
+          const stripe = hStripeElements.current[index];
+          if (cell && stripe) {
+            stripe.style.height = `${cell.offsetHeight}px`;
+            stripe.style.top = `${cell.offsetTop}px`;
+            stripe.style.display = "block";
+          }
         });
-      }, 50);
+
+        rowHeaderRefs.current.forEach((headerCell, index) => {
+          const stripe = firstColStripeElements.current[index];
+          if (headerCell && stripe) {
+            stripe.style.height = `${headerCell.offsetHeight}px`;
+            stripe.style.top = `${headerCell.offsetTop}px`;
+            stripe.style.left = `${headerCell.offsetLeft}px`;
+            stripe.style.width = `${headerCell.offsetWidth}px`;
+            stripe.style.display = "block";
+          }
+        });
+      });
     };
 
-    const observer = new MutationObserver(updateStripes);
+    const observer = new MutationObserver(updateVisuals);
     if (gridRef.current) {
       observer.observe(gridRef.current, {
         childList: true,
@@ -49,85 +65,139 @@ const Rubric = ({ dynamicCells = [] }) => {
       });
     }
 
-    updateStripes();
-    const initTimeout = setTimeout(updateStripes, 100);
-    window.addEventListener("resize", updateStripes);
+    const modalElement = document.getElementById("goodPracticeModal");
+    const handleModalShown = () => {
+      setTimeout(updateVisuals, 50);
+    };
+
+    if (modalElement) {
+      modalElement.addEventListener("shown.bs.modal", handleModalShown);
+    }
+
+    window.addEventListener("resize", updateVisuals);
+    updateVisuals();
 
     return () => {
       observer.disconnect();
-      clearTimeout(initTimeout);
-      window.removeEventListener("resize", updateStripes);
+      window.removeEventListener("resize", updateVisuals);
+      if (modalElement) {
+        modalElement.removeEventListener("shown.bs.modal", handleModalShown);
+      }
     };
-  }, [dynamicCells]);
+  }, [data]);
+
+  let currentRow = 2;
+  let criterionIndexCounter = 0;
+  const totalCriteria = data.reduce(
+    (acc, rubric) => acc + rubric.criteria.length,
+    0
+  );
+
+  hStripeElements.current = [];
+  criterionCellElements.current = [];
+  firstColStripeElements.current = [];
+  rowHeaderRefs.current = [];
 
   return (
     <div className="rubric-container">
-      <div className="rubric-wrapper" ref={wrapperRef}>
-        <div className="horizontal-stripes">
-          {[...Array(3)].map((_, i) => (
+      <div className="rubric-scroll-container">
+        {" "}
+        <div className="rubric-wrapper" ref={wrapperRef}>
+          <div className="vertical-stripes-background">
+            {[...Array(4)].map((_, i) => (
+              <div key={`v-bg-${i}`} className="vertical-stripe" />
+            ))}
+          </div>
+          <div className="first-col-stripes">
+            {data.map((_, i) => (
+              <div
+                key={`fc-stripe-${i}`}
+                ref={(el) => (firstColStripeElements.current[i] = el)}
+                className="first-col-stripe"
+              />
+            ))}
+          </div>
+          <div className="horizontal-stripes" ref={hStripesContainerRef}>
+            {Array.from({ length: totalCriteria }).map((_, i) => (
+              <div
+                key={`h-stripe-${i}`}
+                ref={(el) => (hStripeElements.current[i] = el)}
+                className="horizontal-stripe"
+              />
+            ))}
+          </div>
+          <div className="rubric-grid" ref={gridRef}>
             <div
-              key={`h-${i}`}
-              ref={(el) => (stripeRefs.current[i] = el)}
-              className="horizontal-stripe"
-            />
-          ))}
-        </div>
-
-        <div className="vertical-stripes">
-          {[...Array(4)].map((_, i) => (
-            <div key={`v-${i}`} className="vertical-stripe" />
-          ))}
-        </div>
-
-        <div className="rubric-grid" ref={gridRef}>
-          <div className="rubric-cell header first-col row-0">
-            <h3 className="cell-content">Criterio</h3>
-          </div>
-          <div className="rubric-cell header row-0">
-            <h3 className="cell-content">Logrado (2 puntos)</h3>
-          </div>
-          <div className="rubric-cell header row-0">
-            <h3 className="cell-content">Parcialmente (1 punto)</h3>
-          </div>
-          <div className="rubric-cell header last-col row-0">
-            <h3 className="cell-content">No logrado (0 puntos)</h3>
-          </div>
-
-          <div
-            ref={(el) => (rowRefs.current[1] = el)}
-            className="rubric-cell row-header first-col row-1"
-          >
-            <h3 className="cell-content">Implementación correcta</h3>
-          </div>
-          {dynamicCells.slice(0, 3).map((text, index) => (
-            <div key={`dyn-1-${index}`} className="rubric-cell row-1">
-              <p className="cell-content">{text}</p>
+              className="rubric-cell header"
+              ref={(el) => (headerRefs.current[0] = el)}
+            >
+              <h3>Rubro</h3>
             </div>
-          ))}
-
-          <div
-            ref={(el) => (rowRefs.current[2] = el)}
-            className="rubric-cell row-header first-col row-2"
-          >
-            <h3 className="cell-content">Precondición de aplicación</h3>
-          </div>
-          {dynamicCells.slice(3, 6).map((text, index) => (
-            <div key={`dyn-2-${index}`} className="rubric-cell row-2">
-              <p className="cell-content">{text}</p>
+            <div
+              className="rubric-cell header"
+              ref={(el) => (headerRefs.current[1] = el)}
+            >
+              <h3>Criterio</h3>
             </div>
-          ))}
-
-          <div
-            ref={(el) => (rowRefs.current[3] = el)}
-            className="rubric-cell row-header first-col row-3"
-          >
-            <h3 className="cell-content">Prevención de vulnerabilidades</h3>
-          </div>
-          {dynamicCells.slice(6, 9).map((text, index) => (
-            <div key={`dyn-3-${index}`} className="rubric-cell row-3">
-              <p className="cell-content">{text}</p>
+            <div
+              className="rubric-cell header"
+              ref={(el) => (headerRefs.current[2] = el)}
+            >
+              <h3>Logrado</h3>
             </div>
-          ))}
+            <div
+              className="rubric-cell header"
+              ref={(el) => (headerRefs.current[3] = el)}
+            >
+              <h3>No logrado</h3>
+            </div>
+
+            {data.map((rubric, rubricIndex) => {
+              const criteriaCount = rubric.criteria.length;
+              const startRow = currentRow;
+              currentRow += criteriaCount;
+              return (
+                <React.Fragment key={`rubric-${rubricIndex}`}>
+                  <div
+                    className="rubric-cell row-header"
+                    ref={(el) => (rowHeaderRefs.current[rubricIndex] = el)}
+                    style={{ gridRow: `${startRow} / span ${criteriaCount}` }}
+                  >
+                    <h3 className="cell-content">{rubric.title}</h3>
+                  </div>
+                  {rubric.criteria.map((criterion, critIndex) => {
+                    const currentCriterionIndex = criterionIndexCounter++;
+                    return (
+                      <React.Fragment
+                        key={`criterion-${rubricIndex}-${critIndex}`}
+                      >
+                        <div
+                          className="rubric-cell"
+                          ref={(el) =>
+                            (criterionCellElements.current[
+                              currentCriterionIndex
+                            ] = el)
+                          }
+                        >
+                          <p className="cell-content">
+                            {criterion.description}
+                          </p>
+                        </div>
+                        <div className="rubric-cell">
+                          <p className="cell-content">{criterion.achieved}</p>
+                        </div>
+                        <div className="rubric-cell">
+                          <p className="cell-content">
+                            {criterion.notAchieved}
+                          </p>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
