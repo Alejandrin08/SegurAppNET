@@ -105,6 +105,11 @@ function SecurityMechanismTemplate({
           )}
           <h2>Prácticas recomendadas</h2>
         </div>
+        <p>
+          Recuerda, para llevar a cabo los laboratorios es necesario clonar el
+          repositorio de Github que se encuentra en la sección de
+          "Prerrequisitos".
+        </p>
         {showPractices && (
           <div className="cards card-concept">
             <Carousel

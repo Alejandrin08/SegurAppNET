@@ -119,80 +119,93 @@ export const antiForgeryTokensData = {
       },
     },
     {
-      title: "Exposición y Validación de Tokens en APIs",
+      title: "Tokens Antifalsificación en APIs (Patrón Cookie)",
       description:
-        "Para SPAs (Single-Page Applications) o clientes que consumen una API, el token debe ser generado por un endpoint, enviado al cliente y luego incluido por este en los encabezados de las peticiones que modifican datos.",
+        "Para SPAs (Single-Page Applications) que se autentican con cookies, el token CSRF debe ser generado por un endpoint, enviado al cliente (en el cuerpo de la respuesta) y luego incluido por el cliente en los encabezados de las peticiones que modifican datos.",
       threats: ["CSRF"],
-
       recommendation:
-        "Esencial para: Web API consumidas por SPAs (React, Angular, Vue) o aplicaciones móviles. Es el patrón estándar para arquitecturas desacopladas.",
+        "Uso Específico: Este patrón se usa para Web APIs que (por razones específicas) utilizan autenticación basada en cookies. Es importante notar que el estándar moderno para APIs (especialmente con SPAs) es usar Tokens JWT, los cuales no requieren esta protección CSRF porque el token no se envía automáticamente.",
       warning:
-        "¡Atención! Configurar `SameSiteMode.None` es a menudo necesario para escenarios de API cross-domain, pero esto requiere que la cookie sea enviada obligatoriamente sobre HTTPS (`SecurePolicy.Always`) para ser aceptada por los navegadores modernos.",
-
+        "¡Atención! Este patrón es para clientes tipo SPA (React, Angular, etc.) que deben consumir un endpoint. Si tu cliente es una aplicación ASP.NET Core MVC o Razor, no necesitas este endpoint, ya que el framework lo maneja automáticamente usando el helper (@Html.AntiForgeryToken()) en tus formularios.",
       modalContent: {
-        title: "Implementación para Consumidores de API",
+        title: "Implementación para Consumidores de API (SPAs)",
         practices: [
           {
             title: "1. Configurar Antiforgery para APIs",
             description:
-              "En `Program.cs`, configurar las opciones de antiforgery. Para APIs consumidas por clientes en diferentes dominios, puede ser necesario ajustar `SameSiteMode.None` y `SecurePolicy.Always`.",
+              "En `Program.cs`, configura el servicio antiforgery. Debes definir el nombre del encabezado (HeaderName) que tu cliente JavaScript enviará y el nombre de la cookie que el servidor usará para validar.",
             code: `builder.Services.AddAntiforgery(options =>
 {
+    // El nombre del encabezado que esperamos recibir del cliente
     options.HeaderName = "X-CSRF-TOKEN";
-    // El nombre de la cookie puede ser personalizado
+    // El nombre de la cookie que el servidor crea
     options.Cookie.Name = "XSRF-TOKEN-COOKIE"; 
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    // Lax es la opción segura y estándar para aplicaciones en el mismo dominio
+    options.Cookie.SameSite = SameSiteMode.Lax; 
 });`,
+            postCodeText: "Si SameSite es None, se requiere implementar CORS.",
           },
           {
             title: "2. Crear un Endpoint para Exponer el Token",
             description:
-              "Crear un endpoint GET que el cliente pueda llamar para obtener el token. Este endpoint usa `IAntiforgery` para generar los tokens y establecer la cookie en la respuesta.",
+              "Crea un endpoint GET (usualmente después del login) que el cliente pueda llamar para obtener el token. Este endpoint usa IAntiforgery para generar la cookie y obtener el token de petición (RequestToken).",
             code: `// En un controlador de API
-[HttpGet("csrf-token")]
-public IActionResult GetCsrfToken([FromServices] IAntiforgery antiforgery)
+// Es buena idea inyectar IAntiforgery en el constructor
+private readonly IAntiforgery _antiforgery;
+public TuControlador(IAntiforgery antiforgery)
 {
-    var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+    _antiforgery = antiforgery;
+}
+
+[HttpGet("csrf-token")]
+public IActionResult GetCsrfToken()
+{
+    // Genera el par de tokens (la cookie y el token de petición)
+    var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+    
+    // Devuelve solo el token que el cliente debe usar en el encabezado
     return Ok(new { token = tokens.RequestToken });
 }`,
           },
           {
             title: "3. Validar el Token en Endpoints Sensibles",
             description:
-              "En los endpoints que modifican datos (POST, PUT, DELETE), inyectar `IAntiforgery` y llamar a `ValidateRequestAsync` para verificar la validez del token recibido en el encabezado.",
-            code: `// En un endpoint POST
-[HttpPost("login")]
-public async Task<IActionResult> Login([FromBody] LoginModel model, [FromServices] IAntiforgery antiforgery)
+              "En lugar de validar manualmente, simplemente decora tus endpoints (POST, PUT, DELETE) con el atributo (ValidateAntiForgeryToken). El framework buscará automáticamente el token en el encabezado (definido como X-CSRF-TOKEN) y lo comparará con la cookie.",
+            code: `// En un endpoint que modifica datos
+[HttpPost("actualizar-perfil")]
+[ValidateAntiForgeryToken] // ¡Esto es todo lo que se necesita!
+public IActionResult UpdateProfile([FromBody] ProfileModel model)
 {
-    await antiforgery.ValidateRequestAsync(HttpContext);
-    // ... resto de la lógica de login ...
-    return Ok();
+    // Si el código llega aquí, el token era válido.
+    // ... resto de la lógica ...
+    return Ok(new { message = "Perfil actualizado" });
 }`,
           },
           {
-            title: "4. Consumo desde el Frontend",
+            title: "4. Consumo desde el Frontend (SPA)",
             description:
-              "El cliente primero debe hacer una llamada GET al endpoint del token. Luego, en cada petición POST/PUT/DELETE subsecuente, debe incluir el token recibido en el encabezado `X-CSRF-TOKEN`.",
+              "El cliente (tu SPA) primero debe hacer una llamada GET al endpoint del token (ej. /csrf-token). Luego, en cada petición POST/PUT/DELETE, debe incluir el token recibido en el encabezado (X-CSRF-TOKEN).",
             code: `// Ejemplo en JavaScript
-async function loginUser(email, password) {
-    // 1. Obtener el token CSRF
-    const csrfResponse = await fetch('/api/auth/csrf-token');
+async function getCsrfToken() {
+    // 1. Obtener el token CSRF (se hace una vez, ej. al cargar la app)
+    const csrfResponse = await fetch('/api/csrf-token');
     const csrfData = await csrfResponse.json();
-    const csrfToken = csrfData.token;
+    return csrfData.token;
+}
 
+async function updateUserProfile(profileData, csrfToken) {
     // 2. Realizar la petición POST con el token en el encabezado
-    const loginResponse = await fetch('/api/auth/login', {
+    const updateResponse = await fetch('/api/actualizar-perfil', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
+            'X-CSRF-TOKEN': csrfToken // El token se envía aquí
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(profileData)
     });
-    
-    // ... manejar la respuesta del login ...
+    // ... manejar la respuesta ...
 }`,
           },
         ],
@@ -204,28 +217,27 @@ async function loginUser(email, password) {
                 {
                   description: "Configuración en API (15%)",
                   achieved:
-                    "AddAntiforgery está configurado con HeaderName y cookies seguras (HttpOnly, SameSite, Secure).",
-                  notAchieved:
-                    "Antiforgery no está configurado o usa cookies inseguras.",
+                    "AddAntiforgery está configurado con HeaderName y cookies seguras (HttpOnly, SameSite=Lax).",
+                  notAchieved: "Antiforgery no está configurado correctamente.",
                 },
                 {
                   description: "Exposición del token (15%)",
                   achieved:
-                    "Un endpoint GET (`/api/auth/csrf-token`) devuelve el RequestToken y establece la cookie asociada.",
+                    "Un endpoint GET devuelve el RequestToken (en formato JSON) y establece la cookie asociada.",
                   notAchieved:
                     "No existe el endpoint de obtención de token o no funciona correctamente.",
                 },
                 {
                   description: "Validación en API (10%)",
                   achieved:
-                    "En endpoints POST, `ValidateRequestAsync` rechaza peticiones si falta el encabezado o la cookie.",
+                    "Endpoints sensibles (POST, PUT, etc.) están decorados con el atributo (ValidateAntiForgeryToken).",
                   notAchieved:
-                    "La API no valida el token o permite llamadas sin él.",
+                    "La API no usa el atributo (ValidateAntiForgeryToken) o permite llamadas sin él.",
                 },
                 {
                   description: "Consumo desde frontend (10%)",
                   achieved:
-                    "El frontend obtiene el token de la API y lo envía en el encabezado X-CSRF-TOKEN al hacer login.",
+                    "El frontend obtiene el token de la API y lo envía en el encabezado (X-CSRF-TOKEN) al hacer peticiones que modifican datos.",
                   notAchieved:
                     "El frontend no obtiene el token o no lo envía en el encabezado.",
                 },
@@ -237,7 +249,7 @@ async function loginUser(email, password) {
                 {
                   description: "Protección contra CSRF (50%)",
                   achieved:
-                    "Las peticiones sin token o con un token modificado son rechazadas por el servidor con un error 400.",
+                    "Las peticiones sin token o con un token modificado son rechazadas por el servidor (usualmente con un error 400).",
                   notAchieved:
                     "La API acepta peticiones sin token o con tokens manipulados.",
                 },
@@ -257,7 +269,7 @@ async function loginUser(email, password) {
         "Es un ataque de seguridad en el que un atacante engaña a un usuario para que ejecute acciones no deseadas en una aplicación web, mientras esta autenticado.",
       recommendations: [
         "Uso de [AutoValidateAntiforgeryToken] en Vistas de Servidor",
-        "Exposición y Validación de Tokens en APIs",
+        "Tokens Antifalsificación en APIs (Patrón Cookie)",
       ],
     },
   ],

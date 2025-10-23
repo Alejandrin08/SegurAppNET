@@ -23,13 +23,12 @@ export const corsData = {
       title: "Uso de Políticas Nombradas con [EnableCors]",
       description:
         "Definir políticas de CORS con nombre en la configuración de la aplicación y aplicarlas selectivamente a los controladores o endpoints que necesitan ser accesibles desde otros orígenes.",
-      threats: ["CSRF"],
+      threats: ["Acceso No Autorizado"],
 
       recommendation:
         "Esencial para: Web API que son consumidas por un frontend (como una SPA en React/Angular/Vue) alojado en un dominio o puerto diferente.",
       warning:
-        '¡Peligro! Nunca uses `.AllowAnyOrigin()` en producción. Especifica siempre la lista exacta de dominios de tu frontend con `.WithOrigins("https://tu-frontend.com")`. Usar un comodín `*` es un riesgo de seguridad.',
-
+        '¡Peligro! Nunca uses .AllowAnyOrigin() en producción. Especifica siempre la lista exacta de dominios de tu frontend con .WithOrigins("https://tu-frontend.com"). (Nota Importante: CORS es una política aplicada por el navegador. Si intentas probar tu API llamándola desde código del lado del servidor, como un controlador MVC o Razor usando HttpClient, la política CORS será ignorada, ya que no es una petición de navegador. La protección solo se activa cuando un script en el navegador del usuario, como una SPA, es el que realiza la llamada).',
       modalContent: {
         title: "Implementación de Políticas CORS Nombradas",
         practices: [
@@ -120,7 +119,7 @@ public IActionResult GetData()
       title: "Manejo de Solicitudes de Verificación Previa (Preflight)",
       description:
         "Configurar CORS para manejar correctamente las solicitudes OPTIONS (preflight) que los navegadores envían antes de peticiones complejas (como PUT, DELETE o con encabezados personalizados) para verificar si la solicitud principal es segura.",
-      threats: ["CSRF"],
+      threats: ["Acceso No Autorizado"],
 
       recommendation:
         "Requerido para: Web API que exponen métodos 'complejos' (PUT, DELETE, PATCH) o que esperan encabezados personalizados (ej. `Authorization`) desde un frontend en un origen diferente.",
@@ -204,7 +203,7 @@ public IActionResult PostCrear([FromBody] object data)
       title: "Configuración de Cabeceras (Headers) y Credenciales",
       description:
         "Controlar explícitamente qué encabezados HTTP pueden enviarse en las solicitudes cross-origin y si se permite el envío de credenciales (como cookies o tokens de autorización).",
-      threats: ["CSRF"],
+      threats: ["Acceso No Autorizado"],
 
       recommendation:
         "Esencial para: Web API que manejan autenticación y son consumidas desde un frontend en otro dominio. Para mayor seguridad, complemente esta práctica con la 'Exposición y Validación de Tokens en APIs' del mecanismo 'Tokens antifalsificación'.",
@@ -284,14 +283,13 @@ public IActionResult PostCrear([FromBody] object data)
 
   threats: [
     {
-      title:
-        "Falsificación de petición en sitios cruzados (Cross-site Request Forgery o CSRF)",
+      title: "Acceso No Autorizado",
       description:
-        "Es un ataque de seguridad en el que un atacante engaña a un usuario para que ejecute acciones no deseadas en una aplicación web, mientras esta autenticado.",
+        "Usuarios malintencionados pueden intentar acceder a datos confidenciales o realizar acciones para las que no están autorizados, además, el acceso no autorizado a los datos puede dar lugar a violaciones de datos (Data breaches), lo que resulta en una exposición de información confidencial.",
       recommendations: [
-        "Uso de Políticas Nombradas con [EnableCors]",
-        "Manejo de Solicitudes de Verificación Previa (Preflight)",
+        "Uso de políticas Nombradas con [EnableCors]",
         "Configuración de Cabeceras (Headers) y Credenciales",
+        "Manejo de Solicitudes de Verificación Previa (Preflight)",
       ],
     },
   ],

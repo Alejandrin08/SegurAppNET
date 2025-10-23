@@ -257,18 +257,6 @@ function MenuBar() {
             <ul className="menu-list">
               <li
                 className={`menu-item ${
-                  isActive("/glossary") ? "selected" : ""
-                }`}
-                onClick={() => handleSelectItem("glossary")}
-              >
-                <Link to="/glossary" className="menu-link">
-                  <GiArchiveResearch className="icon-menubar" />
-                  <span>Glosario</span>
-                </Link>
-              </li>
-
-              <li
-                className={`menu-item ${
                   isActive("/recommended-resources") ? "selected" : ""
                 }`}
                 onClick={() => handleSelectItem("recommended-resources")}

@@ -297,29 +297,6 @@ function Home() {
           <div className="container-read-guide">
             <div className="container-big-card-appendices">
               <Link
-                to="/glossary"
-                className="cards big-card"
-                id="card-one-appendices"
-              >
-                <h3>Glosario</h3>
-                <p>
-                  Definen breve de los términos técnicos y conceptos clave
-                  utilizados.
-                </p>
-                <div className="rectangle-blue-appendices">
-                  <div className="letters-row">
-                    {"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                      .split("")
-                      .map((letter, index) => (
-                        <span key={index} className="underlined-letter">
-                          {letter}
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              </Link>
-
-              <Link
                 to="/recommended-resources"
                 className="cards big-card"
                 id="card-two-appendices"

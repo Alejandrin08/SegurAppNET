@@ -9,7 +9,6 @@ import SecretsManagement from "./pages/Security-mechanisms/SecretsManagement";
 import HtmlEncoder from "./pages/Security-mechanisms/HTMLEncoder";
 import HTTPS from "./pages/Security-mechanisms/HTTPS";
 import AntiForgeryTokens from "./pages/Security-mechanisms/AntiForgeryTokens";
-import Appendices from "./pages/Appendices/Appendices";
 import RecommendedResources from "./pages/RecommendedResources/RecommendedResources";
 
 const router = createBrowserRouter([
@@ -52,10 +51,6 @@ const router = createBrowserRouter([
       {
         path: "anti-forgery-tokens",
         element: <AntiForgeryTokens />,
-      },
-      {
-        path: "glossary",
-        element: <Appendices />,
       },
       {
         path: "recommended-resources",

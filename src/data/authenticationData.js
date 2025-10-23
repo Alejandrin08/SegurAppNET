@@ -206,202 +206,6 @@ app.UseSession();`,
       },
     },
     {
-      title: "Validación de Entradas (Data Annotations)",
-      description:
-        "Validar todos los datos que provienen del cliente en el lado del servidor para asegurar su integridad, formato y longitud. Las 'Data Annotations' en los modelos son la primera línea de defensa contra datos maliciosos o malformados.",
-      threats: ["Inyección de Datos"],
-
-      recommendation:
-        "Fundamental para: Todas las aplicaciones ASP.NET Core que reciben datos del usuario (MVC, Razor Pages, Web API, Blazor). Es una práctica no negociable.",
-      warning:
-        "La validación del lado del cliente es una mejora de UX, no una medida de seguridad. La validación del lado del servidor con Data Annotations es la única que garantiza la seguridad, ya que no puede ser eludida.",
-
-      modalContent: {
-        title: "Uso de DataAnnotations para Validación de Modelos",
-        practices: [
-          {
-            title: "1. Añadir Anotaciones a las Propiedades del Modelo",
-            description:
-              "Utilizar atributos de validación del namespace 'System.ComponentModel.DataAnnotations' para decorar las propiedades de los modelos. Esto permite definir reglas como obligatoriedad, tipo de dato, longitud y formato.",
-            code: `// Ejemplo en un ViewModel de Login
-using System.ComponentModel.DataAnnotations;
-
-public class LoginViewModel
-{
-    [Required(ErrorMessage = "El correo electrónico es obligatorio")]
-    [EmailAddress(ErrorMessage = "Formato de correo electrónico inválido")]
-    [MaxLength(100, ErrorMessage = "El email no puede exceder 100 caracteres")]
-    public string Email { get; set; } = null!;
-
-    [Required(ErrorMessage = "La contraseña es obligatoria")]
-    [DataType(DataType.Password)]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
-    public string Password { get; set; } = null!;
-}`,
-          },
-          {
-            title: "2. Habilitar Validación en las Vistas",
-            description:
-              "Añadir la sección de scripts con el archivo parcial '_ValidationScriptsPartial' en las vistas que contienen formularios. Esto habilita la validación del lado del cliente de forma no intrusiva, mejorando la experiencia de usuario.",
-            code: `@* En una vista de Razor (ej: Login.cshtml) *@
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}`,
-          },
-        ],
-        rubric: {
-          rubricData: [
-            {
-              title: "Implementación correcta (50%)",
-              criteria: [
-                {
-                  description: "Importación de dependencia (10%)",
-                  achieved:
-                    "La declaración 'using System.ComponentModel.DataAnnotations;' está presente en los archivos de modelo.",
-                  notAchieved: "Falta la declaración 'using' o es incorrecta.",
-                },
-                {
-                  description: "Validaciones completas en propiedades (30%)",
-                  achieved:
-                    "Todas las propiedades incluyen validaciones apropiadas ([Required], tipo, longitud, etc.) con mensajes de error descriptivos.",
-                  notAchieved:
-                    "Faltan validaciones, están mal implementadas o los mensajes de error son genéricos.",
-                },
-                {
-                  description: "Scripts de validación (10%)",
-                  achieved:
-                    "Se añade la sección '@section Scripts' con el partial '_ValidationScriptsPartial' en todas las vistas con formularios.",
-                  notAchieved:
-                    "Falta la sección Scripts, el partial está mal referenciado o ausente en una o más vistas.",
-                },
-              ],
-            },
-            {
-              title: "Prevención de vulnerabilidades (50%)",
-              criteria: [
-                {
-                  description: "Funcionamiento de validaciones (50%)",
-                  achieved:
-                    "Los formularios muestran mensajes de error claros con datos inválidos y no permiten el envío hasta que todos los datos son correctos.",
-                  notAchieved:
-                    "Formularios permiten envío con datos inválidos o los mensajes de error no se muestran.",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    },
-    {
-      title: "Razor Page: Uso de AuthorizeView",
-      description:
-        "Utilizar el componente <AuthorizeView> en aplicaciones Blazor y Razor para mostrar u ocultar elementos de la interfaz de usuario de forma declarativa, basándose en el estado de autenticación del usuario.",
-      threats: ["Acceso No Autorizado"],
-
-      recommendation:
-        "Específico para: Aplicaciones Blazor (Server y WebAssembly) y cualquier proyecto que utilice Razor Components. Es el método idiomático para la UI condicional en estos frameworks.",
-      warning:
-        "Este componente solo oculta elementos en la UI. No protege los endpoints de la API que esos elementos puedan llamar. La protección de los datos y la lógica de negocio debe hacerse en el backend con el atributo [Authorize].",
-
-      modalContent: {
-        title: "Uso de AuthorizeView para UI Dinámica",
-        practices: [
-          {
-            title: "1. Modificar Vistas con <AuthorizeView>",
-            description:
-              "Envolver la lógica de la interfaz de usuario que depende del estado de autenticación dentro de las etiquetas <Authorized> y <NotAuthorized>.",
-            code: `<AuthorizeView>
-    <Authorized>
-        <span class="me-3">Hola, @context.User.Identity?.Name!</span>
-        <form method="post" action="/Account/Logout">
-            <button type="submit" class="btn btn-link">Log out</button>
-        </form>
-    </Authorized>
-    <NotAuthorized>
-        <NavLink class="btn btn-link" href="/Account/Register">Register</NavLink>
-        <NavLink class="btn btn-link" href="/Account/Login">Login</NavLink>
-    </NotAuthorized>
-</AuthorizeView>`,
-          },
-          {
-            title: "2. Configurar App.razor",
-            description:
-              "Envolver el componente <Routes /> con <CascadingAuthenticationState> para propagar el estado de autenticación a todos los componentes descendientes.",
-            code: `<body>
-    <CascadingAuthenticationState>
-        <Routes />
-    </CascadingAuthenticationState>
-    <script src="_framework/blazor.web.js"></script>
-</body>`,
-          },
-          {
-            title: "3. Añadir using en _Imports.razor",
-            description:
-              "Importar el namespace de autorización para que los componentes relacionados con la autenticación estén disponibles en todas las vistas.",
-            code: `@using Microsoft.AspNetCore.Components.Authorization`,
-          },
-          {
-            title: "4. Registrar Servicios en Program.cs",
-            description:
-              "Añadir los servicios necesarios para el núcleo de autorización y el estado de autenticación en cascada en la configuración de la aplicación.",
-            code: `builder.Services.AddAuthorizationCore();
-builder.Services.AddCascadingAuthenticationState();`,
-          },
-        ],
-        rubric: {
-          rubricData: [
-            {
-              title: "Implementación correcta (50%)",
-              criteria: [
-                {
-                  description: "Uso de etiquetas <AuthorizeView> (15%)",
-                  achieved:
-                    "Se usa correctamente <AuthorizeView> con sus secciones <Authorized> y <NotAuthorized>, y se eliminó lógica de autenticación manual anterior si existía.",
-                  notAchieved:
-                    "Se omite la etiqueta <AuthorizeView>, está incompleta, o la lógica de autenticación anterior no fue eliminada.",
-                },
-                {
-                  description: "Configuración de App.razor (20%)",
-                  achieved:
-                    "Se agregó <CascadingAuthenticationState> envolviendo correctamente a <Routes />.",
-                  notAchieved:
-                    "Se omitió <CascadingAuthenticationState> o está mal posicionado.",
-                },
-                {
-                  description:
-                    "Configuración de _Imports.razor y Program.cs (15%)",
-                  achieved:
-                    "Se agregó la directiva @using en _Imports.razor y se registraron los servicios AddAuthorizationCore() y AddCascadingAuthenticationState() en Program.cs.",
-                  notAchieved:
-                    "Se omitió la directiva de importación o los servicios no fueron registrados correctamente.",
-                },
-              ],
-            },
-            {
-              title: "Prevención de vulnerabilidades (50%)",
-              criteria: [
-                {
-                  description: "Verificación de Sesión Autenticada (25%)",
-                  achieved:
-                    "Al iniciar sesión, el usuario es reconocido como autenticado y no se puede acceder a datos protegidos sin una sesión válida.",
-                  notAchieved:
-                    "El usuario no es reconocido como autenticado tras iniciar sesión o se puede acceder a datos protegidos sin autenticación.",
-                },
-                {
-                  description:
-                    "Cambio Dinámico de Menú según Autenticación (25%)",
-                  achieved:
-                    "La interfaz cambia correctamente para mostrar opciones de usuario autenticado o no autenticado de forma inmediata.",
-                  notAchieved:
-                    "El menú no cambia al autenticarse o desautenticarse, mostrando opciones contradictorias.",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    },
-    {
       title: "Implementación y Protección de JWT",
       description:
         "Utilizar JSON Web Tokens (JWT) para la autenticación sin estado en APIs, donde el cliente envía un token firmado en cada solicitud para verificar su identidad y permisos.",
@@ -704,7 +508,7 @@ dotnet ef database update`,
       title: "Limitación de Tasa de Solicitudes (Rate Limiting)",
       description:
         "Restringir la cantidad de solicitudes que un cliente puede realizar a un endpoint en un período de tiempo determinado, previniendo abusos y ataques de fuerza bruta o denegación de servicio.",
-      threats: ["Acceso No Autorizado"],
+      threats: ["Denial of service o DoS"],
 
       recommendation:
         "Muy recomendado para: Endpoints públicos y sensibles de una Web API, como el de login, registro o cualquier otro que sea computacionalmente costoso.",
@@ -784,7 +588,7 @@ app.MapGet("/api/data", () => "Some data")
       title: "Límite de Tamaño de Solicitud",
       description:
         "Establecer un tamaño máximo para las solicitudes entrantes y sus cuerpos (payloads) para prevenir ataques de denegación de servicio por agotamiento de recursos del servidor.",
-      threats: ["Acceso No Autorizado"],
+      threats: ["Denial of service o DoS"],
 
       recommendation:
         "Esencial para: Cualquier tipo de aplicación (MVC, Web API) que exponga endpoints que permitan la subida de archivos o la recepción de cuerpos de solicitud de gran tamaño.",
@@ -857,6 +661,154 @@ public IActionResult UploadLargeFile(IFormFile file)
         },
       },
     },
+    {
+      title: "Integración de Proveedores Externos (OAuth 2.0 / OpenID)",
+      description:
+        "Añadir la opción de 'Iniciar Sesión Con...' a una aplicación ASP.NET Core que ya utiliza Identity. Esto delega la autenticación a un tercero, como Google, Facebook o Microsoft.",
+      threats: ["Acceso No Autorizado"],
+      recommendation:
+        "Esencial para: Aplicaciones (MVC, Razor) con ASP.NET Core Identity que desean ofrecer inicios de sesión sociales para mejorar la experiencia del usuario y la seguridad.",
+      warning:
+        "¡Importante! La URI de redirección (ejemplo, /signin-google) es extremadamente sensible. Debe estar registrada (con HTTPS en producción) en la consola del proveedor. Un error aquí permitirá que un atacante intercepte el código de autorización.",
+      modalContent: {
+        title: "Implementación de 'Iniciar Sesión con Google'",
+        practices: [
+          {
+            title: "1. Registrar la Aplicación en el Proveedor Externo",
+            description:
+              "Antes de escribir código, debes ir a la consola del proveedor (ej. Google Cloud Console). Allí, debes crear un nuevo 'ID de cliente de OAuth', configurar la 'pantalla de consentimiento' y, lo más importante, registrar tus 'URIs de redireccionamiento autorizados' (ej. https://localhost:PUERTO/signin-google). Al final, el proveedor te dará un 'ID de Cliente' y un 'Secreto de Cliente'.",
+            code: "/* Pasos en Google Cloud Console: \n 1. Ir a 'APIS y Servicios' -> 'Credenciales'.\n 2. 'Crear credenciales' -> 'ID de cliente de OAuth'.\n 3. Seleccionar 'Aplicación web'.\n 4. Añadir URI: https://localhost:PUERTO/signin-google \n 5. Guardar el ID de Cliente y el Secreto. */",
+          },
+          {
+            title: "2. Almacenar Secretos de Cliente",
+            description:
+              "Añade el 'ID de Cliente' y el 'Secreto de Cliente' a tu configuración. Es altamente recomendable usar el 'Secret Manager' (Manejador de Secretos) para esto y no ponerlos en texto plano en 'appsettings.json'.",
+            code: `// En appsettings.json o (preferiblemente) secrets.json
+"Authentication": {
+  "Google": {
+    "ClientId": "TU_ID_DE_CLIENTE_VA_AQUI",
+    "ClientSecret": "TU_SECRETO_DE_CLIENTE_VA_AQUI"
+  }
+}`,
+          },
+          {
+            title: "3. Añadir Proveedor de Autenticación en Program.cs",
+            description:
+              "En 'Program.cs', encadena el servicio del proveedor (ej. 'AddGoogle') después de 'AddIdentity'. Esto le enseña a ASP.NET Core Identity cómo comunicarse con Google, leyendo los secretos desde la configuración.",
+            code: `// Se asume que AddIdentity ya fue llamado
+builder.Services.AddAuthentication()
+   .AddGoogle(googleOptions =>
+   {
+      googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+      googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+   });`,
+          },
+          {
+            title: "4. Modificar la Vista de Login",
+            description:
+              "En tu vista 'Login.cshtml', añade un formulario que apunte a la acción 'ExternalLogin' del 'AccountController'. Cada botón debe tener 'name=\"provider\"' y 'value' con el nombre del proveedor (ej. 'Google').",
+            code: `<form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="oauth-form">
+  <div class="oauth-buttons">
+    <button type="submit" name="provider" value="Google" class="btn btn-oauth btn-google w-100">
+      <svg...>...</svg> Google
+    </button>
+  </div>
+</form>`,
+          },
+          {
+            title: "5. Implementar Lógica del Controlador",
+            description:
+              "Asegúrate de que tu 'AccountController' (el que provee Identity) tenga las acciones 'ExternalLogin' (POST) y 'ExternalLoginCallback' (GET). 'ExternalLogin' inicia el desafío y redirige al usuario a Google, y 'ExternalLoginCallback' maneja la respuesta de Google.",
+            code: `// En AccountController.cs
+[HttpPost]
+public IActionResult ExternalLogin(string provider, string returnUrl = null)
+{
+    // Genera la URL de redirección a la que Google debe volver
+    var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
+    var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+    // Redirige al usuario a Google
+    return new ChallengeResult(provider, properties);
+}
+
+[HttpGet]
+public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+{
+    // Maneja la respuesta de Google
+    var info = await _signInManager.GetExternalLoginInfoAsync();
+    if (info == null)
+    {
+        // Error
+        return RedirectToAction("Login");
+    }
+
+    // Intenta iniciar sesión con el proveedor externo
+    var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+    
+    if (result.Succeeded)
+    {
+        // El usuario ya existe y se logueó
+        return LocalRedirect(returnUrl ?? "/");
+    }
+    else
+    {
+        // El usuario es nuevo, se debe crear la cuenta
+        // ... (lógica para crear un nuevo IdentityUser sin contraseña) ...
+    }
+}`,
+          },
+        ],
+        rubric: {
+          rubricData: [
+            {
+              title: "Implementación correcta (50%)",
+              criteria: [
+                {
+                  description: "Configuración de vista y controlador (15%)",
+                  achieved:
+                    "La vista de Login contiene un formulario con método POST hacia la acción de login externo, incluyendo botones para los proveedores de autenticación configurados. El controlador tiene implementados los métodos de inicio de sesión externa (POST) y callback (GET) con los atributos de autorización apropiados.",
+                  notAchieved:
+                    "La vista no tiene el formulario de autenticación externa, los botones están mal configurados, o los métodos del controlador están ausentes, incompletos o sin los atributos necesarios.",
+                },
+                {
+                  description:
+                    "Configuración de autenticación en la aplicación (Program.cs) (20%)",
+                  achieved:
+                    "La aplicación tiene configurado correctamente el servicio de autenticación con el proveedor OAuth/OpenID seleccionado, obteniendo las credenciales desde configuración externa (no hardcodeadas). El middleware de autenticación está correctamente posicionado en el pipeline, despues de Identity.",
+                  notAchieved:
+                    "Falta la configuración del proveedor de autenticación, las credenciales están hardcodeadas en el código, o el orden del middleware es incorrecto causando errores de autenticación.",
+                },
+                {
+                  description: "Configuración en consola del proveedor (15%)",
+                  achieved:
+                    "Se creó y configuró correctamente una aplicación en la consola del proveedor de identidad, se configuró la pantalla de consentimiento, se generaron las credenciales necesarias, se agregaron los orígenes autorizados y las URIs de redirección correctamente, y se obtuvieron las credenciales del cliente.",
+                  notAchieved:
+                    "La configuración en la consola del proveedor está incompleta, las URIs de redirección no coinciden con la aplicación, falta la pantalla de consentimiento, o no se generaron correctamente las credenciales.",
+                },
+              ],
+            },
+            {
+              title: "Prevención de vulnerabilidades (50%)",
+              criteria: [
+                {
+                  description: "Protección de credenciales (25%)",
+                  achieved:
+                    "Registrar un nuevo usuario usando OAuth y verificar en la bd en la tabla AspNetUsers que la columna PasswordHash es NULL o esta vacía para el usuario nuevo, y existe el usuario en AspNetUserLogins.",
+                  notAchieved:
+                    "No aparece el nuevo usuario registrado en la bd.",
+                },
+                {
+                  description: "Flujo de autorización seguro (25%)",
+                  achieved:
+                    "Iniciar sesión con OAuth, en las herramientas del navegador (Network) los endpoint de OAuth (authClient y consentAuthUser) son https e incluye en la URL el parámetro state=code, el cual cambia en cada sesión.",
+                  notAchieved:
+                    "Alguna parte del flujo de OAuth usa http, falta el parámetro state o es constante y no cambia.",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
   ],
 
   threats: [
@@ -877,17 +829,18 @@ public IActionResult UploadLargeFile(IFormFile file)
       recommendations: [
         "ASP.NET Core Identity",
         "Autenticación de Dos Factores (2FA)",
-        "Razor Page: Uso de AuthorizeView",
         "Implementación y Protección de JWT",
-        "Limitación de Tasa de Solicitudes (Rate Limiting)",
-        "Límite de Tamaño de Solicitud",
+        "Integración de Proveedores Externos (OAuth 2.0 / OpenID)",
       ],
     },
     {
-      title: "Inyección de Datos",
+      title: "Denegación de servicios (Denial of service o DoS)",
       description:
-        "Clase de ataque donde se introducen datos maliciosos en un sistema, que pueden llevar a la ejecución de comandos no autorizados o al acceso a datos no permitidos. La validación de entradas es la defensa principal.",
-      recommendations: ["Validación de Entradas (Data Annotations)"],
+        "Los atacantes pueden saturar una API enviando un gran número de solicitudes, provocando que se vuelva lento o no responda el servidor.",
+      recommendations: [
+        "Limitación de Tasa de Solicitudes (Rate Limiting)",
+        "Límite de Tamaño de Solicitud",
+      ],
     },
     {
       title: "Manipulación de Token",

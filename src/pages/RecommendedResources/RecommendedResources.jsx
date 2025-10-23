@@ -63,10 +63,9 @@ function RecommendedResources() {
               <h3>OWASP ZAP</h3>
             </div>
             <p>
-              Una potente herramienta de código abierto para encontrar
-              vulnerabilidades de seguridad en tu aplicación web de forma
-              automática. Ideal para realizar escaneos de seguridad y pruebas de
-              penetración.
+              Una herramienta de código abierto para encontrar vulnerabilidades
+              de seguridad en tu aplicación web de forma automática. Ideal para
+              realizar escaneos de seguridad y pruebas de penetración.
             </p>
             <a
               href="https://www.zaproxy.org/"

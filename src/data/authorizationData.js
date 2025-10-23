@@ -378,98 +378,6 @@ public IActionResult ManagementTI()
       },
     },
     {
-      title: "Cifrado de Archivos de Configuración",
-      description:
-        "Proteger secretos y datos sensibles (como cadenas de conexión) en los archivos `appsettings.json` cifrándolos en el entorno de producción para que no estén expuestos en texto plano.",
-      threats: ["Acceso No Autorizado"],
-
-      recommendation:
-        "Esencial para: Entornos de producción o cualquier entorno donde los archivos `appsettings.json` puedan ser accesibles por personal no autorizado. Complementa, pero no reemplaza, el uso de un gestor de secretos como Azure Key Vault.",
-      warning:
-        "¡Crítico! La carpeta donde se persisten las claves de `DataProtection` debe tener una copia de seguridad y permisos de acceso restringidos. Si se pierden estas claves, todos los datos cifrados con ellas serán irrecuperables.",
-
-      modalContent: {
-        title: "Uso de Data Protection para Cifrar appsettings.json",
-        practices: [
-          {
-            title: "1. Configurar Data Protection Compartido",
-            description:
-              "Crear un proyecto de consola separado. En ambos proyectos (consola y app web), configurar el servicio de Data Protection para que persista las claves de cifrado en una carpeta compartida y usen el mismo nombre de aplicación.",
-            code: `// Esta configuración debe ser idéntica en ambos proyectos
-services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\\Ruta\\Compartida\\Keys"))
-    .SetApplicationName("NombreDeAplicacionCompartido");`,
-          },
-          {
-            title: "2. Crear Herramienta de Cifrado",
-            description:
-              "En el proyecto de consola, crear la lógica para leer el `appsettings.json`, obtener un 'protector' del servicio de Data Protection, cifrar el valor sensible y sobreescribir el archivo.",
-            code: `// En el proyecto de consola
-var protector = provider.GetDataProtector("Configuration.Protector");
-var configJson = JObject.Parse(File.ReadAllText("appsettings.json"));
-var secretValue = configJson["ConnectionStrings"]["DefaultConnection"].Value<string>();
-
-// Cifrar y reemplazar el valor
-configJson["ConnectionStrings"]["DefaultConnection"] = protector.Protect(secretValue);
-File.WriteAllText("appsettings.json", configJson.ToString());`,
-          },
-          {
-            title: "3. Descifrar Configuración al Iniciar la App",
-            description:
-              "En el `Program.cs` de la aplicación web, obtener una instancia del 'protector' (usando la misma configuración compartida) y descifrar el valor del `appsettings.json` en memoria antes de que la aplicación termine de construirse.",
-            code: `// En Program.cs de la app web
-var protector = app.Services.GetDataProtector("Configuration.Protector");
-var encryptedConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Descifrar y reemplazar en la configuración en memoria
-builder.Configuration["ConnectionStrings:DefaultConnection"] = protector.Unprotect(encryptedConnectionString);`,
-          },
-        ],
-        rubric: {
-          rubricData: [
-            {
-              title: "Implementación correcta (50%)",
-              criteria: [
-                {
-                  description: "Configuración de DataProtection (25%)",
-                  achieved:
-                    "Ambos proyectos (consola y app web) usan una configuración de DataProtection idéntica, apuntando a una carpeta de claves compartida y con un nombre de aplicación definido.",
-                  notAchieved:
-                    "La configuración de DataProtection es inconsistente, falta, o no se persiste en un lugar compartido.",
-                },
-                {
-                  description: "Proceso de Cifrado y Descifrado (25%)",
-                  achieved:
-                    "Existe un proyecto de consola funcional que cifra el archivo appsettings.json, y la app web contiene la lógica para descifrar la configuración al iniciar.",
-                  notAchieved:
-                    "No existe un proyecto para cifrar, o la lógica de descifrado en la app web está ausente o es incorrecta.",
-                },
-              ],
-            },
-            {
-              title: "Prevención de vulnerabilidades (50%)",
-              criteria: [
-                {
-                  description: "Verificación del Archivo (25%)",
-                  achieved:
-                    "Una inspección del appsettings.json en el servidor de destino muestra que los valores sensibles están en formato cifrado e ilegible.",
-                  notAchieved:
-                    "El archivo appsettings.json en el servidor contiene secretos en texto plano.",
-                },
-                {
-                  description: "Funcionalidad Operativa (25%)",
-                  achieved:
-                    "La aplicación se inicia y opera correctamente, demostrando que puede descifrar y utilizar los secretos del archivo de configuración.",
-                  notAchieved:
-                    "La aplicación falla al iniciarse o al intentar usar un secreto, debido a un error en el proceso de descifrado.",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    },
-    {
       title: "ASP.NET Core Identity",
       description:
         "Utilizar el framework integrado de ASP.NET Core para manejar la autenticación y gestión de usuarios, incluyendo registro, login, roles y almacenamiento seguro de contraseñas.",
@@ -643,6 +551,115 @@ dotnet ef database update`,
         },
       },
     },
+    {
+      title: "Razor Page: Uso de AuthorizeView",
+      description:
+        "Utilizar el componente <AuthorizeView> en aplicaciones Blazor y Razor para mostrar u ocultar elementos de la interfaz de usuario de forma declarativa, basándose en el estado de autenticación del usuario.",
+      threats: ["Acceso No Autorizado"],
+
+      recommendation:
+        "Específico para: Aplicaciones Blazor (Server y WebAssembly) y cualquier proyecto que utilice Razor Components. Es el método idiomático para la UI condicional en estos frameworks.",
+      warning:
+        "Este componente solo oculta elementos en la UI. No protege los endpoints de la API que esos elementos puedan llamar. La protección de los datos y la lógica de negocio debe hacerse en el backend con el atributo [Authorize].",
+
+      modalContent: {
+        title: "Uso de AuthorizeView para UI Dinámica",
+        practices: [
+          {
+            title: "1. Modificar Vistas con <AuthorizeView>",
+            description:
+              "Envolver la lógica de la interfaz de usuario que depende del estado de autenticación dentro de las etiquetas <Authorized> y <NotAuthorized>.",
+            code: `<AuthorizeView>
+    <Authorized>
+        <span class="me-3">Hola, @context.User.Identity?.Name!</span>
+        <form method="post" action="/Account/Logout">
+            <button type="submit" class="btn btn-link">Log out</button>
+        </form>
+    </Authorized>
+    <NotAuthorized>
+        <NavLink class="btn btn-link" href="/Account/Register">Register</NavLink>
+        <NavLink class="btn btn-link" href="/Account/Login">Login</NavLink>
+    </NotAuthorized>
+</AuthorizeView>`,
+          },
+          {
+            title: "2. Configurar App.razor",
+            description:
+              "Envolver el componente <Routes /> con <CascadingAuthenticationState> para propagar el estado de autenticación a todos los componentes descendientes.",
+            code: `<body>
+    <CascadingAuthenticationState>
+        <Routes />
+    </CascadingAuthenticationState>
+    <script src="_framework/blazor.web.js"></script>
+</body>`,
+          },
+          {
+            title: "3. Añadir using en _Imports.razor",
+            description:
+              "Importar el namespace de autorización para que los componentes relacionados con la autenticación estén disponibles en todas las vistas.",
+            code: `@using Microsoft.AspNetCore.Components.Authorization`,
+          },
+          {
+            title: "4. Registrar Servicios en Program.cs",
+            description:
+              "Añadir los servicios necesarios para el núcleo de autorización y el estado de autenticación en cascada en la configuración de la aplicación.",
+            code: `builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();`,
+          },
+        ],
+        rubric: {
+          rubricData: [
+            {
+              title: "Implementación correcta (50%)",
+              criteria: [
+                {
+                  description: "Uso de etiquetas <AuthorizeView> (15%)",
+                  achieved:
+                    "Se usa correctamente <AuthorizeView> con sus secciones <Authorized> y <NotAuthorized>, y se eliminó lógica de autenticación manual anterior si existía.",
+                  notAchieved:
+                    "Se omite la etiqueta <AuthorizeView>, está incompleta, o la lógica de autenticación anterior no fue eliminada.",
+                },
+                {
+                  description: "Configuración de App.razor (20%)",
+                  achieved:
+                    "Se agregó <CascadingAuthenticationState> envolviendo correctamente a <Routes />.",
+                  notAchieved:
+                    "Se omitió <CascadingAuthenticationState> o está mal posicionado.",
+                },
+                {
+                  description:
+                    "Configuración de _Imports.razor y Program.cs (15%)",
+                  achieved:
+                    "Se agregó la directiva @using en _Imports.razor y se registraron los servicios AddAuthorizationCore() y AddCascadingAuthenticationState() en Program.cs.",
+                  notAchieved:
+                    "Se omitió la directiva de importación o los servicios no fueron registrados correctamente.",
+                },
+              ],
+            },
+            {
+              title: "Prevención de vulnerabilidades (50%)",
+              criteria: [
+                {
+                  description: "Verificación de Sesión Autenticada (25%)",
+                  achieved:
+                    "Al iniciar sesión, el usuario es reconocido como autenticado y no se puede acceder a datos protegidos sin una sesión válida.",
+                  notAchieved:
+                    "El usuario no es reconocido como autenticado tras iniciar sesión o se puede acceder a datos protegidos sin autenticación.",
+                },
+                {
+                  description:
+                    "Cambio Dinámico de Menú según Autenticación (25%)",
+                  achieved:
+                    "La interfaz cambia correctamente para mostrar opciones de usuario autenticado o no autenticado de forma inmediata.",
+                  notAchieved:
+                    "El menú no cambia al autenticarse o desautenticarse, mostrando opciones contradictorias.",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
   ],
 
   threats: [
@@ -664,7 +681,7 @@ dotnet ef database update`,
         "Control de Acceso Basado en Roles (RBAC)",
         "Autorización Basada en Políticas (Claims)",
         "ASP.NET Core Identity",
-        "Cifrado de Archivos de Configuración",
+        "Razor Page: Uso de AuthorizeView",
       ],
     },
     {
