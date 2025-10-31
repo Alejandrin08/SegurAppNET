@@ -53,8 +53,8 @@ export const corsData = {
             code: `// ...
 app.UseRouting();
 
-// Habilita el middleware de CORS. Puede llevar un nombre de política por defecto.
-app.UseCors("MyPolicyName");
+//Se llama a UseCors() sin una política para que el sistema pueda procesar las políticas aplicadas en los endpoints.
+app.UseCors();
 
 app.UseAuthorization();
 // ...`,
@@ -233,6 +233,13 @@ public IActionResult PostCrear([FromBody] object data)
               "Si la API necesita recibir cookies o encabezados de autenticación del cliente, se debe usar `AllowCredentials()`. **Importante:** Al usar esta opción, es obligatorio especificar los orígenes con `WithOrigins` y no se puede usar `AllowAnyOrigin()`.",
             code: `// ... dentro de la configuración de la política
 .AllowCredentials();`,
+          },
+          {
+            title: "3. Exponer Encabezados Personalizados al Cliente",
+            description:
+              "Usar `WithExposedHeaders` para permitir que el cliente (JavaScript) pueda leer encabezados específicos que la API envía en la respuesta, como 'X-Total-Paginas' para paginación.",
+            code: `// ... dentro de la configuración de la política
+.WithExposedHeaders("X-Total-Paginas", "X-Token-Expirado");`,
           },
         ],
         rubric: {

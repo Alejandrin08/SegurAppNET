@@ -249,6 +249,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });`,
+            postCodeText:
+              "Recuerda instalar el paquete Microsoft.AspNetCore.Authentication.JwtBearer.",
           },
           {
             title: "2. Generar y Firmar Token en el Login",
@@ -508,41 +510,90 @@ dotnet ef database update`,
       title: "Limitación de Tasa de Solicitudes (Rate Limiting)",
       description:
         "Restringir la cantidad de solicitudes que un cliente puede realizar a un endpoint en un período de tiempo determinado, previniendo abusos y ataques de fuerza bruta o denegación de servicio.",
-      threats: ["Denial of service o DoS"],
-
+      threats: ["Denial of service o DoS", "Ataques de Fuerza Bruta"],
       recommendation:
         "Muy recomendado para: Endpoints públicos y sensibles de una Web API, como el de login, registro o cualquier otro que sea computacionalmente costoso.",
       warning:
         "Una política de limitación demasiado estricta puede impactar negativamente la experiencia de usuario o bloquear a clientes legítimos. Monitoree y ajuste los límites según el tráfico real de su aplicación.",
-
       modalContent: {
         title: "Implementación de Rate Limiting",
         practices: [
           {
             title: "1. Configurar Políticas en Program.cs",
             description:
-              "Registrar el servicio de Rate Limiter y definir políticas, como una limitación global o una política específica por dirección IP.",
+              "Registrar el servicio 'AddRateLimiter' y definir políticas. Es común crear una política 'particionada' (ej. por IP) para endpoints específicos y una 'global' para el resto de la API.",
             code: `builder.Services.AddRateLimiter(options =>
 {
-    // Política que limita a 10 peticiones por minuto por IP
-    options.AddFixedWindowLimiter(policyName: "PerIP", options =>
-    {
-        options.PermitLimit = 10;
-        options.Window = TimeSpan.FromMinutes(1);
-        options.QueueLimit = 0;
-    });
+    // Política "PerIP": Limita a 10 peticiones por minuto POR CADA IP.
+    // Usa 'RateLimitPartition.GetFixedWindowLimiter' para particionar por IP.
+    options.AddPolicy("PerIP", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 2 // Pone en cola 2 peticiones antes de rechazar
+            }));
 
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    // Política "Global": Limita a 100 peticiones por minuto PARA TODA LA API.
+    // Esta política se aplica a todos los endpoints que no tengan una propia.
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter("Global",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+    
+    // Opcional: Define una respuesta JSON personalizada cuando se rechaza una petición.
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { error = "Límite de peticiones excedido" }, token);
+    };
 });`,
           },
           {
-            title: "2. Aplicar Políticas en Endpoints y Middleware",
+            title: "2. Activar el Middleware",
             description:
-              "Activar el middleware de Rate Limiter en el pipeline y aplicar las políticas definidas a endpoints específicos usando `.RequireRateLimiting()`.",
-            code: `// Activar el middleware
-app.UseRateLimiter();
+              "Activar el middleware de Rate Limiter en el pipeline (después de UseRouting y UseCors, pero antes de UseAuthentication y UseAuthorization).",
+            code: `// ...
+app.UseRouting();
+app.UseCors(); // Si lo usas
 
-// Aplicar política a un endpoint específico
+app.UseRateLimiter(); // ¡Activar aquí!
+
+app.UseAuthentication();
+app.UseAuthorization();
+// ...`,
+          },
+          {
+            title: "3. Aplicar Políticas a Endpoints",
+            description:
+              "Puedes aplicar políticas a controladores usando el atributo '[EnableRateLimiting]' o a Minimal APIs usando '.RequireRateLimiting()'.",
+            code: `// --- 1. Para Controladores ---
+[ApiController]
+public class AccountController : ControllerBase
+{
+    // Aplica la política "PerIP" solo a este endpoint de login
+    [HttpPost("login")]
+    [EnableRateLimiting("PerIP")]
+    public IActionResult Login(...) { ... }
+    
+    // Este endpoint usará la política "Global" por defecto
+    [HttpGet("perfil")]
+    public IActionResult GetProfile(...) { ... }
+    
+    // Desactiva cualquier límite para este endpoint
+    [HttpGet("salud")]
+    [DisableRateLimiting]
+    public IActionResult GetHealth(...) { ... }
+}
+
+// --- 2. Para Minimal APIs ---
 app.MapGet("/api/data", () => "Some data")
    .RequireRateLimiting("PerIP");`,
           },
@@ -555,16 +606,16 @@ app.MapGet("/api/data", () => "Some data")
                 {
                   description: "Configuración de políticas (25%)",
                   achieved:
-                    "Se implementa una política de limitación (global o por IP) correctamente en Program.cs.",
+                    "Se implementa al menos una política de limitación (global o particionada por IP) correctamente en Program.cs.",
                   notAchieved:
-                    "No existe limitación o la configuración es incompleta.",
+                    "No existe limitación o la configuración es incompleta/incorrecta.",
                 },
                 {
                   description: "Aplicación en endpoints (25%)",
                   achieved:
-                    "Los endpoints sensibles están protegidos con `.RequireRateLimiting()` o una política global.",
+                    "Los endpoints sensibles están protegidos con '[EnableRateLimiting]' o '.RequireRateLimiting()'. El middleware 'UseRateLimiter' está registrado.",
                   notAchieved:
-                    "Endpoints no están protegidos o no responden correctamente tras superar el límite.",
+                    "Endpoints no están protegidos o el middleware 'UseRateLimiter' falta en el pipeline.",
                 },
               ],
             },

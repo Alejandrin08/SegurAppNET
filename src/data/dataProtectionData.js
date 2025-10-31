@@ -146,47 +146,64 @@ public class MyController : ControllerBase
       description:
         "Proteger secretos y datos sensibles (como cadenas de conexión) en los archivos `appsettings.json` cifrándolos en el entorno de producción para que no estén expuestos en texto plano.",
       threats: ["Acceso No Autorizado"],
-
       recommendation:
         "Esencial para: Entornos de producción o cualquier entorno donde los archivos `appsettings.json` puedan ser accesibles por personal no autorizado. Complementa, pero no reemplaza, el uso de un gestor de secretos como Azure Key Vault.",
       warning:
         "¡Crítico! La carpeta donde se persisten las claves de `DataProtection` debe tener una copia de seguridad y permisos de acceso restringidos. Si se pierden estas claves, todos los datos cifrados con ellas serán irrecuperables.",
-
       modalContent: {
         title: "Uso de Data Protection para Cifrar appsettings.json",
         practices: [
           {
-            title: "1. Configurar Data Protection Compartido",
+            title: "1. Preparar la Herramienta de Consola",
             description:
-              "Crear un proyecto de consola separado. En ambos proyectos (consola y app web), configurar el servicio de Data Protection para que persista las claves de cifrado en una carpeta compartida y usen el mismo nombre de aplicación.",
-            code: `// Esta configuración debe ser idéntica en ambos proyectos
+              "Crea un proyecto de consola separado. Asegúrate de añadir el paquete NuGet 'Microsoft.Extensions.DependencyInjection' para poder configurar y usar los servicios de Data Protection.",
+            code: "// Abre la terminal en la carpeta del proyecto de consola:\ndotnet add package Microsoft.Extensions.DependencyInjection",
+          },
+          {
+            title: "2. Configurar Data Protection Compartido",
+            description:
+              "En ambos proyectos (consola y app web), configura el servicio 'AddDataProtection' en `Program.cs`. Es crucial que uses '.PersistKeysToFileSystem()' apuntando a la misma carpeta y '.SetApplicationName()' con el mismo nombre en ambos.",
+            code: `// Esta configuración debe ser idéntica en ambos proyectos (consola y web API)
+// Asegúrate de que la carpeta exista y tenga permisos
 services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\\Ruta\\Compartida\\Keys"))
-    .SetApplicationName("NombreDeAplicacionCompartido");`,
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\\Ruta\\Compartida\\Keys")) // Define una ruta accesible
+    .SetApplicationName("NombreDeAplicacionCompartido"); // Define un nombre único`,
           },
           {
-            title: "2. Crear Herramienta de Cifrado",
+            title: "3. Crear Herramienta de Cifrado",
             description:
-              "En el proyecto de consola, crear la lógica para leer el `appsettings.json`, obtener un 'protector' del servicio de Data Protection, cifrar el valor sensible y sobreescribir el archivo.",
-            code: `// En el proyecto de consola
-var protector = provider.GetDataProtector("Configuration.Protector");
-var configJson = JObject.Parse(File.ReadAllText("appsettings.json"));
-var secretValue = configJson["ConnectionStrings"]["DefaultConnection"].Value<string>();
+              "En el proyecto de consola, obtén el 'IDataProtectionProvider'. Luego, crea un 'protector' con 'CreateProtector' usando una cadena de propósito única (ej. 'MyWebApp.Configuration.v1'). Lee el JSON, cifra el valor sensible con 'protector.Protect()' y guarda el archivo.",
+            code: `// En el Program.cs de la consola
+var provider = services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
+var protector = provider.CreateProtector("MyWebApp.Configuration.v1"); // Cadena de propósito
 
-// Cifrar y reemplazar el valor
-configJson["ConnectionStrings"]["DefaultConnection"] = protector.Protect(secretValue);
-File.WriteAllText("appsettings.json", configJson.ToString());`,
+var configPath = @"RUTA_A_TU_APPSETTINGS.json"; // Ruta al archivo de la API
+var json = File.ReadAllText(configPath);
+var jsonNode = JsonNode.Parse(json)!;
+
+var secretValue = jsonNode["ConnectionStrings"]!["DefaultConnection"]!.GetValue<string>();
+var encryptedValue = protector.Protect(secretValue);
+
+// Reemplazar y guardar
+jsonNode["ConnectionStrings"]!["DefaultConnection"] = encryptedValue;
+File.WriteAllText(configPath, jsonNode.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));`,
           },
           {
-            title: "3. Descifrar Configuración al Iniciar la App",
+            title: "4. Descifrar Configuración al Iniciar la App Web",
             description:
-              "En el `Program.cs` de la aplicación web, obtener una instancia del 'protector' (usando la misma configuración compartida) y descifrar el valor del `appsettings.json` en memoria antes de que la aplicación termine de construirse.",
-            code: `// En Program.cs de la app web
-var protector = app.Services.GetDataProtector("Configuration.Protector");
-var encryptedConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+              "En el `Program.cs` de la aplicación web, justo después de configurar Data Protection, obtén una instancia del 'protector' (usando la misma cadena de propósito). Lee el valor cifrado de la configuración, descífralo con 'protector.Unprotect()', y actualiza la configuración en memoria.",
+            code: `// En Program.cs de la app web, después de AddDataProtection()
+var tempProvider = builder.Services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
+var protector = tempProvider.CreateProtector("MyWebApp.Configuration.v1"); // Misma cadena de propósito
 
-// Descifrar y reemplazar en la configuración en memoria
-builder.Configuration["ConnectionStrings:DefaultConnection"] = protector.Unprotect(encryptedConnectionString);`,
+var encryptedConnString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (!string.IsNullOrEmpty(encryptedConnString))
+{
+    var decryptedConnString = protector.Unprotect(encryptedConnString);
+    // Actualizar configuración en memoria
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = decryptedConnString;
+}`,
           },
         ],
         rubric: {

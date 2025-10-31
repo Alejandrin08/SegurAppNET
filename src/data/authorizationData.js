@@ -501,7 +501,7 @@ dotnet ef database update`,
                 {
                   description: "Configurar base de datos (10%)",
                   achieved:
-                    "Se creó la clase ApplicationDbContext, hereda de IdentityDbContext y se configuró la cadena de conexión en appsettings.json.",
+                    "Se creó la clase ApplicationDbContext, la cual hereda de IdentityDbContext y configuró un constructor con DbContextOptions. Se añadió la cadena de conexión en appsettings.json con servidor y nombre de base de datos correctos.",
                   notAchieved:
                     "No se creó ApplicationDbContext, no hereda de IdentityDbContext, o la cadena de conexión es incorrecta.",
                 },

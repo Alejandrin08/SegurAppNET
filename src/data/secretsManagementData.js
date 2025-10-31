@@ -38,7 +38,9 @@ export const secretsManagementData = {
             description:
               "Para el entorno de desarrollo, inicializar el Secret Manager y almacenar los secretos localmente fuera del control de código fuente.",
             code: `dotnet user-secrets init
-dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"`,
+dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
+//Estos secretos se almacenan en un archivo JSON en la máquina local del desarrollador. 
+//En: %APPDATA%/Microsoft/UserSecrets/<user_secrets_id>/secrets.json`,
           },
           {
             title: "2. Crear un Modelo (POCO) para los Secretos",

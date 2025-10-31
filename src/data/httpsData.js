@@ -104,7 +104,7 @@ app.MapControllerRoute(
                   achieved:
                     "Después de una visita exitosa por HTTPS, si se intenta acceder por HTTP dentro del tiempo de `MaxAge`, el navegador bloquea la solicitud HTTP y la convierte a HTTPS automáticamente.",
                   notAchieved:
-                    "El navegador no bloquea las solicitudes HTTP subsecuentes, permitiendo posibles ataques de SSL Stripping.",
+                    "El navegador no bloquea las solicitudes HTTP subsecuentes, permitiendo posibles ataques.",
                 },
               ],
             },
