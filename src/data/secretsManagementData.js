@@ -1,4 +1,4 @@
-import SecretsManagement from "../assets/secretsManagement.png";
+import SecretsManagement from "../assets/SecretsManagement.png";
 import Secrets from "../assets/Secrets.png";
 
 export const secretsManagementData = {
