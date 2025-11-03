@@ -30,7 +30,6 @@ function Home() {
 
   return (
     <div>
-      <div className="rectangle rectangle-blue">Como empezar</div>
       <section className="section-introduction">
         <h1>Introducción</h1>
         <p>
@@ -105,18 +104,6 @@ function Home() {
                     <div className="list-item-content">
                       <RiVerifiedBadgeLine className="icono-li" />
                       <div className="text-inline">
-                        <h3>Indicaciones visuales:</h3>
-                        <p>
-                          los iconos ayudan a identificar los distintos tipos de
-                          contenido de un vistazo.
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                  <li>
-                    <div className="list-item-content">
-                      <RiVerifiedBadgeLine className="icono-li" />
-                      <div className="text-inline">
                         <h3>Ejemplos prácticos:</h3>
                         <p>
                           escenarios donde se ilustran cómo se aplican los
@@ -177,7 +164,7 @@ function Home() {
                     Clonar el repositorio de GitHub para realizar los
                     laboratorios ubicado{" "}
                     <a
-                      href="https://github.com/tu-repositorio"
+                      href="https://github.com/SegurAppNet/SegurApp-labs.git"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -306,8 +293,14 @@ function Home() {
                   Enlaces y documentos útiles para profundizar en los temas
                   abordados.
                 </p>
-                <div className="rectangle rectangle-purple">
-                  Documentación oficial
+                <div className="p-30 d-flex gap-3 flex-wrap">
+                  <div className="rectangle rectangle-purple">
+                    Herramientas esenciales
+                  </div>
+                  <div className="rectangle rectangle-purple">
+                    Plataformas y Servicios en la Nube
+                  </div>
+                  <div className="rectangle rectangle-purple">Aprendizaje</div>
                 </div>
               </Link>
             </div>

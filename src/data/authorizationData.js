@@ -4,7 +4,7 @@ import Authorization from "../assets/Authorization.png";
 export const authorizationData = {
   securityMechanismTitle: "Autorización",
   definition:
-    "La autorización es el proceso que determina si un usuario autenticado tiene permiso para acceder a un recurso específico o realizar una acción determinada. A diferencia de la autenticación (que verifica quién es el usuario), la autorización define qué puede hacer ese usuario.",
+    "La autorización se refiere al proceso de determinar que acciones o recursos puede acceder un usuario, esto después de haber sido autenticado exitosamente, una vez es autenticado, el usuario recibe una identidad que suele ser utilizado para hacer comprobaciones de autorización.",
   interestingFacts: [
     {
       description:
@@ -22,18 +22,13 @@ export const authorizationData = {
     {
       title: "Control de Acceso Basado en Roles (RBAC)",
       description:
-        "Implementar un sistema donde los permisos se asignan a roles predefinidos (como 'Administrador', 'Usuario') y los usuarios heredan los permisos de los roles que se les asignan. Esto centraliza y simplifica la gestión de permisos.",
+        "Usar RBAC garantiza que los usuarios solo tengan los permisos necesarios para realizar sus tareas.",
       threats: [
         "Elevación de Privilegios",
         "Acceso no Autorizado",
         "Manipulación de URL",
         "Referencia Directa a Objetos Insegura (IDOR)",
       ],
-
-      recommendation:
-        "Fundamental para: Casi todas las aplicaciones (MVC, Razor Pages, Web API) que necesitan diferenciar entre tipos de usuarios, como administradores, moderadores y usuarios estándar.",
-      warning:
-        "La lógica de autorización en las vistas (ej. `@if (User.IsInRole(...))`) puede volverse difícil de mantener si las reglas son complejas. Considere usar Políticas para una lógica más limpia en el backend.",
 
       modalContent: {
         title: "Implementación de RBAC con ASP.NET Core Identity",
@@ -58,7 +53,7 @@ public static class UserRoles
           {
             title: "2. Actualizar Modelo y Vista de Registro",
             description:
-              "Añadir una propiedad 'Role' al ViewModel de registro y un campo de selección (`<select>`) en el formulario para permitir que se elija un rol durante la creación del usuario.",
+              "Añadir una propiedad Role al ViewModel de registro y un campo de selección (<select>) en el formulario para permitir que se elija un rol durante la creación del usuario.",
             code: `// Añadir al RegisterViewModel.cs
 [Required]
 public string Role { get; set; } = null!;
@@ -79,12 +74,12 @@ public string Role { get; set; } = null!;
           {
             title: "3. Modificar Controlador para Asignar Roles",
             description:
-              "Inyectar `RoleManager` en el controlador de cuentas. En el método de registro, después de crear el usuario, usar `userManager.AddToRoleAsync()` para asignarle el rol seleccionado.",
+              "Inyectar RoleManager en el controlador de cuentas. En el método de registro, después de crear el usuario, usar userManager.AddToRoleAsync() para asignarle el rol seleccionado.",
             code: `// Inyectar RoleManager y modificar el registro
 private readonly UserManager<IdentityUser> _userManager;
 private readonly RoleManager<IdentityRole> _roleManager;
 
-// ... en el constructor ...
+// en el constructor ...
 
 [HttpPost]
 public async Task<IActionResult> Register(RegisterViewModel model)
@@ -125,7 +120,7 @@ public async Task<IActionResult> Login()
           {
             title: "5. Proteger Endpoints y Vistas",
             description:
-              'Usar el atributo `[Authorize(Roles = "...")]` en las acciones de los controladores para restringir el acceso por rol. En las vistas de Razor, usar `User.IsInRole("...")` para mostrar u ocultar elementos de la interfaz.',
+              'Usar el atributo [Authorize(Roles = "...")] en las acciones de los controladores para restringir el acceso por rol. En las vistas de Razor, usar User.IsInRole("...") para mostrar u ocultar elementos de la interfaz.',
             code: `// En un controlador
 [Authorize(Roles = UserRoles.Admin)]
 public IActionResult ControlPanel()
@@ -145,7 +140,7 @@ public IActionResult ControlPanel()
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de roles (10%)",
@@ -157,7 +152,7 @@ public IActionResult ControlPanel()
                 {
                   description: "Modelo de datos e Interfaz de usuario (10%)",
                   achieved:
-                    "La propiedad 'Role' fue añadida al modelo de registro y el formulario incluye un <select> que se llena dinámicamente.",
+                    "La propiedad Role fue añadida al modelo de registro y el formulario incluye un <select> que se llena dinámicamente.",
                   notAchieved:
                     "Propiedad faltante en el modelo, o el <select> es inexistente o tiene roles hardcodeados.",
                 },
@@ -192,7 +187,7 @@ public IActionResult ControlPanel()
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Persistencia de roles (10%)",
@@ -224,7 +219,7 @@ public IActionResult ControlPanel()
     {
       title: "Autorización Basada en Políticas (Claims)",
       description:
-        "Definir políticas de autorización personalizadas que verifican la presencia de 'claims' específicos en la identidad de un usuario. Esto permite un control de acceso más granular que los roles.",
+        "Es posible crear políticas que requieran múltiples roles u otras condiciones, haciendo que la lógica de autorización sea más fácil de mantener.",
       threats: [
         "Elevación de Privilegios",
         "Acceso No Autorizado",
@@ -233,9 +228,7 @@ public IActionResult ControlPanel()
       ],
 
       recommendation:
-        "Ideal para: Escenarios que requieren un control de acceso más granular que los roles. Por ejemplo, 'solo los managers del departamento de TI pueden acceder' o 'solo los usuarios mayores de 18 años'.",
-      warning:
-        "Asegúrese de que los claims se añadan a la identidad del usuario de forma consistente durante el login o registro. Un claim faltante resultará en un fallo de autorización silencioso (acceso denegado).",
+        'Ideal para: Escenarios que requieren un control de acceso más granular que los roles. Por ejemplo, "solo los managers del departamento de TI pueden acceder" o "solo los usuarios mayores de 18 años".',
 
       modalContent: {
         title: "Implementación de Autorización con Políticas",
@@ -243,7 +236,7 @@ public IActionResult ControlPanel()
           {
             title: "1. Definir Atributos para Claims",
             description:
-              "Crear una clase estática para definir los posibles valores de un 'claim' (como un área de trabajo). Esto, al igual que con los roles, centraliza la gestión y evita errores.",
+              "Crear una clase estática para definir los posibles valores de un claim (como un área de trabajo). Esto, al igual que con los roles, centraliza la gestión y evita errores.",
             code: `// En una carpeta /Services o /Constants
 public static class WorkAreas
 {
@@ -259,7 +252,7 @@ public static class WorkAreas
           {
             title: "2. Actualizar UI y Modelo de Registro",
             description:
-              "Añadir la propiedad para el claim (ej. 'WorkArea') al ViewModel y un campo de selección al formulario de registro, que se muestre condicionalmente (ej. solo para el rol 'Manager').",
+              "Añadir la propiedad para el claim (ej. WorkArea) al ViewModel y un campo de selección al formulario de registro, que se muestre condicionalmente (ej. solo para el rol Manager).",
             code: `// Añadir a RegisterViewModel.cs
 public string? WorkArea { get; set; }
 
@@ -275,7 +268,7 @@ document.getElementById("roleSelect").addEventListener("change", function () {
           {
             title: "3. Asignar Claims durante el Registro",
             description:
-              "En el controlador, después de crear el usuario y asignarle un rol, verificar si se debe añadir un 'claim' y usar `userManager.AddClaimAsync()` para asociarlo al usuario.",
+              "En el controlador, después de crear el usuario y asignarle un rol, verificar si se debe añadir un claim y usar userManager.AddClaimAsync() para asociarlo al usuario.",
             code: `// En el método Register del AccountController
 if (model.Role == UserRoles.Manager)
 {
@@ -288,7 +281,7 @@ if (model.Role == UserRoles.Manager)
           {
             title: "4. Crear Políticas de Autorización",
             description:
-              "En `Program.cs`, registrar las políticas de autorización. Cada política define uno o más requisitos, como requerir un rol y un 'claim' con un valor específico.",
+              "En Program.cs, registrar las políticas de autorización. Cada política define uno o más requisitos, como requerir un rol y un claim con un valor específico.",
             code: `builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("TechnologyManagerOnly", policy =>
@@ -303,7 +296,7 @@ if (model.Role == UserRoles.Manager)
           {
             title: "5. Aplicar Políticas a Endpoints",
             description:
-              "Proteger las acciones de los controladores utilizando el atributo `[Authorize]` y especificando el nombre de la política a aplicar.",
+              "Proteger las acciones de los controladores utilizando el atributo [Authorize] y especificando el nombre de la política a aplicar.",
             code: `// En un controlador
 [Authorize(Policy = "TechnologyManagerOnly")]
 public IActionResult ManagementTI()
@@ -315,7 +308,7 @@ public IActionResult ManagementTI()
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de claims (workAreas) (10%)",
@@ -334,14 +327,14 @@ public IActionResult ManagementTI()
                 {
                   description: "Registro con claims (10%)",
                   achieved:
-                    "El método de registro asigna el 'claim' al usuario si cumple la condición (ej. es 'Manager') y valida que el valor no sea nulo.",
+                    "El método de registro asigna el claim al usuario si cumple la condición (ej. es Manager) y valida que el valor no sea nulo.",
                   notAchieved:
-                    "El 'claim' no se registra o falta el manejo de errores y validaciones.",
+                    "El claim no se registra o falta el manejo de errores y validaciones.",
                 },
                 {
                   description: "Definición de Políticas (10%)",
                   achieved:
-                    "Las políticas de autorización están correctamente definidas en Program.cs usando `AddPolicy` con los requisitos de rol y claim.",
+                    "Las políticas de autorización están correctamente definidas en Program.cs usando AddPolicy con los requisitos de rol y claim.",
                   notAchieved:
                     "Las políticas no están definidas, están incompletas o tienen una lógica incorrecta.",
                 },
@@ -355,19 +348,19 @@ public IActionResult ManagementTI()
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Persistencia de claims (25%)",
                   achieved:
-                    "Los 'claims' se registran y persisten correctamente en la tabla AspNetUserClaims para los usuarios correspondientes.",
+                    "Los claims se registran y persisten correctamente en la tabla AspNetUserClaims para los usuarios correspondientes.",
                   notAchieved:
                     "La tabla AspNetUserClaims está vacía o no contiene los datos esperados para los usuarios.",
                 },
                 {
                   description: "Validación contra acceso no autorizado (25%)",
                   achieved:
-                    "Un usuario que no cumple con todos los requisitos de una política (ej. un Manager de RRHH intentando acceder a una vista de TI) es redirigido a 'Acceso Denegado'.",
+                    "Un usuario que no cumple con todos los requisitos de una política (ej. un Manager de RRHH intentando acceder a una vista de TI) es redirigido a Acceso Denegado.",
                   notAchieved:
                     "El usuario tiene acceso directo a vistas restringidas sin cumplir con todos los requisitos de la política.",
                 },
@@ -380,18 +373,13 @@ public IActionResult ManagementTI()
     {
       title: "ASP.NET Core Identity",
       description:
-        "Utilizar el framework integrado de ASP.NET Core para manejar la autenticación y gestión de usuarios, incluyendo registro, login, roles y almacenamiento seguro de contraseñas.",
+        "Usar ASP.NET Core Identiy proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basado en reclamaciones.",
       threats: [
         "Elevación de Privilegios",
         "Acceso No Autorizado",
         "Manipulación de URL",
         "Referencia Directa a Objetos Insegura (IDOR)",
       ],
-
-      recommendation:
-        "La base para: La mayoría de las aplicaciones ASP.NET Core (MVC, Razor Pages, Blazor Server) que requieren un sistema de cuentas de usuario. Proporciona una solución completa y segura lista para usar.",
-      warning:
-        "La configuración por defecto es segura, pero debe ser revisada. Ajuste las políticas de complejidad de contraseñas y los parámetros de bloqueo de cuentas (`Lockout`) según los requisitos de seguridad de su aplicación.",
 
       modalContent: {
         title: "Implementación de ASP.NET Core Identity",
@@ -412,7 +400,7 @@ public IActionResult ManagementTI()
           {
             title: "2. Crear el Contexto de Base de Datos",
             description:
-              "Crear una clase `ApplicationDbContext` que herede de `IdentityDbContext` para que Entity Framework pueda gestionar las tablas de Identity.",
+              "Crear una clase ApplicationDbContext que herede de IdentityDbContext para que Entity Framework pueda gestionar las tablas de Identity.",
             code: `using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -454,7 +442,7 @@ builder.Services.ConfigureApplicationCookie(options =>
           {
             title: "4. Implementar Lógica en el Controlador",
             description:
-              "Inyectar `SignInManager` y `UserManager` en el controlador de cuentas y usarlos para implementar la lógica de registro, inicio y cierre de sesión.",
+              "Inyectar SignInManager y UserManager en el controlador de cuentas y usarlos para implementar la lógica de registro, inicio y cierre de sesión.",
             code: `private readonly SignInManager<IdentityUser> _signInManager;
 private readonly UserManager<IdentityUser> _userManager;
 
@@ -489,7 +477,7 @@ dotnet ef database update`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Agregar paquetes NuGet (10%)",
@@ -522,14 +510,14 @@ dotnet ef database update`,
                 {
                   description: "Generar y aplicar migraciones (10%)",
                   achieved:
-                    "Se ejecutaron correctamente los comandos de migraciones 'add' y 'update', creando las tablas de Identity.",
+                    "Se ejecutaron correctamente los comandos de migraciones add y update, creando las tablas de Identity.",
                   notAchieved:
                     "No se generaron las migraciones, fallaron los comandos, o no se crearon las tablas.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Hasheo de contraseñas (25%)",
@@ -554,13 +542,11 @@ dotnet ef database update`,
     {
       title: "Razor Page: Uso de AuthorizeView",
       description:
-        "Utilizar el componente <AuthorizeView> en aplicaciones Blazor y Razor para mostrar u ocultar elementos de la interfaz de usuario de forma declarativa, basándose en el estado de autenticación del usuario.",
+        "Mostrar contenido personalizado en función del estado de autenticación del usuario o de sus funciones mediante el ayudante de etiqueta AuthorizeView.",
       threats: ["Acceso No Autorizado"],
 
-      recommendation:
-        "Específico para: Aplicaciones Blazor (Server y WebAssembly) y cualquier proyecto que utilice Razor Components. Es el método idiomático para la UI condicional en estos frameworks.",
       warning:
-        "Este componente solo oculta elementos en la UI. No protege los endpoints de la API que esos elementos puedan llamar. La protección de los datos y la lógica de negocio debe hacerse en el backend con el atributo [Authorize].",
+        "Este componente solo oculta elementos en la UI. No protege los endpoints de la API que esos elementos puedan llamar. La protección de los datos y la lógica de negocio debe hacerse en el backend con el atributo [Authorize], esto se detalla en la práctica de como Implementar JWT en Autenticación.",
 
       modalContent: {
         title: "Uso de AuthorizeView para UI Dinámica",
@@ -610,7 +596,7 @@ builder.Services.AddCascadingAuthenticationState();`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Uso de etiquetas <AuthorizeView> (15%)",
@@ -637,7 +623,7 @@ builder.Services.AddCascadingAuthenticationState();`,
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Verificación de Sesión Autenticada (25%)",

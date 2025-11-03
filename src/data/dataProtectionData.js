@@ -4,7 +4,7 @@ import DataEncrypt from "../assets/DataEncrypt.png";
 export const dataProtectionData = {
   securityMechanismTitle: "Protección de datos",
   definition:
-    "La protección de datos consiste en implementar mecanismos para asegurar la confidencialidad e integridad de la información sensible que maneja una aplicación. Esto incluye el cifrado de datos tanto en tránsito (usando HTTPS) como en reposo (en bases de datos o archivos), asegurando que solo usuarios autorizados puedan acceder a ellos en un formato legible.",
+    "El mecanismo de seguridad de protección de datos (Data protection), es un mecanismo para cifrar y proteger información sensible ya sean cookies, tokens de sesión y datos confidenciales de los usuarios. ASP.NET Core proporciona una API para implementar esta llamada Data Protection API, esta API se encarga de gestionar las claves de cifrado de manera segura, ya que implementa la rotación periódica de las llaves para mejorar la seguridad.",
   interestingFacts: [
     {
       description:
@@ -21,13 +21,11 @@ export const dataProtectionData = {
     {
       title: "Encriptación de datos con la Data Protection API",
       description:
-        "Utilizar el sistema de protección de datos integrado de ASP.NET Core para cifrar y descifrar información sensible de forma segura, como datos personales de usuarios o secretos de la aplicación que se necesiten almacenar.",
+        "Se deben cifrar datos confidenciales en reposo usando algoritmos de cifrado potente, contraseñas hash y hashes con sal para proteger las credenciales de los usuarios.",
       threats: ["Manipulación de Datos", "Acceso No Autorizado"],
 
       recommendation:
         "Recomendado para: Cualquier tipo de aplicación (MVC, Web API, etc.) que necesite almacenar datos sensibles específicos en una base de datos, como números de identificación personal o información médica, sin cifrar la base de datos completa.",
-      warning:
-        "¡Crítico! La gestión de claves es fundamental. En producción, las claves de Data Protection deben persistir en una ubicación centralizada y segura (como Azure Blob Storage o Redis) para que el cifrado funcione entre múltiples instancias del servidor y para evitar la pérdida de datos si el servidor se reinicia o se reemplaza.",
 
       modalContent: {
         title: "Uso de la Data Protection API para Cifrado",
@@ -35,14 +33,14 @@ export const dataProtectionData = {
           {
             title: "1. Registrar el Servicio de Data Protection",
             description:
-              "En `Program.cs`, registrar el servicio principal de la Data Protection API en el contenedor de dependencias.",
+              "En Program.cs, registrar el servicio principal de la Data Protection API en el contenedor de dependencias.",
             code: `// En Program.cs
 builder.Services.AddDataProtection();`,
           },
           {
             title: "2. Crear un Servicio de Cifrado",
             description:
-              "Crear una clase de servicio que encapsule la lógica de cifrado. Inyectar `IDataProtectionProvider` y crear un 'protector' con una cadena de propósito única para aislar los datos cifrados.",
+              "Crear una clase de servicio que encapsule la lógica de cifrado. Inyectar IDataProtectionProvider y crear un protector con una cadena de propósito única para aislar los datos cifrados.",
             code: `public class EncryptionService
 {
     private readonly IDataProtector _protector;
@@ -58,7 +56,7 @@ builder.Services.AddDataProtection();`,
           {
             title: "3. Implementar Métodos de Cifrado y Descifrado",
             description:
-              "Dentro del servicio, crear métodos que usen `_protector.Protect()` para cifrar y `_protector.Unprotect()` para descifrar. Es crucial manejar la `CryptographicException` en el descifrado para gestionar casos de datos corruptos o manipulados.",
+              "Dentro del servicio, crear métodos que usen _protector.Protect() para cifrar y _protector.Unprotect() para descifrar. Es crucial manejar la CryptographicException en el descifrado para gestionar casos de datos corruptos o manipulados.",
             code: `public string Encrypt(string plainText)
 {
     return _protector.Protect(plainText);
@@ -80,7 +78,7 @@ public string? Decrypt(string cipherText)
           {
             title: "4. Registrar y Usar el Servicio",
             description:
-              "Registrar el `EncryptionService` como un singleton en `Program.cs` para que pueda ser inyectado en controladores u otros servicios donde se necesite proteger o acceder a datos sensibles.",
+              "Registrar el EncryptionServic como un singleton en Program.cs para que pueda ser inyectado en controladores u otros servicios donde se necesite proteger o acceder a datos sensibles.",
             code: `// Registrar el servicio en Program.cs
 builder.Services.AddSingleton<EncryptionService>();
 
@@ -100,12 +98,12 @@ public class MyController : ControllerBase
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Uso de ASP.NET Core Data Protection (30%)",
                   achieved:
-                    "La solución utiliza `IDataProtector` del framework `Microsoft.AspNetCore.DataProtection`. Los servicios están registrados correctamente en Program.cs.",
+                    "La solución utiliza IDataProtector del framework Microsoft.AspNetCore.DataProtection. Los servicios están registrados correctamente en Program.cs.",
                   notAchieved:
                     "No se utiliza el sistema de protección de datos integrado o los servicios no están registrados.",
                 },
@@ -119,7 +117,7 @@ public class MyController : ControllerBase
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Integridad del Cifrado/Descifrado (30%)",
@@ -131,7 +129,7 @@ public class MyController : ControllerBase
                 {
                   description: "Manejo de Datos Corruptos (20%)",
                   achieved:
-                    "Al intentar descifrar datos inválidos o manipulados, la aplicación maneja la `CryptographicException` de forma controlada, sin crashear.",
+                    "Al intentar descifrar datos inválidos o manipulados, la aplicación maneja la CryptographicException de forma controlada, sin crashear.",
                   notAchieved:
                     "La aplicación se bloquea o devuelve un error no controlado al intentar descifrar datos corruptos.",
                 },
@@ -144,25 +142,23 @@ public class MyController : ControllerBase
     {
       title: "Cifrado de Archivos de Configuración",
       description:
-        "Proteger secretos y datos sensibles (como cadenas de conexión) en los archivos `appsettings.json` cifrándolos en el entorno de producción para que no estén expuestos en texto plano.",
+        "Cifrar los archivos de configuración añade una capa de seguridad haciendo que personas no autorizadas descifren su contenido.",
       threats: ["Acceso No Autorizado"],
       recommendation:
-        "Esencial para: Entornos de producción o cualquier entorno donde los archivos `appsettings.json` puedan ser accesibles por personal no autorizado. Complementa, pero no reemplaza, el uso de un gestor de secretos como Azure Key Vault.",
-      warning:
-        "¡Crítico! La carpeta donde se persisten las claves de `DataProtection` debe tener una copia de seguridad y permisos de acceso restringidos. Si se pierden estas claves, todos los datos cifrados con ellas serán irrecuperables.",
+        "Esencial para: Entornos de producción o cualquier entorno donde los archivos appsettings.json puedan ser accesibles por personal no autorizado. Complementa, pero no reemplaza, el uso de un gestor de secretos como Azure Key Vault.",
       modalContent: {
         title: "Uso de Data Protection para Cifrar appsettings.json",
         practices: [
           {
             title: "1. Preparar la Herramienta de Consola",
             description:
-              "Crea un proyecto de consola separado. Asegúrate de añadir el paquete NuGet 'Microsoft.Extensions.DependencyInjection' para poder configurar y usar los servicios de Data Protection.",
+              "Crea un proyecto de consola separado. Asegúrate de añadir el paquete NuGet Microsoft.Extensions.DependencyInjection para poder configurar y usar los servicios de Data Protection.",
             code: "// Abre la terminal en la carpeta del proyecto de consola:\ndotnet add package Microsoft.Extensions.DependencyInjection",
           },
           {
             title: "2. Configurar Data Protection Compartido",
             description:
-              "En ambos proyectos (consola y app web), configura el servicio 'AddDataProtection' en `Program.cs`. Es crucial que uses '.PersistKeysToFileSystem()' apuntando a la misma carpeta y '.SetApplicationName()' con el mismo nombre en ambos.",
+              "En ambos proyectos (consola y app web), configura el servicio AddDataProtection en Program.cs. Es crucial que uses .PersistKeysToFileSystem() apuntando a la misma carpeta y .SetApplicationName() con el mismo nombre en ambos.",
             code: `// Esta configuración debe ser idéntica en ambos proyectos (consola y web API)
 // Asegúrate de que la carpeta exista y tenga permisos
 services.AddDataProtection()
@@ -172,7 +168,7 @@ services.AddDataProtection()
           {
             title: "3. Crear Herramienta de Cifrado",
             description:
-              "En el proyecto de consola, obtén el 'IDataProtectionProvider'. Luego, crea un 'protector' con 'CreateProtector' usando una cadena de propósito única (ej. 'MyWebApp.Configuration.v1'). Lee el JSON, cifra el valor sensible con 'protector.Protect()' y guarda el archivo.",
+              "En el proyecto de consola, obtén el IDataProtectionProvider. Luego, crea un protector con CreateProtector usando una cadena de propósito única (ej. MyWebApp.Configuration.v1). Lee el JSON, cifra el valor sensible con protector.Protect() y guarda el archivo.",
             code: `// En el Program.cs de la consola
 var provider = services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
 var protector = provider.CreateProtector("MyWebApp.Configuration.v1"); // Cadena de propósito
@@ -191,7 +187,7 @@ File.WriteAllText(configPath, jsonNode.ToJsonString(new JsonSerializerOptions { 
           {
             title: "4. Descifrar Configuración al Iniciar la App Web",
             description:
-              "En el `Program.cs` de la aplicación web, justo después de configurar Data Protection, obtén una instancia del 'protector' (usando la misma cadena de propósito). Lee el valor cifrado de la configuración, descífralo con 'protector.Unprotect()', y actualiza la configuración en memoria.",
+              "En el Program.cs de la aplicación web, justo después de configurar Data Protection, obtén una instancia del protector (usando la misma cadena de propósito). Lee el valor cifrado de la configuración, descífralo con protector.Unprotect(), y actualiza la configuración en memoria.",
             code: `// En Program.cs de la app web, después de AddDataProtection()
 var tempProvider = builder.Services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
 var protector = tempProvider.CreateProtector("MyWebApp.Configuration.v1"); // Misma cadena de propósito
@@ -209,7 +205,7 @@ if (!string.IsNullOrEmpty(encryptedConnString))
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de DataProtection (25%)",
@@ -228,7 +224,7 @@ if (!string.IsNullOrEmpty(encryptedConnString))
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Verificación del Archivo (25%)",
@@ -253,14 +249,14 @@ if (!string.IsNullOrEmpty(encryptedConnString))
     {
       title: "Validación de Entradas (Data Annotations)",
       description:
-        "Validar todos los datos que provienen del cliente en el lado del servidor para asegurar su integridad, formato y longitud. Las 'Data Annotations' en los modelos son la primera línea de defensa contra datos maliciosos o malformados.",
+        "Validar y depurar las entradas del usuario ayuda a prevenir la inyección de datos y los ataques XSS.",
       threats: [
         "Inyección de Datos",
         "Cross-Site Scripting (XSS)",
         "Manipulación de Datos",
       ],
       recommendation:
-        "Fundamental para: Todas las aplicaciones ASP.NET Core que reciben datos del usuario (MVC, Razor Pages, Web API, Blazor). Es una práctica no negociable.",
+        "Fundamental para: Todas las aplicaciones ASP.NET Core que reciben datos del usuario (MVC, Razor Pages, Web API, Blazor).",
       warning:
         "La validación del lado del cliente es una mejora de UX, no una medida de seguridad. La validación del lado del servidor con Data Annotations es la única que garantiza la seguridad, ya que no puede ser eludida.",
 
@@ -270,7 +266,7 @@ if (!string.IsNullOrEmpty(encryptedConnString))
           {
             title: "1. Añadir Anotaciones a las Propiedades del Modelo",
             description:
-              "Utilizar atributos de validación del namespace 'System.ComponentModel.DataAnnotations' para decorar las propiedades de los modelos. Esto permite definir reglas como obligatoriedad, tipo de dato, longitud y formato.",
+              "Utilizar atributos de validación del namespace System.ComponentModel.DataAnnotations para decorar las propiedades de los modelos. Esto permite definir reglas como obligatoriedad, tipo de dato, longitud y formato.",
             code: `// Ejemplo en un ViewModel de Login
 using System.ComponentModel.DataAnnotations;
 
@@ -290,7 +286,7 @@ public class LoginViewModel
           {
             title: "2. Habilitar Validación en las Vistas",
             description:
-              "Añadir la sección de scripts con el archivo parcial '_ValidationScriptsPartial' en las vistas que contienen formularios. Esto habilita la validación del lado del cliente de forma no intrusiva, mejorando la experiencia de usuario.",
+              "Añadir la sección de scripts con el archivo parcial _ValidationScriptsPartial en las vistas que contienen formularios. Esto habilita la validación del lado del cliente de forma no intrusiva, mejorando la experiencia de usuario.",
             code: `@* En una vista de Razor (ej: Login.cshtml) *@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -300,13 +296,13 @@ public class LoginViewModel
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Importación de dependencia (10%)",
                   achieved:
-                    "La declaración 'using System.ComponentModel.DataAnnotations;' está presente en los archivos de modelo.",
-                  notAchieved: "Falta la declaración 'using' o es incorrecta.",
+                    "La declaración using System.ComponentModel.DataAnnotations; está presente en los archivos de modelo.",
+                  notAchieved: "Falta la declaración using o es incorrecta.",
                 },
                 {
                   description: "Validaciones completas en propiedades (30%)",
@@ -318,14 +314,14 @@ public class LoginViewModel
                 {
                   description: "Scripts de validación (10%)",
                   achieved:
-                    "Se añade la sección '@section Scripts' con el partial '_ValidationScriptsPartial' en todas las vistas con formularios.",
+                    "Se añade la sección @section Scripts con el partial _ValidationScriptsPartial en todas las vistas con formularios.",
                   notAchieved:
                     "Falta la sección Scripts, el partial está mal referenciado o ausente en una o más vistas.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Funcionamiento de validaciones (50%)",

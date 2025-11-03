@@ -4,7 +4,7 @@ import HTTPS from "../assets/HTTPS.png";
 export const httpsData = {
   securityMechanismTitle: "Forzar el uso de HTTPS",
   definition:
-    "Forzar el uso de HTTPS (Hypertext Transfer Protocol Secure) es una medida de seguridad fundamental que cifra la comunicación entre el navegador del cliente y el servidor web. Esto se logra mediante la configuración del servidor para que redirija automáticamente todas las solicitudes HTTP a HTTPS y utilice encabezados como HSTS para instruir al navegador a que solo se comunique a través de canales seguros.",
+    "El forzar el uso de HTTPS es otro mecanismo de seguridad, se asegura que toda comunicación entre el cliente y el servidor esté cifrada, esto ya que se hace uso del protocolo SSL/TLS.",
   interestingFacts: [
     {
       description:
@@ -21,13 +21,11 @@ export const httpsData = {
     {
       title: "Uso de HSTS (HTTP Strict Transport Security)",
       description:
-        "Implementar el encabezado HSTS para instruir a los navegadores que solo se comuniquen con el servidor a través de HTTPS, eliminando la posibilidad de conexiones inseguras después de la primera visita.",
+        "Usar HSTS para reforzar la comunicación segura al usar siempre conexiones seguras como HTTPS.",
       threats: ["Ataques Man-in-the-Middle", "Manipulación de Datos"],
 
-      recommendation:
-        "Esencial para: Todas las aplicaciones web en producción (MVC, Razor Pages, Blazor, Web API). Es la defensa más robusta contra ataques de SSL Stripping.",
       warning:
-        "¡Crítico! Nunca use un `MaxAge` largo (ej. 365 días) en un entorno de desarrollo (`localhost`). El navegador aplicará la política a todo `localhost`, lo que puede romper otros proyectos locales que no usen HTTPS. Use siempre valores muy cortos (ej. 60 segundos) para pruebas.",
+        "Nunca use un MaxAge largo (ej. 365 días) en un entorno de desarrollo (localhost). El navegador aplicará la política a todo localhost, lo que puede romper otros proyectos locales que no usen HTTPS. Use siempre valores muy cortos (ej. 60 segundos) para pruebas.",
 
       modalContent: {
         title: "Implementación de HSTS en ASP.NET Core",
@@ -35,25 +33,25 @@ export const httpsData = {
           {
             title: "1. Habilitar HTTPS en el Proyecto",
             description:
-              "Asegurarse de que el proyecto ASP.NET Core esté configurado para usar HTTPS desde su creación, ya sea marcando la casilla en Visual Studio o usando el flag `--use-https` en la CLI.",
+              "Asegurarse de que el proyecto ASP.NET Core esté configurado para usar HTTPS desde su creación, ya sea marcando la casilla en Visual Studio o usando el flag --use-https en la CLI.",
             code: `dotnet new mvc --name MiProyectoWeb --use-https`,
           },
           {
             title: "2. Configurar HSTS en Program.cs",
             description:
-              "Registrar el servicio HSTS, especificando un `MaxAge` (tiempo que el navegador recordará la política). Para desarrollo, se usa un valor corto para evitar conflictos con otros proyectos en localhost.",
+              "Registrar el servicio HSTS, especificando un MaxAge (tiempo que el navegador recordará la política). Para desarrollo, se usa un valor corto para evitar conflictos con otros proyectos en localhost.",
             code: `builder.Services.AddHsts(options =>
 {
     // Para desarrollo, usar un valor corto. Para producción, usar 365 días.
     options.MaxAge = TimeSpan.FromSeconds(60); 
     options.IncludeSubDomains = false; // Cambiar a true en producción si aplica
-    options.Preload = false; // Considerar el envío a la lista de preload en producción
+    options.Preload = false; 
 });`,
           },
           {
             title: "3. Añadir Middleware de HSTS y Redirección",
             description:
-              "En el pipeline de la aplicación, añadir `app.UseHsts()` y `app.UseHttpsRedirection()`. La redirección fuerza la primera visita a ser HTTPS, y HSTS se encarga de las visitas subsecuentes.",
+              "En el pipeline de la aplicación, añadir app.UseHsts() y app.UseHttpsRedirection(). La redirección fuerza la primera visita a ser HTTPS, y HSTS se encarga de las visitas subsecuentes.",
             code: `// En Program.cs
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -71,38 +69,38 @@ app.MapControllerRoute(
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de HSTS (25%)",
                   achieved:
-                    "Se agregó `AddHsts()` en Program.cs con un `MaxAge` de corta duración, adecuado para el entorno de desarrollo.",
+                    "Se agregó AddHsts() en Program.cs con un MaxAge de corta duración, adecuado para el entorno de desarrollo.",
                   notAchieved:
-                    "No se configuró `AddHsts()` o se utilizó un `MaxAge` muy largo en un entorno de desarrollo.",
+                    "No se configuró AddHsts() o se utilizó un MaxAge muy largo en un entorno de desarrollo.",
                 },
                 {
                   description: "Redirección HTTPS (25%)",
                   achieved:
-                    "Se agregó `app.UseHttpsRedirection()` en el pipeline y las páginas solicitadas por HTTP redirigen automáticamente a HTTPS.",
+                    "Se agregó app.UseHttpsRedirection() en el pipeline y las páginas solicitadas por HTTP redirigen automáticamente a HTTPS.",
                   notAchieved:
-                    "No se agregó `UseHttpsRedirection()` o las redirecciones automáticas no funcionan.",
+                    "No se agregó UseHttpsRedirection() o las redirecciones automáticas no funcionan.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Header presente en HTTPS (25%)",
                   achieved:
-                    "Al acceder a la página a través de HTTPS, la respuesta del servidor incluye el encabezado 'Strict-Transport-Security' con el 'max-age' configurado.",
+                    "Al acceder a la página a través de HTTPS, la respuesta del servidor incluye el encabezado Strict-Transport-Security con el max-age configurado.",
                   notAchieved:
-                    "El encabezado 'Strict-Transport-Security' no aparece en las respuestas HTTPS o tiene un valor incorrecto.",
+                    "El encabezado Strict-Transport-Security no aparece en las respuestas HTTPS o tiene un valor incorrecto.",
                 },
                 {
                   description: "Protección contra ataques (25%)",
                   achieved:
-                    "Después de una visita exitosa por HTTPS, si se intenta acceder por HTTP dentro del tiempo de `MaxAge`, el navegador bloquea la solicitud HTTP y la convierte a HTTPS automáticamente.",
+                    "Después de una visita exitosa por HTTPS, si se intenta acceder por HTTP dentro del tiempo de MaxAge, el navegador bloquea la solicitud HTTP y la convierte a HTTPS automáticamente.",
                   notAchieved:
                     "El navegador no bloquea las solicitudes HTTP subsecuentes, permitiendo posibles ataques.",
                 },
@@ -115,11 +113,11 @@ app.MapControllerRoute(
     {
       title: "Encabezados de Respuesta HTTP Seguros",
       description:
-        "Añadir encabezados de seguridad adicionales en las respuestas del servidor para instruir al navegador sobre cómo comportarse, mitigando vulnerabilidades como Clickjacking y XSS.",
+        "Proporcionan una capa adicional de seguridad controlando comportamientos específicos del navegador reduciendo el riesgo de ataques del lado del cliente.",
       threats: ["Clickjacking", "Cross-Site Scripting (XSS)"],
 
       recommendation:
-        "Recomendado para: Todas las aplicaciones web (MVC, Razor Pages, Web API, Blazor). Estos encabezados proporcionan una capa de defensa base con un bajo costo de implementación. Para una protección más avanzada, considere usar la práctica 'Content Security Policy (CSP)' del mecanismo 'Codificador HTML'.",
+        "Para una protección más avanzada, considere usar la práctica Content Security Policy (CSP) del mecanismo HTML Encoder.",
 
       modalContent: {
         title: "Implementación de Encabezados de Seguridad",
@@ -127,7 +125,7 @@ app.MapControllerRoute(
           {
             title: "1. Crear un Middleware Personalizado",
             description:
-              "En `Program.cs`, usar `app.Use()` para crear un middleware que intercepte todas las respuestas y añada los encabezados de seguridad necesarios antes de enviarlas al cliente.",
+              "En Program.cs, usar app.Use() para crear un middleware que intercepte todas las respuestas y añada los encabezados de seguridad necesarios antes de enviarlas al cliente.",
             code: `app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
@@ -140,7 +138,7 @@ app.MapControllerRoute(
           {
             title: "2. Detalle de Encabezados Clave",
             description:
-              "Comprender el propósito de cada encabezado: `X-Content-Type-Options: nosniff` previene el MIME-sniffing. `X-Frame-Options: SAMEORIGIN` previene que tu sitio sea cargado en un `<iframe>` de otro dominio. `Referrer-Policy` controla cuánta información de la URL de origen se envía al navegar a otros sitios.",
+              "Comprender el propósito de cada encabezado: X-Content-Type-Options: nosniff previene el MIME-sniffing. X-Frame-Options: SAMEORIGIN previene que tu sitio sea cargado en un <iframe> de otro dominio. Referrer-Policy controla cuánta información de la URL de origen se envía al navegar a otros sitios.",
             code: `// X-Content-Type-Options: Previene que un archivo .txt con código JS sea ejecutado por el navegador.
 // X-Frame-Options: Evita que un sitio malicioso muestre tu web en un iframe para engañar al usuario y que haga clic en botones invisibles.
 // Referrer-Policy: Previene que URLs con información sensible (ej. tokens de reseteo de contraseña) se filtren a sitios externos.`,
@@ -149,7 +147,7 @@ app.MapControllerRoute(
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración en Program.cs (50%)",
@@ -161,7 +159,7 @@ app.MapControllerRoute(
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Verificación de encabezados (50%)",

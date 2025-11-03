@@ -4,7 +4,7 @@ import Cookies from "../assets/Cookies.png";
 export const authenticationData = {
   securityMechanismTitle: "Autenticación",
   definition:
-    "La autenticación es el proceso de verificar la identidad de un usuario o sistema. En las aplicaciones web, esto garantiza que solo las entidades autorizadas puedan acceder a recursos protegidos, típicamente mediante credenciales como un nombre de usuario y una contraseña.",
+    "La autenticación es el proceso mediante el cual se verifica la identidad de un usuario para asegurarse de que es quien dice ser. Se realiza a partir de la comparación de credenciales que están almacenadas en una base de datos, una aplicación, recurso o sistema operativo. De igual manera, se suele emplear los llamados reclamos (claims) lo cual permite agregar información adicional a un usuario como su nombre, dirección de correo, roles y entre otros reclamos",
   interestingFacts: [
     {
       description:
@@ -13,7 +13,7 @@ export const authenticationData = {
     },
     {
       description:
-        "Los ataques de 'Credential Stuffing' son una de las amenazas más comunes. Los atacantes usan listas de credenciales robadas de otras brechas para intentar iniciar sesión en múltiples sistemas, aprovechando la reutilización de contraseñas por parte de los usuarios.",
+        "Los atacantes pueden usan listas de credenciales robadas de otras brechas para intentar iniciar sesión en múltiples sistemas, aprovechando la reutilización de contraseñas por parte de los usuarios.",
       image: Cookies,
     },
   ],
@@ -22,13 +22,11 @@ export const authenticationData = {
     {
       title: "Autenticación de Dos Factores (2FA)",
       description:
-        "Implementar un segundo paso de verificación (generalmente un código de un solo uso basado en tiempo, TOTP) después del login con contraseña. Esto protege las cuentas incluso si la contraseña es comprometida.",
+        "Añade una capa adicional de seguridad, ya que exige a los usuarios proporcionar una verificación adicional, normalmente en forma de una contraseña de un solo uso.",
       threats: ["Elevación de Privilegios", "Acceso No Autorizado"],
 
       recommendation:
         "Esencial para: Cualquier aplicación (MVC, Razor Pages, Web API, Blazor) que maneje cuentas de usuario y datos sensibles. Es un estándar de la industria para la seguridad de cuentas.",
-      warning:
-        "Es crucial implementar un mecanismo de recuperación de cuentas (códigos de respaldo) para evitar que los usuarios queden permanentemente bloqueados si pierden su dispositivo de autenticación.",
 
       modalContent: {
         title: "Implementación de 2FA con Google Authenticator",
@@ -72,7 +70,7 @@ public class LoginWith2FAViewModel
           {
             title: "3. Crear Servicios y Modificar Controlador",
             description:
-              "Crear un servicio para manejar la lógica de 2FA (generar QR, validar códigos) e inyectarlo en el controlador de cuentas. Modificar el controlador para añadir los métodos GET y POST para 'EnableTwoFactor' y 'LoginWith2FA', y ajustar el flujo de Login para que redirija a la configuración o validación de 2FA según corresponda.",
+              "Crear un servicio para manejar la lógica de 2FA (generar QR, validar códigos) e inyectarlo en el controlador de cuentas. Modificar el controlador para añadir los métodos GET y POST para EnableTwoFactor y LoginWith2FA, y ajustar el flujo de Login para que redirija a la configuración o validación de 2FA según corresponda.",
             code: `// Ejemplo de inyección en el controlador
 private readonly ITwoFactorAuthenticationService _2faService;
 
@@ -115,7 +113,7 @@ app.UseSession();`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Instalación de paquetes Nuget (5%)",
@@ -169,14 +167,14 @@ app.UseSession();`,
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Verificación de Base de Datos (15%)",
                   achieved:
-                    "El campo 'TwoFactorEnabled' en la tabla de usuarios se actualiza a 'true' tras una activación exitosa.",
+                    "El campo TwoFactorEnabled en la tabla de usuarios se actualiza a true tras una activación exitosa.",
                   notAchieved:
-                    "'TwoFactorEnabled' no se actualiza o los datos no persisten.",
+                    "TwoFactorEnabled no se actualiza o los datos no persisten.",
                 },
                 {
                   description: "Flujo de Activación 2FA (15%)",
@@ -208,7 +206,7 @@ app.UseSession();`,
     {
       title: "Implementación y Protección de JWT",
       description:
-        "Utilizar JSON Web Tokens (JWT) para la autenticación sin estado en APIs, donde el cliente envía un token firmado en cada solicitud para verificar su identidad y permisos.",
+        "Utiliza algoritmos de firma fuerte (RS256 con cifrado de clave privada/pública). Son tokens de sesión de corta duración con políticas de caducidad seguras para minimizar el secuestro de sesiones.",
       threats: [
         "Manipulación de Token",
         "Elevación de Privilegios",
@@ -216,9 +214,9 @@ app.UseSession();`,
       ],
 
       recommendation:
-        "Estándar para: Web API que necesitan autenticación sin estado, especialmente si son consumidas por SPAs (React, Angular, Vue) o aplicaciones móviles.",
+        "Estándar para: Web API que necesitan autenticación sin estado, especialmente si son consumidas por SPAs (React, Angular, Vue).",
       warning:
-        "Almacenar JWTs en el `localStorage` del navegador puede exponerlos a ataques XSS. Considere usar cookies `HttpOnly` para almacenar los tokens de forma más segura o implementar medidas de mitigación de XSS robustas.",
+        "Almacenar JWTs en el localStorage del navegador puede exponerlos a ataques XSS. Considere usar cookies HttpOnly para almacenar los tokens de forma más segura o implementar medidas de mitigación de XSS robustas.",
 
       modalContent: {
         title: "Implementación Segura de JSON Web Tokens (JWT)",
@@ -226,7 +224,7 @@ app.UseSession();`,
           {
             title: "1. Configurar Autenticación JWT",
             description:
-              "En `appsettings.json`, definir una clave secreta segura, emisor y audiencia. Luego, en `Program.cs`, registrar el servicio de autenticación JWT, configurando los parámetros de validación del token.",
+              "En appsettings.json, definir una clave secreta segura, emisor y audiencia. Luego, en Program.cs, registrar el servicio de autenticación JWT, configurando los parámetros de validación del token.",
             code: `// En appsettings.json
 "Jwt": {
   "Key": "UNA_CLAVE_SECRETA_MUY_LARGA_Y_SEGURA_DE_MAS_DE_32_BYTES",
@@ -255,7 +253,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
           {
             title: "2. Generar y Firmar Token en el Login",
             description:
-              "En el endpoint de login, tras verificar las credenciales, generar un token con los 'claims' necesarios (como ID de usuario y roles) y firmarlo con la clave secreta.",
+              "En el endpoint de login, tras verificar las credenciales, generar un token con los claims necesarios (como ID de usuario y roles) y firmarlo con la clave secreta.",
             code: `// En el controlador de Autenticación
 var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -274,7 +272,7 @@ return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });`,
           {
             title: "3. Proteger Rutas y Activar Middleware",
             description:
-              "Proteger los controladores o acciones de la API con el atributo [Authorize]. Finalmente, activar el middleware de autenticación y autorización en `Program.cs`.",
+              "Proteger los controladores o acciones de la API con el atributo [Authorize]. Finalmente, activar el middleware de autenticación y autorización en Program.cs.",
             code: `// En un controlador
 [Authorize]
 [ApiController]
@@ -289,7 +287,7 @@ app.UseAuthorization();`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de backend (20%)",
@@ -308,7 +306,7 @@ app.UseAuthorization();`,
                 {
                   description: "Envío desde frontend (10%)",
                   achieved:
-                    "El cliente (frontend) incluye el encabezado 'Authorization: Bearer <token>' en las llamadas a endpoints protegidos.",
+                    "El cliente (frontend) incluye el encabezado Authorization: Bearer <token> en las llamadas a endpoints protegidos.",
                   notAchieved:
                     "El token no se adjunta en los encabezados de las solicitudes.",
                 },
@@ -322,7 +320,7 @@ app.UseAuthorization();`,
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Firma y validación (50%)",
@@ -340,13 +338,8 @@ app.UseAuthorization();`,
     {
       title: "ASP.NET Core Identity",
       description:
-        "Utilizar el framework integrado de ASP.NET Core para manejar la autenticación y gestión de usuarios, incluyendo registro, login, roles y almacenamiento seguro de contraseñas.",
+        "Usar ASP.NET Core Identiy proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basado en reclamaciones.",
       threats: ["Elevación de Privilegios", "Acceso No Autorizado"],
-
-      recommendation:
-        "La base para: La mayoría de las aplicaciones ASP.NET Core (MVC, Razor Pages, Blazor Server) que requieren un sistema de cuentas de usuario. Proporciona una solución completa y segura lista para usar.",
-      warning:
-        "La configuración por defecto es segura, pero debe ser revisada. Ajuste las políticas de complejidad de contraseñas y los parámetros de bloqueo de cuentas (`Lockout`) según los requisitos de seguridad de su aplicación.",
 
       modalContent: {
         title: "Implementación de ASP.NET Core Identity",
@@ -367,7 +360,7 @@ app.UseAuthorization();`,
           {
             title: "2. Crear el Contexto de Base de Datos",
             description:
-              "Crear una clase `ApplicationDbContext` que herede de `IdentityDbContext` para que Entity Framework pueda gestionar las tablas de Identity.",
+              "Crear una clase ApplicationDbContext que herede de IdentityDbContext para que Entity Framework pueda gestionar las tablas de Identity.",
             code: `using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -409,7 +402,7 @@ builder.Services.ConfigureApplicationCookie(options =>
           {
             title: "4. Implementar Lógica en el Controlador",
             description:
-              "Inyectar `SignInManager` y `UserManager` en el controlador de cuentas y usarlos para implementar la lógica de registro, inicio y cierre de sesión.",
+              "Inyectar SignInManager y UserManager en el controlador de cuentas y usarlos para implementar la lógica de registro, inicio y cierre de sesión.",
             code: `private readonly SignInManager<IdentityUser> _signInManager;
 private readonly UserManager<IdentityUser> _userManager;
 
@@ -444,7 +437,7 @@ dotnet ef database update`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Agregar paquetes NuGet (10%)",
@@ -484,7 +477,7 @@ dotnet ef database update`,
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Hasheo de contraseñas (25%)",
@@ -509,19 +502,19 @@ dotnet ef database update`,
     {
       title: "Limitación de Tasa de Solicitudes (Rate Limiting)",
       description:
-        "Restringir la cantidad de solicitudes que un cliente puede realizar a un endpoint en un período de tiempo determinado, previniendo abusos y ataques de fuerza bruta o denegación de servicio.",
+        "Ayuda a mitigar los ataques de fuerza bruta y DoS limitando el número de peticiones desde una IP específica ",
       threats: ["Denial of service o DoS", "Ataques de Fuerza Bruta"],
       recommendation:
         "Muy recomendado para: Endpoints públicos y sensibles de una Web API, como el de login, registro o cualquier otro que sea computacionalmente costoso.",
       warning:
-        "Una política de limitación demasiado estricta puede impactar negativamente la experiencia de usuario o bloquear a clientes legítimos. Monitoree y ajuste los límites según el tráfico real de su aplicación.",
+        "Una política de limitación demasiado estricta puede impactar negativamente la experiencia de usuario o bloquear a clientes legítimos.",
       modalContent: {
         title: "Implementación de Rate Limiting",
         practices: [
           {
             title: "1. Configurar Políticas en Program.cs",
             description:
-              "Registrar el servicio 'AddRateLimiter' y definir políticas. Es común crear una política 'particionada' (ej. por IP) para endpoints específicos y una 'global' para el resto de la API.",
+              "Registrar el servicio AddRateLimiter y definir políticas. Existen diferentes tipos de particiones (ej. por IP) para endpoints específicos o la global para el resto de la API.",
             code: `builder.Services.AddRateLimiter(options =>
 {
     // Política "PerIP": Limita a 10 peticiones por minuto POR CADA IP.
@@ -562,19 +555,18 @@ dotnet ef database update`,
               "Activar el middleware de Rate Limiter en el pipeline (después de UseRouting y UseCors, pero antes de UseAuthentication y UseAuthorization).",
             code: `// ...
 app.UseRouting();
-app.UseCors(); // Si lo usas
+app.UseCors(); 
 
-app.UseRateLimiter(); // ¡Activar aquí!
+app.UseRateLimiter(); 
 
 app.UseAuthentication();
-app.UseAuthorization();
-// ...`,
+app.UseAuthorization();`,
           },
           {
             title: "3. Aplicar Políticas a Endpoints",
             description:
-              "Puedes aplicar políticas a controladores usando el atributo '[EnableRateLimiting]' o a Minimal APIs usando '.RequireRateLimiting()'.",
-            code: `// --- 1. Para Controladores ---
+              "Puedes aplicar políticas a controladores usando el atributo [EnableRateLimiting] o a Minimal APIs usando .RequireRateLimiting().",
+            code: `// 1. Para Controladores 
 [ApiController]
 public class AccountController : ControllerBase
 {
@@ -593,7 +585,7 @@ public class AccountController : ControllerBase
     public IActionResult GetHealth(...) { ... }
 }
 
-// --- 2. Para Minimal APIs ---
+// 2. Para Minimal APIs 
 app.MapGet("/api/data", () => "Some data")
    .RequireRateLimiting("PerIP");`,
           },
@@ -601,7 +593,7 @@ app.MapGet("/api/data", () => "Some data")
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de políticas (25%)",
@@ -613,14 +605,14 @@ app.MapGet("/api/data", () => "Some data")
                 {
                   description: "Aplicación en endpoints (25%)",
                   achieved:
-                    "Los endpoints sensibles están protegidos con '[EnableRateLimiting]' o '.RequireRateLimiting()'. El middleware 'UseRateLimiter' está registrado.",
+                    "Los endpoints sensibles están protegidos con [EnableRateLimiting] o .RequireRateLimiting(). El middleware UseRateLimiter está registrado.",
                   notAchieved:
-                    "Endpoints no están protegidos o el middleware 'UseRateLimiter' falta en el pipeline.",
+                    "Endpoints no están protegidos o el middleware UseRateLimiter falta en el pipeline.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Mitigación de abuso de solicitudes (50%)",
@@ -638,13 +630,11 @@ app.MapGet("/api/data", () => "Some data")
     {
       title: "Límite de Tamaño de Solicitud",
       description:
-        "Establecer un tamaño máximo para las solicitudes entrantes y sus cuerpos (payloads) para prevenir ataques de denegación de servicio por agotamiento de recursos del servidor.",
+        "Ayuda a evitar ataques de denegación de servicio (DoS) limitando el tamaño del cuerpo de la petición.",
       threats: ["Denial of service o DoS"],
 
       recommendation:
         "Esencial para: Cualquier tipo de aplicación (MVC, Web API) que exponga endpoints que permitan la subida de archivos o la recepción de cuerpos de solicitud de gran tamaño.",
-      warning:
-        "Un límite global demasiado bajo puede romper funcionalidades legítimas de la aplicación. Es preferible establecer un límite global conservador y usar el atributo `[RequestSizeLimit]` para aumentar el límite solo en los endpoints que específicamente lo necesiten.",
 
       modalContent: {
         title: "Configuración de Límites de Tamaño de Solicitud",
@@ -652,7 +642,7 @@ app.MapGet("/api/data", () => "Some data")
           {
             title: "1. Configuración Global",
             description:
-              "Establecer límites para el tamaño de los cuerpos de formularios y multipartes de forma global para toda la aplicación en `Program.cs`.",
+              "Establecer límites para el tamaño de los cuerpos de formularios y multipartes de forma global para toda la aplicación en Program.cs.",
             code: `using Microsoft.AspNetCore.Http.Features;
 
 builder.Services.Configure<FormOptions>(options =>
@@ -664,7 +654,7 @@ builder.Services.Configure<FormOptions>(options =>
           {
             title: "2. Configuración por Endpoint",
             description:
-              "Utilizar el atributo `[RequestSizeLimit]` directamente en una acción de controlador para anular la configuración global y establecer un límite específico.",
+              "Utilizar el atributo [RequestSizeLimit] directamente en una acción de controlador para anular la configuración global y establecer un límite específico.",
             code: `[HttpPost("upload-large-file")]
 // Límite específico para este endpoint (ej. 100 MB)
 [RequestSizeLimit(100 * 1024 * 1024)]
@@ -678,7 +668,7 @@ public IActionResult UploadLargeFile(IFormFile file)
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de políticas globales (25%)",
@@ -697,7 +687,7 @@ public IActionResult UploadLargeFile(IFormFile file)
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Mitigación de payloads excesivos (50%)",
@@ -715,25 +705,23 @@ public IActionResult UploadLargeFile(IFormFile file)
     {
       title: "Integración de Proveedores Externos (OAuth 2.0 / OpenID)",
       description:
-        "Añadir la opción de 'Iniciar Sesión Con...' a una aplicación ASP.NET Core que ya utiliza Identity. Esto delega la autenticación a un tercero, como Google, Facebook o Microsoft.",
+        "Aprovechar OAuth2 y OpenID para la autenticación externa, ya que estos protocolos presentan métodos seguros para la autenticación y autorización de usuarios y así se pueden integrar proveedores de inicio de sesión como Google.",
       threats: ["Acceso No Autorizado"],
-      recommendation:
-        "Esencial para: Aplicaciones (MVC, Razor) con ASP.NET Core Identity que desean ofrecer inicios de sesión sociales para mejorar la experiencia del usuario y la seguridad.",
       warning:
-        "¡Importante! La URI de redirección (ejemplo, /signin-google) es extremadamente sensible. Debe estar registrada (con HTTPS en producción) en la consola del proveedor. Un error aquí permitirá que un atacante intercepte el código de autorización.",
+        "La URI de redirección (ejemplo, /signin-google) es extremadamente sensible. Debe estar registrada (con HTTPS en producción) en la consola del proveedor. Un error aquí permitirá que un atacante intercepte el código de autorización.",
       modalContent: {
         title: "Implementación de 'Iniciar Sesión con Google'",
         practices: [
           {
             title: "1. Registrar la Aplicación en el Proveedor Externo",
             description:
-              "Antes de escribir código, debes ir a la consola del proveedor (ej. Google Cloud Console). Allí, debes crear un nuevo 'ID de cliente de OAuth', configurar la 'pantalla de consentimiento' y, lo más importante, registrar tus 'URIs de redireccionamiento autorizados' (ej. https://localhost:PUERTO/signin-google). Al final, el proveedor te dará un 'ID de Cliente' y un 'Secreto de Cliente'.",
+              "Antes de escribir código, debes ir a la consola del proveedor (ej. Google Cloud Console). Allí, debes crear un nuevo ID de cliente de OAuth, configurar la pantalla de consentimiento y, lo más importante, registrar tus URIs de redireccionamiento autorizados (ej. https://localhost:PUERTO/signin-google). Al final, el proveedor te dará un ID de Cliente y un Secreto de Cliente.",
             code: "/* Pasos en Google Cloud Console: \n 1. Ir a 'APIS y Servicios' -> 'Credenciales'.\n 2. 'Crear credenciales' -> 'ID de cliente de OAuth'.\n 3. Seleccionar 'Aplicación web'.\n 4. Añadir URI: https://localhost:PUERTO/signin-google \n 5. Guardar el ID de Cliente y el Secreto. */",
           },
           {
             title: "2. Almacenar Secretos de Cliente",
             description:
-              "Añade el 'ID de Cliente' y el 'Secreto de Cliente' a tu configuración. Es altamente recomendable usar el 'Secret Manager' (Manejador de Secretos) para esto y no ponerlos en texto plano en 'appsettings.json'.",
+              "Añade el ID de Cliente y el Secreto de Cliente a tu configuración. Es altamente recomendable usar el Secret Manager (Manejador de Secretos) para esto y no ponerlos en texto plano en appsettings.json.",
             code: `// En appsettings.json o (preferiblemente) secrets.json
 "Authentication": {
   "Google": {
@@ -745,7 +733,7 @@ public IActionResult UploadLargeFile(IFormFile file)
           {
             title: "3. Añadir Proveedor de Autenticación en Program.cs",
             description:
-              "En 'Program.cs', encadena el servicio del proveedor (ej. 'AddGoogle') después de 'AddIdentity'. Esto le enseña a ASP.NET Core Identity cómo comunicarse con Google, leyendo los secretos desde la configuración.",
+              "En Program.cs, encadena el servicio del proveedor (ej. AddGoogle) después de AddIdentity. Esto le enseña a ASP.NET Core Identity cómo comunicarse con Google, leyendo los secretos desde la configuración.",
             code: `// Se asume que AddIdentity ya fue llamado
 builder.Services.AddAuthentication()
    .AddGoogle(googleOptions =>
@@ -757,7 +745,7 @@ builder.Services.AddAuthentication()
           {
             title: "4. Modificar la Vista de Login",
             description:
-              "En tu vista 'Login.cshtml', añade un formulario que apunte a la acción 'ExternalLogin' del 'AccountController'. Cada botón debe tener 'name=\"provider\"' y 'value' con el nombre del proveedor (ej. 'Google').",
+              'En tu vista Login.cshtml, añade un formulario que apunte a la acción ExternalLogin del AccountController. Cada botón debe tener name="provider" y value con el nombre del proveedor (ej. Google).',
             code: `<form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="oauth-form">
   <div class="oauth-buttons">
     <button type="submit" name="provider" value="Google" class="btn btn-oauth btn-google w-100">
@@ -769,7 +757,7 @@ builder.Services.AddAuthentication()
           {
             title: "5. Implementar Lógica del Controlador",
             description:
-              "Asegúrate de que tu 'AccountController' (el que provee Identity) tenga las acciones 'ExternalLogin' (POST) y 'ExternalLoginCallback' (GET). 'ExternalLogin' inicia el desafío y redirige al usuario a Google, y 'ExternalLoginCallback' maneja la respuesta de Google.",
+              "Asegúrate de que tu AccountController (el que provee Identity) tenga las acciones ExternalLogin (POST) y ExternalLoginCallback (GET). ExternalLogin inicia el desafío y redirige al usuario a Google, y ExternalLoginCallback maneja la respuesta de Google.",
             code: `// En AccountController.cs
 [HttpPost]
 public IActionResult ExternalLogin(string provider, string returnUrl = null)
@@ -811,7 +799,7 @@ public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, 
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de vista y controlador (15%)",
@@ -838,7 +826,7 @@ public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, 
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Protección de credenciales (25%)",
