@@ -297,7 +297,6 @@ public class LoginViewModel
           rubricData: [
             {
               title: "Implementación técnica (50%)",
-              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Importación de dependencia (10%)",

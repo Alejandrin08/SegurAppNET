@@ -98,7 +98,6 @@ app.Use(async (context, next) =>
           rubricData: [
             {
               title: "Implementación técnica (50%)",
-              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de middleware (25%)",

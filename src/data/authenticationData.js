@@ -1525,7 +1525,6 @@ public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null,
           rubricData: [
             {
               title: "Implementación técnica (50%)",
-              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de vista y controlador (15%)",
@@ -1552,7 +1551,6 @@ public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null,
               ],
             },
             {
-              title: "Efectividad en seguridad (50%)",
               title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
