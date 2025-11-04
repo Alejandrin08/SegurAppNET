@@ -160,10 +160,6 @@
     padding: var(--spacing-xs) !important;
   }
 
-  .icon-mechanism {
-    font-size: 1.5rem !important;
-  }
-
   .container-cards {
     flex-direction: column !important;
     gap: var(--spacing-md) !important;
@@ -453,7 +449,7 @@
 
 .icon-mechanism {
   font-size: var(--footer-icon-size);
-  color: black;
+  color: white;
 }
 
 .underlined-letter {
