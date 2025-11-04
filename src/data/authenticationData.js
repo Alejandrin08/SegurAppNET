@@ -70,37 +70,635 @@ public class LoginWith2FAViewModel
 }`,
           },
           {
-            title: "3. Crear Servicios y Modificar Controlador",
-            description:
-              "Crear un servicio para manejar la lógica de 2FA (generar QR, validar códigos) e inyectarlo en el controlador de cuentas. Modificar el controlador para añadir los métodos GET y POST para 'EnableTwoFactor' y 'LoginWith2FA', y ajustar el flujo de Login para que redirija a la configuración o validación de 2FA según corresponda.",
-            code: `// Ejemplo de inyección en el controlador
-private readonly ITwoFactorAuthenticationService _2faService;
+            title: "3. Crear servicios ",
+            description: "Implementar un servicio para manejar la lógica de 2FA, incluyendo la generación del código QR y la validación de los códigos TOTP. Asi como un proveedor de tokens personalizado.",
+            code: `// En una carperta Services, crear TwoFactorAuthenticationService y GoogleAuthenticatorTokenProvider 
+// TwoFactorAuthenticationService.cs
+using QRCoder;
+using System.Text;
 
-public AccountController(ITwoFactorAuthenticationService 2faService)
+public interface ITwoFactorAuthenticationService
 {
-    _2faService = 2faService;
+    string GenerateSecretKey();
+    string GenerateQRCode(string email, string secretKey);
+    bool VerifyCode(string secretKey, string code);
 }
+
+public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
+{
+    public string GenerateSecretKey()
+    {
+        var randomBytes = new byte[20];
+        System.Security.Cryptography.RandomNumberGenerator.Fill(randomBytes);
+        return Base32Encoding.ToString(randomBytes);
+    }
+
+    public string GenerateQRCode(string email, string secretKey)
+    {
+        var issuer = "SegurAppNet";
+        var qrCodeData = $"otpauth://totp/{issuer}:{email}?secret={secretKey}&issuer={issuer}";
+        
+        using (var qrGenerator = new QRCodeGenerator())
+        {
+            var qrCodeDataStruct = qrGenerator.CreateQrCode(qrCodeData, QRCodeGenerator.ECCLevel.Q);
+            using (var qrCode = new BitmapByteQRCode(qrCodeDataStruct))
+            {
+                var qrCodeImage = qrCode.GetGraphic(20);
+                return $"data:image/png;base64,{Convert.ToBase64String(qrCodeImage)}";
+            }
+        }
+    }
+
+    public bool VerifyCode(string secretKey, string code)
+    {
+        if (string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(code))
+            return false;
+
+        var bytes = Base32Encoding.ToBytes(secretKey);
+        var totp = new Totp(bytes);
+        return totp.VerifyTotp(code, out _);
+    }
+}
+
+public static class Base32Encoding
+{
+    private static readonly string Base32Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+    public static string ToString(byte[] data)
+    {
+        var result = new StringBuilder();
+        var buffer = 0;
+        var bitsLeft = 0;
+
+        foreach (var b in data)
+        {
+            buffer = (buffer << 8) | b;
+            bitsLeft += 8;
+
+            while (bitsLeft >= 5)
+            {
+                var index = (buffer >> (bitsLeft - 5)) & 0x1F;
+                result.Append(Base32Chars[index]);
+                bitsLeft -= 5;
+            }
+        }
+
+        if (bitsLeft > 0)
+        {
+            var index = (buffer << (5 - bitsLeft)) & 0x1F;
+            result.Append(Base32Chars[index]);
+        }
+
+        return result.ToString();
+    }
+
+    public static byte[] ToBytes(string base32)
+    {
+        base32 = base32.TrimEnd('=').ToUpper();
+        var output = new byte[base32.Length * 5 / 8];
+        var buffer = 0;
+        var bitsLeft = 0;
+        var index = 0;
+
+        foreach (var c in base32)
+        {
+            var value = Base32Chars.IndexOf(c);
+            if (value < 0) throw new ArgumentException("Carácter inválido en cadena Base32");
+
+            buffer = (buffer << 5) | value;
+            bitsLeft += 5;
+
+            if (bitsLeft >= 8)
+            {
+                output[index++] = (byte)(buffer >> (bitsLeft - 8));
+                bitsLeft -= 8;
+            }
+        }
+
+        return output;
+    }
+}
+
+
+public class Totp
+{
+    private readonly byte[] _secret;
+    private readonly int _step = 30;
+    private readonly int _digits = 6;
+
+    public Totp(byte[] secret)
+    {
+        _secret = secret;
+    }
+
+    public bool VerifyTotp(string code, out long timeStepUsed)
+    {
+        timeStepUsed = 0;
+        if (string.IsNullOrEmpty(code) || code.Length != _digits)
+            return false;
+
+        var currentTimeStep = GetCurrentTimeStepNumber();
+        
+        for (int i = -1; i <= 1; i++)
+        {
+            var testCode = GenerateCode(currentTimeStep + i);
+            if (testCode == code)
+            {
+                timeStepUsed = currentTimeStep + i;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private string GenerateCode(long timeStepNumber)
+    {
+        var data = BitConverter.GetBytes(timeStepNumber);
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(data);
+
+        using (var hmac = new System.Security.Cryptography.HMACSHA1(_secret))
+        {
+            var hash = hmac.ComputeHash(data);
+            var offset = hash[hash.Length - 1] & 0x0F;
+            var binaryCode = ((hash[offset] & 0x7F) << 24)
+                           | ((hash[offset + 1] & 0xFF) << 16)
+                           | ((hash[offset + 2] & 0xFF) << 8)
+                           | (hash[offset + 3] & 0xFF);
+
+            var code = binaryCode % (int)Math.Pow(10, _digits);
+            return code.ToString().PadLeft(_digits, '0');
+        }
+    }
+
+    private long GetCurrentTimeStepNumber()
+    {
+        var unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        return unixTime / _step;
+    }
+}
+
+// GoogleAuthenticatorTokenProvider.cs
+using Microsoft.AspNetCore.Identity;
+
+public class GoogleAuthenticatorTokenProvider : IUserTwoFactorTokenProvider<IdentityUser>
+{
+    private readonly ITwoFactorAuthenticationService _twoFactorService;
+
+    public GoogleAuthenticatorTokenProvider(ITwoFactorAuthenticationService twoFactorService)
+    {
+        _twoFactorService = twoFactorService;
+    }
+
+    public async Task<bool> CanGenerateTwoFactorTokenAsync(UserManager<IdentityUser> manager, IdentityUser user)
+    {
+        
+        var is2faEnabled = await manager.GetTwoFactorEnabledAsync(user);
+        if (!is2faEnabled) return false;
+
+        var secretKey = await manager.GetAuthenticationTokenAsync(user, "GoogleAuthenticator", "SecretKey");
+        return !string.IsNullOrEmpty(secretKey);
+    }
+
+    public Task<string> GenerateAsync(string purpose, UserManager<IdentityUser> manager, IdentityUser user)
+    {
+        
+        return Task.FromResult(string.Empty);
+    }
+
+    public async Task<bool> ValidateAsync(string purpose, string token, UserManager<IdentityUser> manager, IdentityUser user)
+    {
+        
+        var secretKey = await manager.GetAuthenticationTokenAsync(user, "GoogleAuthenticator", "SecretKey");
+        
+        if (string.IsNullOrEmpty(secretKey))
+            return false;
+
+        return _twoFactorService.VerifyCode(secretKey, token);
+    }
+}`
+          },
+          {
+            title: "4. Crear las Vistas de 2FA",
+            description: "Añadir las vistas para la activación de 2FA (mostrando el QR) y para el login con 2FA (ingreso del código).",
+            code: `// Ejemplo de EnableTwoFactor.cshtml
+@model Enable2FAViewModel
+
+@{
+    ViewData["Title"] = "Habilitar Autenticación de Dos Factores";
+    ViewData["HideNav"] = true; 
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2 class="login-title">Autenticación de Dos Factores</h2>
+            <p class="login-subtitle">Protege tu cuenta con seguridad adicional</p>
+        </div>
+
+        <div class="mb-4">
+            <p class="text-muted small mb-3">Para habilitar la autenticación de dos factores, sigue estos pasos:</p>
+            <ol class="small text-muted ps-3">
+                <li class="mb-2">Instala Google Authenticator en tu dispositivo móvil</li>
+                <li class="mb-2">Escanea el código QR o ingresa la clave manualmente</li>
+                <li class="mb-2">Ingresa el código de verificación generado por la app</li>
+            </ol>
+        </div>
+
+        <div class="mb-4">
+            <div class="form-floating">
+                <input type="text" class="form-control login-input" value="@Model.SecretKey" readonly />
+                <label class="form-label">Clave Secreta</label>
+            </div>
+            <small class="form-text text-muted">Guarda esta clave en un lugar seguro</small>
+        </div>
+
+        <div class="text-center mb-4">
+            <img src="@Model.QRCodeUrl" alt="Código QR" class="img-fluid" style="max-width: 250px; border-radius: 12px; border: 2px solid #e9ecef;" />
+        </div>
+
+        <form method="post" class="login-form">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                </div>
+            }
+
+            <div class="form-floating mb-4">
+                <input asp-for="Code" class="form-control login-input" placeholder="Código" autocomplete="off" required />
+                <label asp-for="Code" class="form-label">Código de Verificación</label>
+                <span asp-validation-for="Code" class="text-danger small"></span>
+                <div class="input-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100">
+                <span class="btn-text">Verificar y Habilitar</span>
+                <div class="btn-loader d-none">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p class="text-muted small">¿Necesitas ayuda? <a href="#" class="text-decoration-none">Contacta soporte</a></p>
+        </div>
+    </div>
+
+    <div class="login-bg-pattern"></div>
+</div>
+
+<script>
+    document.querySelector('.login-form').addEventListener('submit', function() {
+        const btn = document.querySelector('.btn-login');
+        const btnText = btn.querySelector('.btn-text');
+        const btnLoader = btn.querySelector('.btn-loader');
+
+        btnText.classList.add('d-none');
+        btnLoader.classList.remove('d-none');
+        btn.disabled = true;
+    });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+// Ejemplo de LoginWith2FA.cshtml
+@model YourProject.Models.LoginWith2FAViewModel
+
+@{
+    ViewData["Title"] = "Autenticación de Dos Factores";
+    ViewData["HideNav"] = true; 
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
+                    <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="12" cy="16" r="1" fill="currentColor" />
+                </svg>
+            </div>
+            <h2 class="login-title">Verificación de Seguridad</h2>
+            <p class="login-subtitle">Ingresa el código de tu aplicación autenticadora</p>
+        </div>
+
+        <form method="post" asp-route-returnUrl="@Model.ReturnUrl" class="login-form">
+            <input asp-for="RememberMe" type="hidden" />
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                </div>
+            }
+
+            <div class="form-floating mb-3">
+                <input asp-for="TwoFactorCode" 
+                       class="form-control login-input text-center" 
+                       placeholder="Código" 
+                       autocomplete="off" 
+                       maxlength="6"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       style="letter-spacing: 0.5em; font-size: 1.5rem; font-weight: 600;"
+                       required />
+                <label asp-for="TwoFactorCode" class="form-label">Código de Verificación</label>
+                <span asp-validation-for="TwoFactorCode" class="text-danger small"></span>
+                <div class="input-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="form-check mb-4 ps-0">
+                <label class="form-check-label d-flex align-items-center" style="cursor: pointer;">
+                    <input asp-for="RememberMachine" class="form-check-input me-2" type="checkbox" style="cursor: pointer;" />
+                    <span class="text-muted small">@Html.DisplayNameFor(m => m.RememberMachine)</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100">
+                <span class="btn-text">Verificar e Iniciar Sesión</span>
+                <div class="btn-loader d-none">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p class="text-muted small">¿Problemas con el código? <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Volver al inicio</a></p>
+        </div>
+    </div>
+
+    <div class="login-bg-pattern"></div>
+</div>
+
+<script>
+    document.querySelector('.login-form').addEventListener('submit', function() {
+        const btn = document.querySelector('.btn-login');
+        const btnText = btn.querySelector('.btn-text');
+        const btnLoader = btn.querySelector('.btn-loader');
+
+        btnText.classList.add('d-none');
+        btnLoader.classList.remove('d-none');
+        btn.disabled = true;
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.querySelector('input[name="TwoFactorCode"]');
+        if (codeInput) {
+            codeInput.focus();
+        }
+    });
+
+    document.querySelector('input[name="TwoFactorCode"]').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    document.querySelector('input[name="TwoFactorCode"]').addEventListener('input', function(e) {
+        if (this.value.length === 6) {
+            // Opcional: descomentar para auto-submit
+            // this.form.submit();
+        }
+    });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+            `
+
+          },
+          {
+            title: "5. Modificar Controlador",
+            description:
+              "Modificar el controlador para añadir los métodos GET y POST para 'EnableTwoFactor' y 'LoginWith2FA', y ajustar el flujo de Login para que redirija a la configuración o validación de 2FA según corresponda.",
+            code: `// Inyección en el controlador de 2FA, agregar ITwoFactorAuthenticationService al constructor
+private readonly ITwoFactorAuthenticationService _twoFactorService;
+
 
 // Lógica del Login modificada
 [HttpPost]
 public async Task<IActionResult> Login(LoginViewModel model)
 {
     // ... lógica de validación de contraseña ...
-    var user = await _userManager.FindByEmailAsync(model.Email);
-    if (user.TwoFactorEnabled)
+    var has2fa = await _userManager.GetTwoFactorEnabledAsync(user);
+    var hasAuthenticatorKey = await _userManager.GetAuthenticationTokenAsync(user, "GoogleAuthenticator", "SecretKey") != null;
+
+    if (has2fa && hasAuthenticatorKey)
     {
-        return RedirectToAction("LoginWith2FA");
+      var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: true);
+
+      if (result.RequiresTwoFactor)
+      {
+        return RedirectToAction("LoginWith2FA", new
+        {
+          ReturnUrl = returnUrl,
+          RememberMe = false
+        });
+      }
+      else if (result.Succeeded)
+      {
+        return RedirectToAction("Index", "Home");
+      }
+    }
+    else
+    {
+      return RedirectToAction("EnableTwoFactor", "Account" );
     }
     // ... resto del flujo ...
-}`,
+}
+    
+// Método GET EnableTwoFactor
+[HttpGet]
+public async Task<IActionResult> EnableTwoFactor()
+{
+    var user = await _userManager.GetUserAsync(User);
+    if (user == null)
+    {
+        return NotFound($"Incapaz de cargar la información del usuario con ID '{_userManager.GetUserId(User)}'.");
+    }
+    var secretKey = _twoFactorService.GenerateSecretKey();
+    var email = await _userManager.GetEmailAsync(user) ?? user.Email ?? string.Empty;
+    var qrCodeUrl = _twoFactorService.GenerateQRCode(email, secretKey);
+
+    var model = new Enable2FAViewModel
+    {
+        SecretKey = secretKey,
+        QRCodeUrl = qrCodeUrl
+    };
+
+    HttpContext.Session.SetString("2FASecretKey", secretKey);
+
+    return View(model);
+}
+
+// Método POST EnableTwoFactor
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> EnableTwoFactor(Enable2FAViewModel model)
+{
+    var user = await _userManager.GetUserAsync(User);
+    if (user == null)
+    {
+        return NotFound($"Incapaz de cargar la información del usuario con ID '{_userManager.GetUserId(User)}'.");
+    }
+    if (model == null || string.IsNullOrEmpty(model.Code))
+    {
+        ModelState.AddModelError(string.Empty, "Por favor, ingresa el código de verificación.");
+        return View(model);
+    }
+
+    var secretKey = HttpContext.Session.GetString("2FASecretKey");
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        ModelState.AddModelError(string.Empty, "Sesión expirada. Por favor, intenta de nuevo.");
+        return RedirectToAction("EnableTwoFactor");
+    }
+
+    if (_twoFactorService.VerifyCode(secretKey, model.Code))
+    {
+        await _userManager.SetAuthenticationTokenAsync(user, "GoogleAuthenticator", "SecretKey", secretKey);
+
+        await _userManager.SetTwoFactorEnabledAsync(user, true);
+
+        HttpContext.Session.Remove("2FASecretKey");
+
+        TempData["SuccessMessage"] = "Autenticación de dos factores habilitada correctamente.";
+        return RedirectToAction("Index", "Home");
+    }
+    else
+    {
+        ModelState.AddModelError(string.Empty, "Código de verificación inválido.");
+        model.SecretKey = secretKey;
+        var email = await _userManager.GetEmailAsync(user) ?? user.Email ?? string.Empty;
+        model.QRCodeUrl = _twoFactorService.GenerateQRCode(email, secretKey);
+        return View(model);
+    }
+}
+
+// Método GET LoginWith2FA
+[HttpGet]
+public async Task<IActionResult> LoginWith2FA(string? returnUrl = null, bool rememberMe = false)
+{
+    var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+    if (user == null)
+    {
+        return RedirectToAction("Login");
+    }
+
+    var model = new LoginWith2FAViewModel
+    {
+        TwoFactorCode = string.Empty,
+        ReturnUrl = returnUrl,
+        RememberMe = rememberMe
+    };
+
+    return View(model);
+}
+
+// Método POST LoginWith2FA
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> LoginWith2FA(LoginWith2FAViewModel model)
+{
+
+    if (!ModelState.IsValid)
+    {
+        return View(model);
+    }
+
+    var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+    if (user == null)
+    {
+
+        throw new InvalidOperationException("No se puede cargar el usuario de autenticación de dos factores.");
+    }
+
+    var secretKey = await _userManager.GetAuthenticationTokenAsync(user, "GoogleAuthenticator", "SecretKey");
+
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        ModelState.AddModelError(string.Empty, "Error de configuración de 2FA. Contacta al administrador.");
+        return View(model);
+    }
+
+    var isCodeValid = _twoFactorService.VerifyCode(secretKey, model.TwoFactorCode);
+
+    if (isCodeValid)
+    {
+
+        var result = await _signInManager.TwoFactorSignInAsync(
+            "GoogleAuthenticator",
+            model.TwoFactorCode,
+            model.RememberMe,
+            model.RememberMachine);
+
+
+        if (result.Succeeded)
+        {
+
+            if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+            {
+                return Redirect(model.ReturnUrl);
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        else if (result.IsLockedOut)
+        {
+            ModelState.AddModelError(string.Empty, "Cuenta bloqueada. Inténtelo más tarde.");
+        }
+        else
+        {
+            ModelState.AddModelError(string.Empty, "Código de verificación inválido.");
+        }
+    }
+    else
+    {
+        ModelState.AddModelError(string.Empty, "Código de verificación inválido.");
+    }
+
+    return View(model);
+}
+`,
           },
           {
-            title: "4. Configurar Servicios en Program.cs",
+            title: "6. Configurar Servicios en Program.cs",
             description:
               "Registrar el proveedor de tokens personalizado, el servicio de 2FA y habilitar el manejo de sesiones en el contenedor de dependencias de la aplicación.",
             code: `// En Program.cs
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
+    //...// otras configuraciones ...
     options.SignIn.RequireConfirmedAccount = false;
     options.Tokens.AuthenticatorTokenProvider = "GoogleAuthenticator";
 }).AddTokenProvider<GoogleAuthenticatorTokenProvider>("GoogleAuthenticator");
@@ -115,7 +713,7 @@ app.UseSession();`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Instalación de paquetes Nuget (5%)",
@@ -141,7 +739,7 @@ app.UseSession();`,
                 {
                   description: "Vistas de 2FA (8%)",
                   achieved:
-                    "Se crean las vistas para mostrar el QR y para ingresar el código de 6 dígitos, ambas con validación del lado del cliente.",
+                    "Se crean las vistas para mostrar el QR y para ingresar el código de 6 dígitos.",
                   notAchieved:
                     "Vistas creadas pero faltan campos, validaciones o no son funcionales.",
                 },
@@ -153,9 +751,9 @@ app.UseSession();`,
                     "Faltan métodos o fueron creados con lógica incompleta o errónea. No implementa manejo de errores.",
                 },
                 {
-                  description: "Modificación de flujo de login y registro (4%)",
+                  description: "Modificación de flujo de login (4%)",
                   achieved:
-                    "El login verifica si 2FA está activo y redirige correctamente. El registro redirige al login.",
+                    "El login verifica si 2FA está activo y redirige correctamente.",
                   notAchieved:
                     "Redirecciones implementadas con errores en el flujo o no hay validación de 2FA en login.",
                 },
@@ -169,7 +767,7 @@ app.UseSession();`,
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Verificación de Base de Datos (15%)",
@@ -383,7 +981,12 @@ namespace YourProject.Data
             title: "3. Configurar Servicios en Program.cs",
             description:
               "Registrar el DbContext, configurar el servicio de Identity con políticas de contraseña y bloqueo, y configurar las cookies de autenticación.",
-            code: `// Registrar DbContext
+            code: `//Agregar using necesarios
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using IdentityProject.Data
+
+// Registrar DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -404,13 +1007,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Home/AccessDenied";
-});`,
+});
+
+//Añadir uso de Autenticación 
+app.UseAuthentication(); `,
           },
           {
             title: "4. Implementar Lógica en el Controlador",
             description:
               "Inyectar `SignInManager` y `UserManager` en el controlador de cuentas y usarlos para implementar la lógica de registro, inicio y cierre de sesión.",
-            code: `private readonly SignInManager<IdentityUser> _signInManager;
+            code: `//Añadir imports necesarios
+using Microsoft.AspNetCore.Identity;
+
+private readonly SignInManager<IdentityUser> _signInManager;
 private readonly UserManager<IdentityUser> _userManager;
 
 public AccountController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
@@ -421,6 +1030,7 @@ public AccountController(SignInManager<IdentityUser> signInManager, UserManager<
 
 // Ejemplo de Login
 [HttpPost]
+[ValidateAntiForgeryToken]
 public async Task<IActionResult> Login(LoginViewModel model)
 {
     if (ModelState.IsValid)
@@ -431,10 +1041,57 @@ public async Task<IActionResult> Login(LoginViewModel model)
         ModelState.AddModelError(string.Empty, "Credenciales inválidas");
     }
     return View(model);
-}`,
+}
+
+// Ejemplo de Registro
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Register(RegisterViewModel model)  {
+
+    if (ModelState.IsValid)
+    {
+        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (result.Succeeded)
+       {
+           await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }        
+    }
+
+    return View(model);
+
+}
+
+// Ejemplo de Logout
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Logout()
+{
+    await _signInManager.SignOutAsync();
+    return RedirectToAction("Login", "Account");
+}
+`,
           },
           {
-            title: "5. Crear y Aplicar Migraciones",
+            title: "5. Configurar la Cadena de Conexión",
+            description:
+              "Añadir la cadena de conexión a la base de datos en el archivo `appsettings.json` para que Entity Framework pueda conectarse a la base de datos SQL Server.",
+            code: `// En appsettings.json ejemplo de conexión
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=IdentityProject;Trusted_Connection=true;TrustServerCertificate=true;"
+  },`
+          },
+          {
+            title: "6. Crear y Aplicar Migraciones",
             description:
               "Usar la CLI de Entity Framework para generar las migraciones que crearán el esquema de base de datos de Identity y luego aplicarlas a la base de datos.",
             code: `dotnet ef migrations add InitialCreate
@@ -772,46 +1429,113 @@ builder.Services.AddAuthentication()
               "Asegúrate de que tu 'AccountController' (el que provee Identity) tenga las acciones 'ExternalLogin' (POST) y 'ExternalLoginCallback' (GET). 'ExternalLogin' inicia el desafío y redirige al usuario a Google, y 'ExternalLoginCallback' maneja la respuesta de Google.",
             code: `// En AccountController.cs
 [HttpPost]
-public IActionResult ExternalLogin(string provider, string returnUrl = null)
+[AllowAnonymous]
+public IActionResult ExternalLogin(string provider, string? returnUrl = null)
 {
-    // Genera la URL de redirección a la que Google debe volver
-    var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
+
+    var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { returnUrl });
     var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-    // Redirige al usuario a Google
-    return new ChallengeResult(provider, properties);
+
+    return Challenge(properties, provider);
 }
 
 [HttpGet]
-public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+[AllowAnonymous]
+public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
 {
-    // Maneja la respuesta de Google
+    returnUrl ??= Url.Content("~/");
+    var loginModel = new LoginViewModel { Email = "" };
+
+    if (remoteError != null)
+    {
+        ModelState.AddModelError(string.Empty, $"Error del proveedor externo: {remoteError}");
+        return View("Login", loginModel);
+    }
+
     var info = await _signInManager.GetExternalLoginInfoAsync();
     if (info == null)
     {
-        // Error
-        return RedirectToAction("Login");
+        ModelState.AddModelError(string.Empty, "Error cargando la información del login externo.");
+        return View("Login", loginModel);
     }
 
-    // Intenta iniciar sesión con el proveedor externo
-    var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-    
+    var result = await _signInManager.ExternalLoginSignInAsync(
+        info.LoginProvider,
+        info.ProviderKey,
+        isPersistent: false,
+        bypassTwoFactor: true);
+
     if (result.Succeeded)
     {
-        // El usuario ya existe y se logueó
-        return LocalRedirect(returnUrl ?? "/");
+        return RedirectToAction("Index", "Home");
+    }
+
+    if (result.IsLockedOut)
+    {
+        ModelState.AddModelError(string.Empty, "Cuenta bloqueada. Inténtelo más tarde.");
+        return View("Login", loginModel);
     }
     else
     {
-        // El usuario es nuevo, se debe crear la cuenta
-        // ... (lógica para crear un nuevo IdentityUser sin contraseña) ...
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+        if (email != null)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (createResult.Succeeded)
+                {
+                    createResult = await _userManager.AddLoginAsync(user, info);
+                    if (createResult.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+
+                foreach (var error in createResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View("Login", loginModel);
+            }
+            else
+            {
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                if (addLoginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty,
+                        "Esta cuenta de email ya está registrada. Por favor, inicia sesión con tu método original.");
+                    loginModel.Email = email;
+                    return View("Register");
+                }
+            }
+        }
+        else
+        {
+            ModelState.AddModelError(string.Empty,
+                "No se pudo obtener el email del proveedor externo. Por favor, regístrese manualmente.");
+            return View("Login", loginModel);
+        }
     }
-}`,
+}
+`,
           },
         ],
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de vista y controlador (15%)",
@@ -822,7 +1546,7 @@ public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, 
                 },
                 {
                   description:
-                    "Configuración de autenticación en la aplicación (Program.cs) (20%)",
+                    "Configuración de autenticación (Program.cs) (20%)",
                   achieved:
                     "La aplicación tiene configurado correctamente el servicio de autenticación con el proveedor OAuth/OpenID seleccionado, obteniendo las credenciales desde configuración externa (no hardcodeadas). El middleware de autenticación está correctamente posicionado en el pipeline, despues de Identity.",
                   notAchieved:
@@ -838,7 +1562,7 @@ public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, 
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Protección de credenciales (25%)",

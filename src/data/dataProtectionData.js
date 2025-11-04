@@ -300,7 +300,7 @@ public class LoginViewModel
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Importación de dependencia (10%)",
@@ -325,7 +325,7 @@ public class LoginViewModel
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Funcionamiento de validaciones (50%)",

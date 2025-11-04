@@ -81,12 +81,12 @@ public string Role { get; set; } = null!;
             description:
               "Inyectar `RoleManager` en el controlador de cuentas. En el método de registro, después de crear el usuario, usar `userManager.AddToRoleAsync()` para asignarle el rol seleccionado.",
             code: `// Inyectar RoleManager y modificar el registro
-private readonly UserManager<IdentityUser> _userManager;
 private readonly RoleManager<IdentityRole> _roleManager;
 
 // ... en el constructor ...
 
 [HttpPost]
+[ValidateAntiForgeryToken]
 public async Task<IActionResult> Register(RegisterViewModel model)
 {
     // ...
@@ -95,6 +95,19 @@ public async Task<IActionResult> Register(RegisterViewModel model)
     {
         // Asignar el rol después de crear el usuario
         await _userManager.AddToRoleAsync(user, model.Role);
+        if (roleResult.Succeeded)
+        {
+          await _signInManager.SignInAsync(user, isPersistent: false);
+          return RedirectToAction("Index", "Home");
+        }
+        else
+        {
+          await _userManager.DeleteAsync(user);
+          foreach (var error in roleResult.Errors)
+             {
+            ModelState.AddModelError(string.Empty, $"Error asignando rol: {error.Description}");
+           }
+       }
         // ...
     }
     // ...
@@ -139,25 +152,29 @@ public IActionResult ControlPanel()
     <li class="nav-item">
         <a class="nav-link" asp-action="ControlPanel">Panel de Control</a>
     </li>
-}`,
+}
+    
+//Asegúrese de limpiar la base de datos, en la tabla usuarios y roles, antes de probar la asignación de roles para evitar conflictos con datos preexistentes o inexistentes.`,
           },
+
+        
         ],
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica  (50%)",
               criteria: [
                 {
                   description: "Configuración de roles (10%)",
                   achieved:
-                    "La clase UserRoles está creada correctamente con constantes y un método para obtener todos los roles.",
+                    "La clase donde se definen roles está creada correctamente con constantes y un método funcional para obtener todos los roles.",
                   notAchieved:
                     "Clase inexistente, mal ubicada o el método no retorna los roles correctamente.",
                 },
                 {
                   description: "Modelo de datos e Interfaz de usuario (10%)",
                   achieved:
-                    "La propiedad 'Role' fue añadida al modelo de registro y el formulario incluye un <select> que se llena dinámicamente.",
+                    "La propiedad 'Role' fue añadida al modelo de registro y el formulario incluye un <select> con iteración sobre roles.",
                   notAchieved:
                     "Propiedad faltante en el modelo, o el <select> es inexistente o tiene roles hardcodeados.",
                 },
@@ -171,7 +188,7 @@ public IActionResult ControlPanel()
                 {
                   description: "Registro con roles (10%)",
                   achieved:
-                    "El método de registro crea el usuario y le asigna el rol seleccionado, manejando un rollback si la asignación del rol falla.",
+                    "El método de registro crea el usuario y le asigna el rol seleccionado.",
                   notAchieved:
                     "El rol no se asigna al usuario durante el registro o falta el manejo de errores.",
                 },
@@ -192,12 +209,12 @@ public IActionResult ControlPanel()
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Persistencia de roles (10%)",
                   achieved:
-                    "Los roles y su relación con los usuarios se registran y persisten correctamente en las tablas AspNetRoles y AspNetUserRoles.",
+                    "Los roles y su relación con los usuarios se registran y persisten correctamente en las tablas AspNetRoles y AspNetUserRoles en la base de datos.",
                   notAchieved:
                     "La tabla de roles está vacía o no se registran correctamente las relaciones entre usuarios y roles.",
                 },
@@ -263,7 +280,21 @@ public static class WorkAreas
             code: `// Añadir a RegisterViewModel.cs
 public string? WorkArea { get; set; }
 
-// Script en Register.cshtml para mostrar/ocultar el campo
+// Añadir al Register.cshtml una sección para la selección del claim
+<div class="form-floating mb-4 position-relative" id="workAreaContainer" style="display:none;">
+    <select asp-for="WorkArea" class="form-control login-input pe-5" >
+        <option value="">Selecciona un área de trabajo</option>
+        @foreach (var area in PoliticaDeRolesIdentity.Services.WorkAreas.GetAllAreas())
+        {
+            <option value="@area">@area</option>
+        }
+    </select>
+    <label asp-for="WorkArea" class="form-label">Área de trabajo</label>
+    <span asp-validation-for="WorkArea" class="text-danger small"></span>
+</div>
+
+
+// Script en Register.cshtml para mostrar/ocultar el campo, por ejemplo, añade un id al select de rol para que se active el claim solo si es 'Manager'
 document.getElementById("roleSelect").addEventListener("change", function () {
     if (this.value === "Manager") {
         document.getElementById("workAreaContainer").style.display = "block";
@@ -281,8 +312,20 @@ if (model.Role == UserRoles.Manager)
 {
     if (string.IsNullOrEmpty(model.WorkArea)) { /* Manejar error */ }
     
-    var claim = new System.Security.Claims.Claim("WorkArea", model.WorkArea);
-    await _userManager.AddClaimAsync(user, claim);
+    var claimResult = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("WorkArea", model.WorkArea));
+    if (claimResult.Succeeded)
+    {
+      await _signInManager.SignInAsync(user, isPersistent: false);
+      return RedirectToAction("Index", "Home");
+    }
+    else
+    {
+      await _userManager.DeleteAsync(user);
+      foreach (var error in claimResult.Errors)
+      {
+        ModelState.AddModelError(string.Empty, $"Error asignando claim de área de trabajo: {error.Description}");
+      }
+    }
 }`,
           },
           {
@@ -309,32 +352,35 @@ if (model.Role == UserRoles.Manager)
 public IActionResult ManagementTI()
 {
     return View();
-}`,
+}
+    
+//Asegúrese de limpiar la base de datos, en la tabla de usuarios y roles, antes de probar la asignación de claims para evitar conflictos con datos preexistentes o inexistentes.`,
           },
         ],
+        
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
-                  description: "Configuración de claims (workAreas) (10%)",
+                  description: "Configuración de claims  (10%)",
                   achieved:
-                    "La clase para los valores de los claims (ej. WorkAreas) está creada correctamente con constantes y un método para obtener todos los valores.",
+                    "La clase para los valores de los claims está creada correctamente con constantes y un método para obtener todos los valores.",
                   notAchieved:
                     "Clase inexistente, mal ubicada o el método no retorna los valores correctamente.",
                 },
                 {
                   description: "Modelo de datos e Interfaz de usuario (10%)",
                   achieved:
-                    "La propiedad para el claim (ej. WorkArea) fue añadida al modelo de registro y el formulario incluye un <select> que se muestra condicionalmente.",
+                    "La propiedad para el claim fue añadida al modelo de registro y el formulario incluye un <select> que se muestra condicionalmente.",
                   notAchieved:
-                    "Propiedad faltante, o el <select> no es condicional o está mal configurado.",
+                    "Propiedad faltante, el <select> no es condicional, está mal configurado o las opciones de claim están hardcodeadas.",
                 },
                 {
                   description: "Registro con claims (10%)",
                   achieved:
-                    "El método de registro asigna el 'claim' al usuario si cumple la condición (ej. es 'Manager') y valida que el valor no sea nulo.",
+                    "El método de registro asigna el 'claim' al usuario y valida que el valor no sea nulo.",
                   notAchieved:
                     "El 'claim' no se registra o falta el manejo de errores y validaciones.",
                 },
@@ -355,7 +401,7 @@ public IActionResult ManagementTI()
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Persistencia de claims (25%)",
@@ -367,7 +413,7 @@ public IActionResult ManagementTI()
                 {
                   description: "Validación contra acceso no autorizado (25%)",
                   achieved:
-                    "Un usuario que no cumple con todos los requisitos de una política (ej. un Manager de RRHH intentando acceder a una vista de TI) es redirigido a 'Acceso Denegado'.",
+                    "Un usuario que no cumple con todos los requisitos de una política es redirigido a 'Acceso Denegado'.",
                   notAchieved:
                     "El usuario tiene acceso directo a vistas restringidas sin cumplir con todos los requisitos de la política.",
                 },
@@ -428,7 +474,12 @@ namespace YourProject.Data
             title: "3. Configurar Servicios en Program.cs",
             description:
               "Registrar el DbContext, configurar el servicio de Identity con políticas de contraseña y bloqueo, y configurar las cookies de autenticación.",
-            code: `// Registrar DbContext
+            code: `//Agregar using necesarios
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using IdentityProject.Data
+
+// Registrar DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -449,13 +500,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Home/AccessDenied";
-});`,
+});
+
+//Añadir uso de Autenticación 
+app.UseAuthentication(); `,
           },
           {
             title: "4. Implementar Lógica en el Controlador",
             description:
               "Inyectar `SignInManager` y `UserManager` en el controlador de cuentas y usarlos para implementar la lógica de registro, inicio y cierre de sesión.",
-            code: `private readonly SignInManager<IdentityUser> _signInManager;
+            code: `//Añadir imports necesarios
+using Microsoft.AspNetCore.Identity;
+
+private readonly SignInManager<IdentityUser> _signInManager;
 private readonly UserManager<IdentityUser> _userManager;
 
 public AccountController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
@@ -466,6 +523,7 @@ public AccountController(SignInManager<IdentityUser> signInManager, UserManager<
 
 // Ejemplo de Login
 [HttpPost]
+[ValidateAntiForgeryToken]
 public async Task<IActionResult> Login(LoginViewModel model)
 {
     if (ModelState.IsValid)
@@ -476,10 +534,57 @@ public async Task<IActionResult> Login(LoginViewModel model)
         ModelState.AddModelError(string.Empty, "Credenciales inválidas");
     }
     return View(model);
-}`,
+}
+
+// Ejemplo de Registro
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Register(RegisterViewModel model)  {
+
+    if (ModelState.IsValid)
+    {
+        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (result.Succeeded)
+       {
+           await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }        
+    }
+
+    return View(model);
+
+}
+
+// Ejemplo de Logout
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Logout()
+{
+    await _signInManager.SignOutAsync();
+    return RedirectToAction("Login", "Account");
+}
+`,
           },
           {
-            title: "5. Crear y Aplicar Migraciones",
+            title: "5. Configurar la Cadena de Conexión",
+            description:
+              "Añadir la cadena de conexión a la base de datos en el archivo `appsettings.json` para que Entity Framework pueda conectarse a la base de datos SQL Server.",
+            code: `// En appsettings.json ejemplo de conexión
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=IdentityProject;Trusted_Connection=true;TrustServerCertificate=true;"
+  },`
+          },
+          {
+            title: "6. Crear y Aplicar Migraciones",
             description:
               "Usar la CLI de Entity Framework para generar las migraciones que crearán el esquema de base de datos de Identity y luego aplicarlas a la base de datos.",
             code: `dotnet ef migrations add InitialCreate
@@ -489,47 +594,47 @@ dotnet ef database update`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "•	Implementación técnica  (50%)",
               criteria: [
                 {
                   description: "Agregar paquetes NuGet (10%)",
                   achieved:
                     "Se agregaron correctamente los paquetes de Identity y Entity Framework Core en el archivo .csproj.",
                   notAchieved:
-                    "No se agregaron los paquetes necesarios, faltan paquetes o sus versiones son incorrectas.",
+                    "No se agregaron los paquetes necesarios, faltan paquetes o sus versiones no son compatibles.",
                 },
                 {
                   description: "Configurar base de datos (10%)",
                   achieved:
                     "Se creó la clase ApplicationDbContext, la cual hereda de IdentityDbContext y configuró un constructor con DbContextOptions. Se añadió la cadena de conexión en appsettings.json con servidor y nombre de base de datos correctos.",
                   notAchieved:
-                    "No se creó ApplicationDbContext, no hereda de IdentityDbContext, o la cadena de conexión es incorrecta.",
+                    "No se creó ApplicationDbContext, no hereda de IdentityDbContext, falta el constructor apropiado, o no se configuró la cadena de conexión o solo se hizo parcialmente.",
                 },
                 {
                   description: "Configurar servicios en Program.cs (10%)",
                   achieved:
-                    "Se registró DbContext, se configuró AddIdentity con políticas y se configuraron las cookies de autenticación.",
+                    "Se registró DbContext, se configuró AddIdentity con opciones de contraseñas, lockout y se configuraron las cookies de autenticación.",
                   notAchieved:
-                    "No se registraron los servicios de Identity, falta configuración de DbContext o cookies.",
+                    "No se registraron los servicios de Identity, falta configuración de DbContext, lockout o cookies.",
                 },
                 {
                   description: "Agregar lógica a controladores (10%)",
                   achieved:
-                    "Se inyectaron SignInManager y UserManager y se implementó la lógica de login, registro y logout usando Identity.",
+                    "Se inyectaron SignInManager y UserManager y se implementó la lógica de login (PasswordSignInAsync), registro (CreateAsync) y logout (SignOutAsync) usando Identity.",
                   notAchieved:
                     "No se inyectaron las dependencias, falta lógica de autenticación o no se manejan errores.",
                 },
                 {
                   description: "Generar y aplicar migraciones (10%)",
                   achieved:
-                    "Se ejecutaron correctamente los comandos de migraciones 'add' y 'update', creando las tablas de Identity.",
+                    "Se ejecutaron correctamente los comandos de migraciones 'add' y 'update', creando las tablas de Identity en la base de datos.",
                   notAchieved:
                     "No se generaron las migraciones, fallaron los comandos, o no se crearon las tablas.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "•	Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Hasheo de contraseñas (25%)",
@@ -569,7 +674,8 @@ dotnet ef database update`,
             title: "1. Modificar Vistas con <AuthorizeView>",
             description:
               "Envolver la lógica de la interfaz de usuario que depende del estado de autenticación dentro de las etiquetas <Authorized> y <NotAuthorized>.",
-            code: `<AuthorizeView>
+            code: `//Si se tiene logica anterior de autenticación manual, eliminarla y usar AuthorizeView
+<AuthorizeView>
     <Authorized>
         <span class="me-3">Hola, @context.User.Identity?.Name!</span>
         <form method="post" action="/Account/Logout">
@@ -610,7 +716,7 @@ builder.Services.AddCascadingAuthenticationState();`,
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Uso de etiquetas <AuthorizeView> (15%)",
@@ -637,7 +743,7 @@ builder.Services.AddCascadingAuthenticationState();`,
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Verificación de Sesión Autenticada (25%)",
