@@ -4,7 +4,7 @@ import Whitelist from "../assets/Whitelist.png";
 export const corsData = {
   securityMechanismTitle: "CORS (Cross-Origin Resource Sharing)",
   definition:
-    "CORS es un mecanismo de seguridad del navegador que permite o restringe las solicitudes de recursos en un sitio web desde un dominio diferente al del recurso solicitado. Controla qué sitios externos tienen permiso para acceder a los recursos de tu aplicación, previniendo que scripts maliciosos en otros sitios interactúen con tu API sin autorización.",
+    "Cross-origin Resource Sharing o también llamado CORS, permite a las aplicaciones web controlar los dominios externos que pueden acceder a sus recursos, es decir, es una comunicación entre dominios en diferentes URLs. Por defecto, los navegadores aplican políticas que restringen solicitudes desde dominios diferentes al de la aplicación. Sin embargo, CORS permite ser más permisivo y hacer que estas restricciones no apliquen para aquellas fuentes que sabemos son de casos legítimos como el acceso a una API pública o el cargar recursos de una CDN.",
   interestingFacts: [
     {
       description:
@@ -22,7 +22,7 @@ export const corsData = {
     {
       title: "Uso de Políticas Nombradas con [EnableCors]",
       description:
-        "Definir políticas de CORS con nombre en la configuración de la aplicación y aplicarlas selectivamente a los controladores o endpoints que necesitan ser accesibles desde otros orígenes.",
+        "Habilitar CORS con el atributo [EnableCors] y aplicar una política con nombre sólo a aquellos endpoints que requieren CORS proporciona el mejor control.",
       threats: ["Acceso No Autorizado"],
 
       recommendation:
@@ -35,7 +35,7 @@ export const corsData = {
           {
             title: "1. Crear la Política CORS en Program.cs",
             description:
-              "Usar `AddCors` y `AddPolicy` para definir una política con un nombre específico, estableciendo los orígenes, métodos y encabezados permitidos.",
+              "Usar AddCors y AddPolicy para definir una política con un nombre específico, estableciendo los orígenes, métodos y encabezados permitidos.",
             code: `builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicyName", policy =>
@@ -49,20 +49,20 @@ export const corsData = {
           {
             title: "2. Registrar el Middleware CORS",
             description:
-              "Añadir `app.UseCors()` al pipeline de la aplicación, antes de `UseAuthorization`, para habilitar la evaluación de las políticas CORS en las solicitudes entrantes.",
-            code: `// ...
+              "Añadir app.UseCors() al pipeline de la aplicación, antes de UseAuthorization, para habilitar la evaluación de las políticas CORS en las solicitudes entrantes.",
+            code: `
 app.UseRouting();
 
 //Se llama a UseCors() sin una política para que el sistema pueda procesar las políticas aplicadas en los endpoints.
 app.UseCors();
 
 app.UseAuthorization();
-// ...`,
+`,
           },
           {
             title: "3. Aplicar la Política a Endpoints Específicos",
             description:
-              'Usar el atributo `[EnableCors("NombreDeLaPolitica")]` directamente en los controladores o acciones que deban ser accesibles desde orígenes externos.',
+              'Usar el atributo [EnableCors("NombreDeLaPolitica")] directamente en los controladores o acciones que deban ser accesibles desde orígenes externos.',
             code: `[HttpGet("data")]
 [EnableCors("MyPolicyName")] 
 public IActionResult GetData()
@@ -74,40 +74,40 @@ public IActionResult GetData()
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de política (20%)",
                   achieved:
-                    "Se creó una política nombrada con `AddPolicy`, especificando orígenes con `WithOrigins` y métodos/encabezados.",
+                    "Se creó una política nombrada con AddPolicy, especificando orígenes con WithOrigins y métodos/encabezados.",
                   notAchieved:
-                    "No se creó una política o se usa `AllowAnyOrigin` sin una restricción clara.",
+                    "No se creó una política o se usa AllowAnyOrigin sin una restricción clara.",
                 },
                 {
                   description: "Registro de middleware (20%)",
                   achieved:
-                    "Se agregó `app.UseCors()` en el orden correcto dentro del pipeline (antes de `UseAuthorization`).",
+                    "Se agregó app.UseCors() en el orden correcto dentro del pipeline (antes de UseAuthorization).",
                   notAchieved:
                     "No se registró el middleware o está en un orden incorrecto.",
                 },
                 {
                   description: "Aplicación selectiva (10%)",
                   achieved:
-                    'Se usa el atributo `[EnableCors("NombrePolicy")]` solo en los endpoints que lo requieren.',
+                    'Se usa el atributo [EnableCors("NombrePolicy")] solo en los endpoints que lo requieren.',
                   notAchieved:
                     "Se aplica CORS globalmente a todos los endpoints sin necesidad, o no se usa el atributo.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Protección de acceso (50%)",
                   achieved:
-                    "Al enviar una solicitud desde un origen no permitido, el servidor no incluye el encabezado `Access-Control-Allow-Origin`. Solo los orígenes configurados en `WithOrigins` lo reciben.",
+                    "Al enviar una solicitud desde un origen no permitido, el servidor no incluye el encabezado Access-Control-Allow-Origin. Solo los orígenes configurados en WithOrigins lo reciben.",
                   notAchieved:
-                    "El servidor responde con `Access-Control-Allow-Origin: *` o permite cualquier origen sin validación.",
+                    "El servidor responde con Access-Control-Allow-Origin: * o permite cualquier origen sin validación.",
                 },
               ],
             },
@@ -118,21 +118,18 @@ public IActionResult GetData()
     {
       title: "Manejo de Solicitudes de Verificación Previa (Preflight)",
       description:
-        "Configurar CORS para manejar correctamente las solicitudes OPTIONS (preflight) que los navegadores envían antes de peticiones complejas (como PUT, DELETE o con encabezados personalizados) para verificar si la solicitud principal es segura.",
+        "Las peticiones de comprobación previa permiten al servidor determinar si puede responder adecuadamente antes de realizar la petición. Si una solicitud de verificación previa falla, el navegador no enviará la solicitud real. Esto evita que usuarios malintencionados o bots realicen peticiones entre dominios no autorizadas que podrían intentar abusar de su sitio web.",
       threats: ["Acceso No Autorizado"],
 
       recommendation:
-        "Requerido para: Web API que exponen métodos 'complejos' (PUT, DELETE, PATCH) o que esperan encabezados personalizados (ej. `Authorization`) desde un frontend en un origen diferente.",
-      warning:
-        "Olvidar incluir 'OPTIONS' en la lista de `WithMethods` es un error común que causa que las solicitudes preflight fallen, bloqueando las peticiones complejas. Siempre debe estar presente si se usa `WithMethods`.",
-
+        "Requerido para: Web API que exponen métodos complejos (PUT, DELETE, PATCH) o que esperan encabezados personalizados (ej. Authorization) desde un frontend en un origen diferente.",
       modalContent: {
         title: "Configuración de Solicitudes Preflight",
         practices: [
           {
             title: "1. Configurar Métodos Permitidos Explícitamente",
             description:
-              "En la política CORS, usar `WithMethods` para especificar la lista exacta de métodos HTTP permitidos. Es crucial incluir `OPTIONS` para que las solicitudes preflight sean exitosas.",
+              "En la política CORS, usar WithMethods para especificar la lista exacta de métodos HTTP permitidos.",
             code: `builder.Services.AddCors(options =>
 {
     options.AddPolicy("PreflightPolicy", policy =>
@@ -146,7 +143,7 @@ public IActionResult GetData()
           {
             title: "2. Configurar Tiempo de Caché para Preflight (Opcional)",
             description:
-              "Usar `SetPreflightMaxAge` para indicarle al navegador que puede cachear el resultado de la solicitud preflight por un tiempo determinado, reduciendo el número de solicitudes OPTIONS.",
+              "Usar SetPreflightMaxAge para indicarle al navegador que puede cachear el resultado de la solicitud preflight por un tiempo determinado, reduciendo el número de solicitudes OPTIONS.",
             code: `// ... dentro de la configuración de la política
 .SetPreflightMaxAge(TimeSpan.FromMinutes(10));`,
           },
@@ -165,31 +162,30 @@ public IActionResult PostCrear([FromBody] object data)
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de métodos (25%)",
                   achieved:
-                    "La política CORS incluye `WithMethods` con la lista explícita de verbos HTTP, incluyendo 'OPTIONS'.",
-                  notAchieved:
-                    "No se configuraron los métodos permitidos o falta 'OPTIONS' en la lista.",
+                    "La política CORS incluye WithMethods con la lista explícita de verbos HTTP, incluyendo OPTIONS.",
+                  notAchieved: "No se configuraron los métodos permitidos.",
                 },
                 {
                   description: "Caché de preflight (25%)",
                   achieved:
-                    "Se configuró `SetPreflightMaxAge` para establecer un tiempo de caché y optimizar las solicitudes.",
+                    "Se configuró SetPreflightMaxAge para establecer un tiempo de caché y optimizar las solicitudes.",
                   notAchieved:
                     "No se configuró MaxAge, causando una solicitud preflight en cada petición compleja.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Validación de Preflight (50%)",
                   achieved:
-                    "Al enviar una solicitud OPTIONS (preflight) desde un origen no permitido, el servidor la rechaza. Solo orígenes válidos reciben los encabezados `Access-Control-Allow-Methods` y `Access-Control-Allow-Origin`.",
+                    "Al enviar una solicitud OPTIONS (preflight) desde un origen no permitido, el servidor la rechaza. Solo orígenes válidos reciben los encabezados Access-Control-Allow-Methods y Access-Control-Allow-Origin.",
                   notAchieved:
                     "La verificación preflight permite cualquier origen o no valida correctamente, permitiendo solicitudes cross-origin maliciosas.",
                 },
@@ -202,13 +198,13 @@ public IActionResult PostCrear([FromBody] object data)
     {
       title: "Configuración de Cabeceras (Headers) y Credenciales",
       description:
-        "Controlar explícitamente qué encabezados HTTP pueden enviarse en las solicitudes cross-origin y si se permite el envío de credenciales (como cookies o tokens de autorización).",
+        "Configurar adecuadamente cabeceras como «Access-Control-Allow-Origin» y «Access-Control-Allow-Headers» para no exponer accidentalmente información sensible sobre la aplicación o usuarios a través de estas peticiones.",
       threats: ["Acceso No Autorizado"],
 
       recommendation:
-        "Esencial para: Web API que manejan autenticación y son consumidas desde un frontend en otro dominio. Para mayor seguridad, complemente esta práctica con la 'Exposición y Validación de Tokens en APIs' del mecanismo 'Tokens antifalsificación'.",
+        "Esencial para: Web API que manejan autenticación y son consumidas desde un frontend en otro dominio.",
       warning:
-        "¡Configuración de alto riesgo! Nunca combine `.AllowCredentials()` con `.AllowAnyOrigin()`. Es una vulnerabilidad grave, y los navegadores modernos bloquearán la solicitud por seguridad. Siempre use `WithOrigins` con dominios específicos si permite credenciales.",
+        "Nunca combine .AllowCredentials() con .AllowAnyOrigin(). Es una vulnerabilidad grave, y los navegadores modernos bloquearán la solicitud por seguridad. Siempre use WithOrigins con dominios específicos si permite credenciales.",
 
       modalContent: {
         title: "Manejo de Encabezados y Credenciales en CORS",
@@ -216,7 +212,7 @@ public IActionResult PostCrear([FromBody] object data)
           {
             title: "1. Configurar Encabezados Permitidos",
             description:
-              "Usar `WithHeaders` en la política CORS para especificar una lista blanca de encabezados que el cliente tiene permitido enviar, como 'Authorization' para tokens o 'Content-Type'.",
+              "Usar WithHeaders en la política CORS para especificar una lista blanca de encabezados que el cliente tiene permitido enviar, como Authorization para tokens o Content-Type.",
             code: `builder.Services.AddCors(options =>
 {
     options.AddPolicy("HeadersPolicy", policy =>
@@ -230,14 +226,14 @@ public IActionResult PostCrear([FromBody] object data)
           {
             title: "2. Permitir Credenciales de Forma Segura",
             description:
-              "Si la API necesita recibir cookies o encabezados de autenticación del cliente, se debe usar `AllowCredentials()`. **Importante:** Al usar esta opción, es obligatorio especificar los orígenes con `WithOrigins` y no se puede usar `AllowAnyOrigin()`.",
+              "Si la API necesita recibir cookies o encabezados de autenticación del cliente, se debe usar AllowCredentials(). Al usar esta opción, es obligatorio especificar los orígenes con WithOrigins y no se puede usar AllowAnyOrigin().",
             code: `// ... dentro de la configuración de la política
 .AllowCredentials();`,
           },
           {
             title: "3. Exponer Encabezados Personalizados al Cliente",
             description:
-              "Usar `WithExposedHeaders` para permitir que el cliente (JavaScript) pueda leer encabezados específicos que la API envía en la respuesta, como 'X-Total-Paginas' para paginación.",
+              "Usar WithExposedHeaders para permitir que el cliente (JavaScript) pueda leer encabezados específicos que la API envía en la respuesta, como X-Total-Paginas para paginación.",
             code: `// ... dentro de la configuración de la política
 .WithExposedHeaders("X-Total-Paginas", "X-Token-Expirado");`,
           },
@@ -245,40 +241,40 @@ public IActionResult PostCrear([FromBody] object data)
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de headers permitidos (20%)",
                   achieved:
-                    'Se usa `WithHeaders("Header1", ...)` para especificar los encabezados que el cliente puede enviar.',
+                    'Se usa WithHeaders("Header1", ...) para especificar los encabezados que el cliente puede enviar.',
                   notAchieved:
                     "No se configuraron los encabezados permitidos, bloqueando solicitudes legítimas.",
                 },
                 {
                   description: "Exposición de headers (20%)",
                   achieved:
-                    "Se usa `WithExposedHeaders` para permitir que el cliente lea encabezados de respuesta personalizados.",
+                    "Se usa WithExposedHeaders para permitir que el cliente lea encabezados de respuesta personalizados.",
                   notAchieved:
                     "El cliente no puede acceder a encabezados personalizados enviados por el servidor.",
                 },
                 {
                   description: "Manejo de Credenciales (10%)",
                   achieved:
-                    "Si se necesita autenticación, se configuró `AllowCredentials()` junto con una lista específica de `WithOrigins`.",
+                    "Si se necesita autenticación, se configuró AllowCredentials() junto con una lista específica de WithOrigins.",
                   notAchieved:
-                    "Se usa `AllowCredentials()` con `AllowAnyOrigin()`, lo cual es una configuración insegura y prohibida.",
+                    "Se usa AllowCredentials() con AllowAnyOrigin(), lo cual es una configuración insegura y prohibida.",
                 },
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Control de Acceso (50%)",
                   achieved:
                     "Solo los orígenes y encabezados válidos son permitidos. Si se usan credenciales, la política de origen es estricta, previniendo el abuso de sesiones autenticadas desde sitios no confiables.",
                   notAchieved:
-                    "El servidor permite encabezados o credenciales desde cualquier origen, permitiendo ataques CSRF.",
+                    "El servidor permite encabezados o credenciales desde cualquier origen.",
                 },
               ],
             },

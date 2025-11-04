@@ -1,10 +1,10 @@
-import SecretsManagement from "../assets/secretsManagement.png";
+import SecretsManagement from "../assets/SecretsManagement.png";
 import Secrets from "../assets/Secrets.png";
 
 export const secretsManagementData = {
   securityMechanismTitle: "Manejo de secretos",
   definition:
-    "El manejo de secretos es la práctica de gestionar de forma segura las credenciales digitales, como claves de API, contraseñas y certificados. El objetivo principal es separar estos secretos del código fuente y cargarlos desde un lugar seguro que varía según el entorno (desarrollo, producción), minimizando el riesgo de exposición.",
+    "El manejo de secretos es importante aplicarlo en aquellos casos donde es necesario alojar las contraseñas y secretos en general. Es importante para reducir el riesgo de exponer datos sensibles o confidenciales.",
   interestingFacts: [
     {
       description:
@@ -22,13 +22,13 @@ export const secretsManagementData = {
     {
       title: "Secretos fuera del código (Secret Manager y Key Vault)",
       description:
-        "Separar los secretos de la aplicación (claves de API, contraseñas, cadenas de conexión) del código fuente y cargarlos desde una fuente segura dependiendo del entorno (desarrollo o producción).",
+        "Utilice variables de entorno o herramientas de gestión de la configuración que mantengan los secretos fuera del código fuente. Esta práctica minimiza el riesgo de exposición accidental y simplifica el proceso de actualización de secretos.",
       threats: ["Manipulación de Datos", "Acceso no autorizado"],
 
       recommendation:
-        "Esencial para: Todas las aplicaciones (MVC, Web API, Blazor, etc.). Es una práctica de seguridad fundamental que nunca debe omitirse. El Secret Manager es para desarrollo local, mientras que Azure Key Vault (o un servicio similar) es el estándar para producción.",
+        "Esencial para: Todas las aplicaciones (MVC, Web API, Blazor, etc.). El Secret Manager es para desarrollo local, mientras que Azure Key Vault (o un servicio similar) es el estándar para producción. Se recomienda complementar con la práctica de Cifrado de Archivos de Configuración del mecanismo de seguridad de Protección de datos.",
       warning:
-        "¡Crítico! El Secret Manager solo protege los secretos en la máquina local de desarrollo y no debe usarse nunca en producción. Asegúrese de que el acceso al almacén de secretos de producción (como Key Vault) esté restringido mediante políticas de acceso estrictas (Managed Identities).",
+        "El Secret Manager solo protege los secretos en la máquina local de desarrollo y no debe usarse nunca en producción. Asegúrese de que el acceso al almacén de secretos de producción (como Key Vault) esté restringido mediante políticas de acceso estrictas.",
 
       modalContent: {
         title: "Uso del Secret Manager y Azure Key Vault",
@@ -55,13 +55,13 @@ dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
           {
             title: "3. Configurar el Patrón IOptions",
             description:
-              "En `Program.cs`, usar `builder.Services.Configure<T>` para vincular la sección de configuración correspondiente a la clase del modelo POCO.",
+              "En Program.cs, usar builder.Services.Configure<T> para vincular la sección de configuración correspondiente a la clase del modelo POCO.",
             code: `builder.Services.Configure<ExampleClassName>(builder.Configuration.GetSection("ExampleName"));`,
           },
           {
             title: "4. Inyectar y Usar Secretos en un Servicio",
             description:
-              "Inyectar `IOptions<ExampleClassName>` en un servicio para acceder a los secretos de forma segura y fuertemente tipada.",
+              "Inyectar IOptions<ExampleClassName> en un servicio para acceder a los secretos de forma segura.",
             code: `public class ExampleService : IExampleService
 {
     private readonly ExampleClassName _secrets;
@@ -76,7 +76,7 @@ dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
           {
             title: "5. Producción: Integrar con un Almacén Externo",
             description:
-              "Para producción, añadir un proveedor de configuración como Azure Key Vault en `Program.cs` para cargar los secretos desde un servicio centralizado y seguro.",
+              "Para producción, añadir un proveedor de configuración como Azure Key Vault en Program.cs para cargar los secretos desde un servicio centralizado y seguro.",
             code: `if (builder.Environment.IsProduction())
 {
     var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
@@ -88,7 +88,7 @@ dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Separación de Secretos por Entorno (30%)",
@@ -107,7 +107,7 @@ dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Ausencia de Secretos en código (30%)",

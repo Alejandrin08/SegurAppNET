@@ -28,7 +28,6 @@ function SecurityMechanismTemplate({
 
   return (
     <div className="security-mechanism">
-      <div className="rectangle rectangle-blue">Implementación</div>
       <h1>Mecanismos de seguridad</h1>
       <p>
         Aprenda a implementar la seguridad en los sistemas web con las mejores

@@ -12,7 +12,7 @@ function Footer() {
         </p>
       </div>
       <div className="grid-item-2">
-        <h2>Capítulos</h2>
+        <h2>Contenido</h2>
         <ul>
           <li>1. Introducción</li>
           <li>2. Mecanismos de seguridad</li>
@@ -20,8 +20,12 @@ function Footer() {
         </ul>
       </div>
       <div className="grid-item-3">
-        <h2>Redes</h2>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+        <h2>Laboratorios</h2>
+        <a
+          href="https://github.com/SegurAppNet/SegurApp-labs.git"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <FaGithub className="icon-footer" />
         </a>
       </div>
@@ -29,7 +33,7 @@ function Footer() {
         <div className="line-footer"></div>
       </div>
       <div className="grid-item-5">
-        <p>© 2025 SegurAppNet. Todos los derechos reservados</p>
+        <p>2025 SegurAppNet.</p>
       </div>
     </div>
   );

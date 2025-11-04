@@ -26,16 +26,29 @@
   flex-direction: column;
   flex-shrink: 0;
   flex-basis: calc((100% - var(--spacing-md) * 2) / 3);
-
-  /* --- CAMBIO: Tarjetas aún más altas para dar espacio --- */
   height: 520px;
-
   background-color: var(--bg-green-light);
   padding: var(--spacing-md);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.threat-tag {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.3rem 0.75rem;
+  box-sizing: border-box;
+  background-color: #e5f8dd;
+  color: #4b5563;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+  cursor: default;
+  transition: none;
 }
 
 @media (min-width: 901px) {
@@ -72,27 +85,25 @@
   width: 100%;
 }
 
-/* --- CAMBIO: Revertido a columna única --- */
 .threats-container {
   display: flex;
-  flex-direction: column; /* Apila las amenazas verticalmente */
-  align-items: center; /* Centra las amenazas */
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
   margin-bottom: var(--spacing-md);
   width: 100%;
 }
 
 .rectangle-good-practice {
-  /* Los estilos de color y borde de este elemento se mantienen */
   padding: 4px 8px;
   font-size: 0.8rem;
   border-radius: 4px;
   text-align: center;
-  width: fit-content; /* El ancho se ajusta al texto */
+  width: fit-content;
 }
 
 .carousel-button {
-  margin-top: auto; /* Asegura que el botón siempre esté al final */
+  margin-top: auto;
   background-color: var(--color-primary-light);
   color: var(--color-primary);
   border: 1px solid var(--border-color);

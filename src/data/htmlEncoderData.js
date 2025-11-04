@@ -4,7 +4,7 @@ import CSP from "../assets/CSP.png";
 export const htmlEncoderData = {
   securityMechanismTitle: "Codificador HTML (HTML Encoder)",
   definition:
-    "Un codificador de salida (Output Encoder) es un mecanismo de seguridad que se encarga de transformar datos antes de ser renderizados en la interfaz de usuario. Su función principal es neutralizar contenido potencialmente malicioso, como scripts, convirtiendo caracteres especiales (ej. `<` a `&lt;`) para que el navegador los interprete como texto literal y no como código ejecutable, previniendo así ataques de Cross-Site Scripting (XSS).",
+    "El HTML Encoder se asegura que los datos devueltos por la API estén correctamente codificados para evitar que se ejecuten como código malicioso en el navegador del usuario. ASP.NET Core provee del framework de Razor el cual se encarga de codificar automáticamente las variables para prevenir la ejecución de scripts maliciosos.",
   interestingFacts: [
     {
       description:
@@ -22,7 +22,7 @@ export const htmlEncoderData = {
     {
       title: "Content Security Policy (CSP)",
       description:
-        "Implementar un encabezado de respuesta HTTP que le dice al navegador de qué fuentes tiene permitido cargar contenido. CSP es una defensa crucial contra ataques de Cross-Site Scripting (XSS) y otras inyecciones de código.",
+        "CSP es una política que restringe al navegador la ejecución de scripts que no se adhieran a la política. Con la CSP, defina las fuentes permitidas de scripts y otros recursos, dificultando a los atacantes la inyección de contenido malicioso.",
       threats: [
         "Cross-Site Scripting (XSS)",
         "Clickjacking",
@@ -32,7 +32,7 @@ export const htmlEncoderData = {
       recommendation:
         "Esencial para: Todas las aplicaciones web modernas (MVC, Razor Pages, Web API con frontend, Blazor). Es una capa de defensa en profundidad crítica contra ataques XSS y de inyección de contenido.",
       warning:
-        "¡Cuidado! Una CSP demasiado restrictiva puede romper la funcionalidad de tu sitio al bloquear scripts, estilos o fuentes legítimas (ej. de CDNs o servicios de terceros). Empieza con una política estricta (`'self'`) y añade explícitamente los orígenes necesarios. Evita a toda costa el uso de `'unsafe-inline'` y `'unsafe-eval'` en producción.",
+        "¡Cuidado! Una CSP demasiado restrictiva puede romper la funcionalidad de tu sitio al bloquear scripts, estilos o fuentes legítimas (ej. de CDNs o servicios de terceros). Empieza con una política estricta (self) y añade explícitamente los orígenes necesarios. Evita a toda costa el uso de unsafe-inline y unsafe-eval en producción.",
 
       modalContent: {
         title: "Implementación de Content Security Policy (CSP)",
@@ -98,6 +98,7 @@ app.Use(async (context, next) =>
           rubricData: [
             {
               title: "Implementación técnica (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración de middleware (25%)",
@@ -121,7 +122,7 @@ app.Use(async (context, next) =>
                 {
                   description: "Presencia del Encabezado CSP (25%)",
                   achieved:
-                    "Al inspeccionar las herramientas de red del navegador, el encabezado 'Content-Security-Policy' está presente en la respuesta HTTP de la página.",
+                    "Al inspeccionar las herramientas de red del navegador, el encabezado Content-Security-Policy está presente en la respuesta HTTP de la página.",
                   notAchieved:
                     "No se encuentra el encabezado Content-Security-Policy en la respuesta HTTP.",
                 },

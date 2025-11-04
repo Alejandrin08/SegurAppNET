@@ -150,10 +150,7 @@ function Carousel({ items = [], onSelectPractice }) {
               <div className="card-footer">
                 <div className="threats-container">
                   {item.threats?.map((threat, i) => (
-                    <div
-                      key={i}
-                      className="rectangle-good-practice rectangle-blue"
-                    >
+                    <div key={i} className="threat-tag">
                       {threat}
                     </div>
                   ))}

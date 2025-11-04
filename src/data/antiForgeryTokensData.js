@@ -4,7 +4,7 @@ import CSRF from "../assets/CSRF.png";
 export const antiForgeryTokensData = {
   securityMechanismTitle: "Tokens antifalsificación",
   definition:
-    "Los tokens antifalsificación (antiforgery tokens) son valores únicos generados por el servidor que se incluyen en formularios o peticiones. Sirven para validar que una solicitud que modifica datos proviene del cliente legítimo y no de un sitio malicioso, previniendo ataques de Falsificación de Solicitudes en Sitios Cruzados (CSRF).",
+    "Los tokens anti-falsificación son un mecanismo de seguridad que provee ASP.NET Core para prevenir los ataques de Cross-Site Request Forgery (CSRF). Se trata de un token único que se asigna a cada sesión de usuario y se incluyen en un campo oculto en los formularios HTML secretamente. Cuando se envían los datos del formulario al servidor, el token se válida para asegurar que la fuente de la solicitud sea de un cliente legítimo, si el token no está incluido o no coincide con los valores almacenados, el servidor rechazara la solicitud maliciosa.",
   interestingFacts: [
     {
       description:
@@ -22,7 +22,7 @@ export const antiForgeryTokensData = {
     {
       title: "Uso de [AutoValidateAntiforgeryToken] en Vistas de Servidor",
       description:
-        "Para aplicaciones MVC o Razor Pages que renderizan vistas desde el servidor, esta es la forma más sencilla y robusta de protegerse contra CSRF. La validación se aplica de forma global a todas las peticiones que modifican estado.",
+        "El usar AutoValidateAntiforgeryToken para escenarios no API, asegura que las acciones POST estén protegidas por defecto. La alternativa es aplicar ValidateAntiForgeryToken a cada método, sin embargo, esto puede causar que se deje desprotegido por error un método.",
       threats: ["CSRF"],
 
       recommendation:
@@ -36,7 +36,7 @@ export const antiForgeryTokensData = {
           {
             title: "1. Configurar Validación Automática",
             description:
-              "En `Program.cs`, añadir el filtro `AutoValidateAntiforgeryTokenAttribute` a los servicios de controladores. Esto asegura que todas las peticiones POST, PUT, DELETE y PATCH sean validadas.",
+              "En Program.cs, añadir el filtro AutoValidateAntiforgeryTokenAttribute a los servicios de controladores. Esto asegura que todas las peticiones POST, PUT, DELETE y PATCH sean validadas.",
             code: `builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -58,7 +58,7 @@ export const antiForgeryTokensData = {
           {
             title: "3. Incluir el Token en Formularios Razor",
             description:
-              'En cada formulario de las vistas Razor, incluir el tag helper `@Html.AntiForgeryToken()`. Esto renderizará un campo `<input type="hidden">` con el token que será enviado automáticamente.',
+              'En cada formulario de las vistas Razor, incluir el tag helper @Html.AntiForgeryToken(). Esto renderizará un campo <input type="hidden"> con el token que será enviado automáticamente.',
             code: `<form asp-action="Login" method="post">
     @Html.AntiForgeryToken()
     
@@ -77,7 +77,7 @@ export const antiForgeryTokensData = {
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración en Program.cs (30%)",
@@ -103,7 +103,7 @@ export const antiForgeryTokensData = {
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Protección contra CSRF (50%)",
@@ -124,7 +124,7 @@ export const antiForgeryTokensData = {
         "Para SPAs (Single-Page Applications) que se autentican con cookies, el token CSRF debe ser generado por un endpoint, enviado al cliente (en el cuerpo de la respuesta) y luego incluido por el cliente en los encabezados de las peticiones que modifican datos.",
       threats: ["CSRF"],
       recommendation:
-        "Uso Específico: Este patrón se usa para Web APIs que (por razones específicas) utilizan autenticación basada en cookies. Es importante notar que el estándar moderno para APIs (especialmente con SPAs) es usar Tokens JWT, los cuales no requieren esta protección CSRF porque el token no se envía automáticamente.",
+        "Este patrón se usa para Web APIs que (por razones específicas) utilizan autenticación basada en cookies. Es importante notar que el estándar moderno para APIs (especialmente con SPAs) es usar Tokens JWT, los cuales no requieren esta protección CSRF porque el token no se envía automáticamente.",
       warning:
         "¡Atención! Este patrón es para clientes tipo SPA (React, Angular, etc.) que deben consumir un endpoint. Si tu cliente es una aplicación ASP.NET Core MVC o Razor, no necesitas este endpoint, ya que el framework lo maneja automáticamente usando el helper (@Html.AntiForgeryToken()) en tus formularios.",
       modalContent: {
@@ -133,26 +133,24 @@ export const antiForgeryTokensData = {
           {
             title: "1. Configurar Antiforgery para APIs",
             description:
-              "En `Program.cs`, configura el servicio antiforgery. Debes definir el nombre del encabezado (HeaderName) que tu cliente JavaScript enviará y el nombre de la cookie que el servidor usará para validar.",
+              "En Program.cs, configura el servicio antiforgery. Debes definir el nombre del encabezado (HeaderName) que tu cliente JavaScript enviará y el nombre de la cookie que el servidor usará para validar.",
             code: `builder.Services.AddAntiforgery(options =>
 {
-    // El nombre del encabezado que esperamos recibir del cliente
     options.HeaderName = "X-CSRF-TOKEN";
-    // El nombre de la cookie que el servidor crea
     options.Cookie.Name = "XSRF-TOKEN-COOKIE"; 
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     // Lax es la opción segura y estándar para aplicaciones en el mismo dominio
     options.Cookie.SameSite = SameSiteMode.Lax; 
 });`,
-            postCodeText: "Si SameSite es None, se requiere implementar CORS.",
+            postCodeText:
+              "Si SameSite es None, se requiere implementar CORS. Continuar en la práctica EnableCors del mecanismo CORS.",
           },
           {
             title: "2. Crear un Endpoint para Exponer el Token",
             description:
               "Crea un endpoint GET (usualmente después del login) que el cliente pueda llamar para obtener el token. Este endpoint usa IAntiforgery para generar la cookie y obtener el token de petición (RequestToken).",
             code: `// En un controlador de API
-// Es buena idea inyectar IAntiforgery en el constructor
 private readonly IAntiforgery _antiforgery;
 public TuControlador(IAntiforgery antiforgery)
 {
@@ -172,14 +170,14 @@ public IActionResult GetCsrfToken()
           {
             title: "3. Validar el Token en Endpoints Sensibles",
             description:
-              "En lugar de validar manualmente, simplemente decora tus endpoints (POST, PUT, DELETE) con el atributo (ValidateAntiForgeryToken). El framework buscará automáticamente el token en el encabezado (definido como X-CSRF-TOKEN) y lo comparará con la cookie.",
+              "En lugar de validar manualmente, simplemente en tus endpoints (POST, PUT, DELETE) agrega el atributo ValidateAntiForgeryToken. El framework buscará automáticamente el token en el encabezado (definido como X-CSRF-TOKEN) y lo comparará con la cookie.",
             code: `// En un endpoint que modifica datos
 [HttpPost("actualizar-perfil")]
-[ValidateAntiForgeryToken] // ¡Esto es todo lo que se necesita!
+[ValidateAntiForgeryToken] 
 public IActionResult UpdateProfile([FromBody] ProfileModel model)
 {
     // Si el código llega aquí, el token era válido.
-    // ... resto de la lógica ...
+    // resto de la lógica 
     return Ok(new { message = "Perfil actualizado" });
 }`,
           },
@@ -189,7 +187,7 @@ public IActionResult UpdateProfile([FromBody] ProfileModel model)
               "El cliente (tu SPA) primero debe hacer una llamada GET al endpoint del token (ej. /csrf-token). Luego, en cada petición POST/PUT/DELETE, debe incluir el token recibido en el encabezado (X-CSRF-TOKEN).",
             code: `// Ejemplo en JavaScript
 async function getCsrfToken() {
-    // 1. Obtener el token CSRF (se hace una vez, ej. al cargar la app)
+    // 1. Obtener el token CSRF 
     const csrfResponse = await fetch('/api/csrf-token');
     const csrfData = await csrfResponse.json();
     return csrfData.token;
@@ -212,7 +210,7 @@ async function updateUserProfile(profileData, csrfToken) {
         rubric: {
           rubricData: [
             {
-              title: "Implementación correcta (50%)",
+              title: "Implementación técnica (50%)",
               criteria: [
                 {
                   description: "Configuración en API (15%)",
@@ -244,7 +242,7 @@ async function updateUserProfile(profileData, csrfToken) {
               ],
             },
             {
-              title: "Prevención de vulnerabilidades (50%)",
+              title: "Efectividad en seguridad (50%)",
               criteria: [
                 {
                   description: "Protección contra CSRF (50%)",
