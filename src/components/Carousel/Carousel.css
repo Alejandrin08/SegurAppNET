@@ -43,7 +43,6 @@
   box-sizing: border-box;
   background-color: #e5f8dd;
   color: #4b5563;
-  border: 1px solid #cbd5e1;
   border-radius: var(--border-radius);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-normal);
