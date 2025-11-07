@@ -40,8 +40,10 @@ export const htmlEncoderData = {
           {
             title: "1. Configurar Middleware CSP en Program.cs",
             description:
-              "Añadir un middleware personalizado para interceptar todas las respuestas y adjuntar el encabezado Content-Security-Policy con las directivas de seguridad adecuadas. Estas directivas definen las fuentes permitidas para diferentes tipos de recursos.",
-            code: `app.Use(async (context, next) =>
+              "Añadir un middleware personalizado para interceptar todas las respuestas y adjuntar el encabezado 'Content-Security-Policy' con las directivas de seguridad adecuadas. Estas directivas definen las fuentes permitidas para diferentes tipos de recursos. Se hace uso de nonce para permitir scripts y/o estilos específicos si es necesario.",
+            code: `//En Program.cs
+//Ejemplo básico de configuración de CSP
+app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; " +
@@ -54,7 +56,42 @@ export const htmlEncoderData = {
         "base-uri 'self';"
     );
     await next();
-});`,
+});
+
+//Ejemplo avanzado con nonce, si se usan scripts en línea y además recursos externos
+app.Use(async (context, next) =>
+{
+    var nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+    context.Items["csp-nonce"] = nonce;
+
+    context.Response.Headers.Append("Content-Security-Policy",
+        "default-src 'self'; " +
+        $"script-src 'self' 'nonce-{nonce}'; " +
+        $"style-src 'self' 'nonce-{nonce}' https://fonts.googleapis.com; " +
+        "img-src 'self' data:; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "connect-src 'self'; " +
+        "frame-ancestors 'none'; " +
+        "base-uri 'self';");
+
+    await next();
+});
+
+`,
+          },
+          {
+            title: "2. Usar nonce en Scripts y Estilos en línea",
+            description:
+              "Si tu aplicación utiliza scripts o estilos en línea, asegúrate de incluir el nonce generado en las etiquetas correspondientes para que no sean bloqueados por la CSP.",
+            code: `//En tus vistas en las que uses scripts o estilos inline añade nonce="@Context.Items["csp-nonce"]", por ejemplo:
+<script nonce="@Context.Items["csp-nonce"]">
+  // Código JavaScript inline
+</script>
+
+<style nonce="@Context.Items["csp-nonce"]">
+  /* Código CSS inline */
+</style>
+            `,
           },
         ],
         rubric: {
@@ -72,14 +109,14 @@ export const htmlEncoderData = {
                 {
                   description: "Directivas CSP implementadas (25%)",
                   achieved:
-                    "Se implementan directivas clave como default-src, script-src, style-src, y frame-ancestors, ajustadas a las necesidades del proyecto.",
+                    "Se implementan directivas clave como default-src, script-src, style-src, y frame-ancestors, ajustadas a las necesidades del proyecto (uso de nonce si es necesario).",
                   notAchieved:
                     "No se implementan directivas cruciales o la configuración bloquea recursos legítimos de la aplicación.",
                 },
               ],
             },
             {
-              title: "Efectividad en seguridad (50%)",
+              title: "Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Presencia del Encabezado CSP (25%)",

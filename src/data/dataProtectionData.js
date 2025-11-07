@@ -321,7 +321,7 @@ public class LoginViewModel
               ],
             },
             {
-              title: "Efectividad en seguridad (50%)",
+              title: "Efectividad en seguridad  (50%)",
               criteria: [
                 {
                   description: "Funcionamiento de validaciones (50%)",
