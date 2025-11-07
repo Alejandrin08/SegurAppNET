@@ -42,21 +42,6 @@ export const htmlEncoderData = {
             description:
               "Añadir un middleware personalizado para interceptar todas las respuestas y adjuntar el encabezado 'Content-Security-Policy' con las directivas de seguridad adecuadas. Estas directivas definen las fuentes permitidas para diferentes tipos de recursos. Se hace uso de nonce para permitir scripts y/o estilos específicos si es necesario.",
             code: `//En Program.cs
-//Ejemplo básico de configuración de CSP
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("Content-Security-Policy",
-        "default-src 'self'; " +
-        "script-src 'self'; " +
-        "style-src 'self'; " +
-        "img-src 'self' data:; " + // Permite imágenes del propio dominio y data URIs
-        "font-src 'self'; " +
-        "connect-src 'self'; " +
-        "frame-ancestors 'none'; " + // Previene clickjacking
-        "base-uri 'self';"
-    );
-    await next();
-});
 
 //Ejemplo avanzado con nonce, si se usan scripts en línea y además recursos externos
 app.Use(async (context, next) =>
@@ -121,7 +106,7 @@ app.Use(async (context, next) =>
                 {
                   description: "Presencia del Encabezado CSP (25%)",
                   achieved:
-                    "Al inspeccionar las herramientas de red del navegador, el encabezado Content-Security-Policy está presente en la respuesta HTTP de la página.",
+                    "Al inspeccionar las herramientas de desarrollador, en la sección de red (Network) del navegador, ir a Encabezados (Headers) Content-Security-Policy está presente en la respuesta HTTP de la página.",
                   notAchieved:
                     "No se encuentra el encabezado Content-Security-Policy en la respuesta HTTP.",
                 },
