@@ -199,7 +199,7 @@ public IActionResult ControlPanel()
                 {
                   description: "Validación contra acceso no autorizado (20%)",
                   achieved:
-                    "Un usuario sin el rol requerido es redirigido a la página de 'Acceso Denegado' al intentar acceder a una URL protegida.",
+                    "Un usuario sin el rol requerido es redirigido a la página de Acceso Denegado al intentar acceder a una URL protegida.",
                   notAchieved:
                     "Un usuario puede acceder directamente a vistas restringidas para las que no tiene el rol adecuado.",
                 },
@@ -549,7 +549,7 @@ dotnet ef database update`,
         "Este componente solo oculta elementos en la UI. No protege los endpoints de la API que esos elementos puedan llamar. La protección de los datos y la lógica de negocio debe hacerse en el backend con el atributo [Authorize], esto se detalla en la práctica de como Implementar JWT en Autenticación.",
 
       modalContent: {
-        title: "Uso de AuthorizeView para UI Dinámica",
+        title: "Uso de AuthorizeView",
         practices: [
           {
             title: "1. Modificar Vistas con <AuthorizeView>",

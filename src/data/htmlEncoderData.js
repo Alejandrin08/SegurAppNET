@@ -91,7 +91,7 @@ export const htmlEncoderData = {
                 {
                   description: "Verificación contra Scripts In-line (25%)",
                   achieved:
-                    "Al intentar inyectar un script simple (ej. <script>alert('xss')</script>) en un campo de entrada, el script es bloqueado y la consola del navegador reporta una violación de la CSP.",
+                    "Al intentar inyectar un script simple (ej. javascript:document.head.appendChild(Object.assign(document.createElement('script'),{textContent:\"alert('x')\"}))) en un campo de entrada, el script es bloqueado y la consola del navegador reporta una violación de la CSP.",
                   notAchieved:
                     "El script se ejecuta o el sistema no reporta ninguna violación de CSP en la consola.",
                 },
