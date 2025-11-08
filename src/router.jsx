@@ -10,6 +10,7 @@ import HtmlEncoder from "./pages/Security-mechanisms/HTMLEncoder";
 import HTTPS from "./pages/Security-mechanisms/HTTPS";
 import AntiForgeryTokens from "./pages/Security-mechanisms/AntiForgeryTokens";
 import RecommendedResources from "./pages/RecommendedResources/RecommendedResources";
+import NotFound from "./pages/NotFound/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -45,7 +46,7 @@ const router = createBrowserRouter([
         element: <HtmlEncoder />,
       },
       {
-        path: "https",
+        path: "httpshttps",
         element: <HTTPS />,
       },
       {
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: "recommended-resources",
         element: <RecommendedResources />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

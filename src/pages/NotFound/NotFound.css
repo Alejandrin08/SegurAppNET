@@ -1,0 +1,51 @@
+@import "../../styles/variables.css";
+
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-xl);
+  margin: var(--spacing-lg) auto;
+  background-color: var(--bg-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  max-width: 700px;
+  width: 90%;
+  flex-grow: 1;
+}
+
+.not-found-icon {
+  font-size: 6rem;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.not-found-container h1 {
+  color: var(--color-secondary) !important;
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.not-found-container p {
+  color: var(--color-text) !important;
+  text-align: center !important;
+  max-width: 500px;
+  margin-bottom: var(--spacing-lg) !important;
+}
+
+.not-found-button {
+  background-color: var(--color-primary);
+  color: var(--bg-white) !important;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  transition: background-color var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.not-found-button:hover {
+  background-color: var(--color-secondary);
+  transform: translateY(-2px);
+}
