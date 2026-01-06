@@ -30,7 +30,9 @@ export const antiForgeryTokensData = {
       warning:
         "Este enfoque no es adecuado para SPAs (Single-Page Applications como React, Angular) o clientes que consumen la API de forma desacoplada, ya que estos dependen de JavaScript para manejar los tokens.",
 
-      modalContent: {
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/AntiforgeryTokens/AntiforgeryTokensMVC",
+
+        modalContent: {
         title: "Implementación en Vistas Renderizadas por Servidor",
         practices: [
           {
@@ -127,7 +129,10 @@ export const antiForgeryTokensData = {
         "Este patrón se usa para Web APIs que (por razones específicas) utilizan autenticación basada en cookies. Es importante notar que el estándar moderno para APIs (especialmente con SPAs) es usar Tokens JWT, los cuales no requieren esta protección CSRF porque el token no se envía automáticamente.",
       warning:
         "¡Atención! Este patrón es para clientes tipo SPA (React, Angular, etc.) que deben consumir un endpoint. Si tu cliente es una aplicación ASP.NET Core MVC o Razor, no necesitas este endpoint, ya que el framework lo maneja automáticamente usando el helper (@Html.AntiForgeryToken()) en tus formularios.",
-      modalContent: {
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/AntiforgeryTokens/AntiforgeryTokensAPI",
+
+        modalContent: {
         title: "Implementación para Consumidores de API (SPAs)",
         practices: [
           {

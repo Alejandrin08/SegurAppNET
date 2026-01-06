@@ -30,6 +30,8 @@ export const secretsManagementData = {
       warning:
         "El Secret Manager solo protege los secretos en la máquina local de desarrollo y no debe usarse nunca en producción. Asegúrese de que el acceso al almacén de secretos de producción (como Key Vault) esté restringido mediante políticas de acceso estrictas.",
 
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/SecretsManagement/SecretsOutsideCode",
+
       modalContent: {
         title: "Uso del Secret Manager y Azure Key Vault",
         practices: [

@@ -27,6 +27,8 @@ export const authenticationData = {
 
       recommendation:
         "Esencial para: Cualquier aplicación (MVC, Razor Pages, Web API, Blazor) que maneje cuentas de usuario y datos sensibles. Es un estándar de la industria para la seguridad de cuentas.",
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authentication/IdentityProject2FA",
 
       modalContent: {
         title: "Implementación de 2FA con Google Authenticator",
@@ -816,6 +818,8 @@ app.UseSession();`,
         "Estándar para: Web API que necesitan autenticación sin estado, especialmente si son consumidas por SPAs (React, Angular, Vue).",
       warning:
         "Almacenar JWTs en el localStorage del navegador puede exponerlos a ataques XSS. Considere usar cookies HttpOnly para almacenar los tokens de forma más segura o implementar medidas de mitigación de XSS robustas.",
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authentication/JWT/JWTBackend",
 
       modalContent: {
         title: "Implementación Segura de JSON Web Tokens (JWT)",
@@ -939,6 +943,8 @@ app.UseAuthorization();`,
       description:
         "Usar ASP.NET Core Identiy proporciona un marco sólido para gestionar usuarios, contraseñas, acceso basado en funciones y autorización basado en reclamaciones.",
       threats: ["Elevación de Privilegios", "Acceso No Autorizado"],
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authentication/Identity",
 
       modalContent: {
         title: "Implementación de ASP.NET Core Identity",
@@ -1166,7 +1172,10 @@ dotnet ef database update`,
         "Muy recomendado para: Endpoints públicos y sensibles de una Web API, como el de login, registro o cualquier otro que sea computacionalmente costoso.",
       warning:
         "Una política de limitación demasiado estricta puede impactar negativamente la experiencia de usuario o bloquear a clientes legítimos.",
-      modalContent: {
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authentication/RateLimiting",  
+
+        modalContent: {
         title: "Implementación de Rate Limiting",
         practices: [
           {
@@ -1294,6 +1303,8 @@ app.MapGet("/api/data", () => "Some data")
       recommendation:
         "Esencial para: Cualquier tipo de aplicación (MVC, Web API) que exponga endpoints que permitan la subida de archivos o la recepción de cuerpos de solicitud de gran tamaño.",
 
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authentication/RequestSizeLimit", 
+        
       modalContent: {
         title: "Configuración de Límites de Tamaño de Solicitud",
         practices: [
@@ -1367,8 +1378,11 @@ public IActionResult UploadLargeFile(IFormFile file)
       threats: ["Acceso No Autorizado"],
       warning:
         "La URI de redirección (ejemplo, /signin-google) es extremadamente sensible. Debe estar registrada (con HTTPS en producción) en la consola del proveedor. Un error aquí permitirá que un atacante intercepte el código de autorización.",
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authentication/IdentityProjectOAuth%26OpenID",  
+
       modalContent: {
-        title: "Implementación de 'Iniciar Sesión con Google'",
+        title: "Implementación de Iniciar Sesión con Google",
         practices: [
           {
             title: "1. Registrar la Aplicación en el Proveedor Externo",

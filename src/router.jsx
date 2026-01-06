@@ -46,7 +46,7 @@ const router = createBrowserRouter([
         element: <HtmlEncoder />,
       },
       {
-        path: "httpshttps",
+        path: "https",
         element: <HTTPS />,
       },
       {

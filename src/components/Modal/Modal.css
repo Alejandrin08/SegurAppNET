@@ -148,6 +148,107 @@
   color: var(--modal-close-hover);
 }
 
+.github-banner {
+  background: transparent;
+  border-bottom: none;
+  padding: var(--spacing-sm) 0; 
+  margin: var(--spacing-sm) auto;
+  width: 100%;
+  max-width: 960px;
+}
+
+.github-banner-content {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  background-color: #f8f9fa; 
+  border: 1px solid var(--modal-border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-md); 
+}
+
+.github-icon-container {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background: var(--color-primary-light); 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.github-icon {
+  font-size: 1.2rem;
+  color: var(--color-primary); 
+}
+
+.github-text {
+  flex: 1;
+}
+
+.github-text h4 {
+  color: var(--color-text); 
+  font-size: 1rem; 
+  margin: 0 0 2px 0; 
+  font-weight: var(--font-weight-semibold);
+}
+
+.github-text p {
+  color: var(--color-text-light, #666); 
+  margin: 0;
+  line-height: 1.4;
+  text-align: left !important;
+  font-size: 0.85rem;
+}
+
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 4px var(--spacing-sm);
+  background: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-medium);
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.github-link:hover {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+@media (max-width: var(--breakpoint-tablet)) {
+  .github-banner-content {
+    flex-direction: row;
+    text-align: left;
+    padding: var(--spacing-sm);
+  }
+  
+  .github-text p {
+     text-align: left !important;
+  }
+}
+
+@media (max-width: var(--breakpoint-mobile)) {
+  .github-banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .github-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: var(--breakpoint-tablet)) {
   .custom-modal-body {
     padding: var(--spacing-md);

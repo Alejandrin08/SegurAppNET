@@ -7,13 +7,12 @@ import {
   MdOutlineSecurity,
   MdHttps,
 } from "react-icons/md";
-import { FaBookReader, FaUserAltSlash, FaBars } from "react-icons/fa";
+import { FaBookReader, FaUserAltSlash, FaBars, FaQuestionCircle } from "react-icons/fa";
 import { GoChecklist } from "react-icons/go";
 import { FaUserLock } from "react-icons/fa6";
 import { SiWebauthn, SiAwssecretsmanager } from "react-icons/si";
 import { FcDataProtection } from "react-icons/fc";
 import { BsFiletypeHtml } from "react-icons/bs";
-import { GiArchiveResearch } from "react-icons/gi";
 import { PiUserCircleGearDuotone } from "react-icons/pi";
 
 function MenuBar() {
@@ -73,7 +72,6 @@ function MenuBar() {
         className={`menu-nav ${menuOpen ? "active" : ""}`}
         aria-hidden={!menuOpen}
       >
-        {" "}
         <h2>
           <b>Tabla de contenido</b>
         </h2>
@@ -106,6 +104,20 @@ function MenuBar() {
                 <Link to="/#how-to-read" className="menu-link">
                   <FaBookReader className="icon-menubar" />
                   <span>¿Cómo leer esta guía?</span>
+                </Link>
+              </li>
+
+              <li
+                className={`menu-item ${
+                  isActive("/") && selectedItem === "why-this-guide"
+                    ? "selected"
+                    : ""
+                }`}
+                onClick={() => handleSelectItem("why-this-guide")}
+              >
+                <Link to="/#why-this-guide" className="menu-link">
+                  <FaQuestionCircle className="icon-menubar" />
+                  <span>¿Por qué esta guía?</span>
                 </Link>
               </li>
 

@@ -27,6 +27,8 @@ export const dataProtectionData = {
       recommendation:
         "Recomendado para: Cualquier tipo de aplicación (MVC, Web API, etc.) que necesite almacenar datos sensibles específicos en una base de datos, como números de identificación personal o información médica, sin cifrar la base de datos completa.",
 
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/DataProtection/EncryptData",  
+
       modalContent: {
         title: "Uso de la Data Protection API para Cifrado",
         practices: [
@@ -146,6 +148,9 @@ public class MyController : ControllerBase
       threats: ["Acceso No Autorizado"],
       recommendation:
         "Esencial para: Entornos de producción o cualquier entorno donde los archivos appsettings.json puedan ser accesibles por personal no autorizado. Complementa, pero no reemplaza, el uso de un gestor de secretos como Azure Key Vault.",
+
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/DataProtection/EncryptConfigFiles",
+      
       modalContent: {
         title: "Uso de Data Protection para Cifrar appsettings.json",
         practices: [
@@ -259,6 +264,8 @@ if (!string.IsNullOrEmpty(encryptedConnString))
         "Fundamental para: Todas las aplicaciones ASP.NET Core que reciben datos del usuario (MVC, Razor Pages, Web API, Blazor).",
       warning:
         "La validación del lado del cliente es una mejora de UX, no una medida de seguridad. La validación del lado del servidor con Data Annotations es la única que garantiza la seguridad, ya que no puede ser eludida.",
+
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/DataProtection/InputValidation",
 
       modalContent: {
         title: "Uso de DataAnnotations para Validación de Modelos",

@@ -30,6 +30,8 @@ export const authorizationData = {
         "Referencia Directa a Objetos Insegura (IDOR)",
       ],
 
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authorization/RBAC",  
+
       modalContent: {
         title: "Implementación de RBAC con ASP.NET Core Identity",
         practices: [
@@ -246,6 +248,8 @@ public IActionResult ControlPanel()
 
       recommendation:
         'Ideal para: Escenarios que requieren un control de acceso más granular que los roles. Por ejemplo, "solo los managers del departamento de TI pueden acceder" o "solo los usuarios mayores de 18 años".',
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authorization/RolePolicyIdentity",  
 
       modalContent: {
         title: "Implementación de Autorización con Políticas",
@@ -426,7 +430,7 @@ public IActionResult ManagementTI()
         "Manipulación de URL",
         "Referencia Directa a Objetos Insegura (IDOR)",
       ],
-
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authorization/Identity",
       modalContent: {
         title: "Implementación de ASP.NET Core Identity",
         practices: [
@@ -652,6 +656,8 @@ dotnet ef database update`,
 
       warning:
         "Este componente solo oculta elementos en la UI. No protege los endpoints de la API que esos elementos puedan llamar. La protección de los datos y la lógica de negocio debe hacerse en el backend con el atributo [Authorize], esto se detalla en la práctica de como Implementar JWT en Autenticación.",
+
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authorization/UseRazorAuthorizeView",
 
       modalContent: {
         title: "Uso de AuthorizeView",

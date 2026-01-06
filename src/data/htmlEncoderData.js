@@ -34,6 +34,8 @@ export const htmlEncoderData = {
       warning:
         "¡Cuidado! Una CSP demasiado restrictiva puede romper la funcionalidad de tu sitio al bloquear scripts, estilos o fuentes legítimas (ej. de CDNs o servicios de terceros). Empieza con una política estricta (self) y añade explícitamente los orígenes necesarios. Evita a toda costa el uso de unsafe-inline y unsafe-eval en producción.",
 
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/HTMLEncoder/ContentSecurityPolicy",
+
       modalContent: {
         title: "Implementación de Content Security Policy (CSP)",
         practices: [

@@ -27,6 +27,8 @@ export const httpsData = {
       warning:
         "Nunca use un MaxAge largo (ej. 365 días) en un entorno de desarrollo (localhost). El navegador aplicará la política a todo localhost, lo que puede romper otros proyectos locales que no usen HTTPS. Use siempre valores muy cortos (ej. 60 segundos) para pruebas.",
 
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/EnforceHTTPS/HSTS",
+
       modalContent: {
         title: "Implementación de HSTS en ASP.NET Core",
         practices: [
@@ -118,6 +120,8 @@ app.MapControllerRoute(
 
       recommendation:
         "Para una protección más avanzada, considere usar la práctica Content Security Policy (CSP) del mecanismo HTML Encoder.",
+
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/EnforceHTTPS/HTTPHeaders",
 
       modalContent: {
         title: "Implementación de Encabezados de Seguridad",

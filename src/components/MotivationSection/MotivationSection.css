@@ -1,0 +1,362 @@
+@import "../../styles/variables.css";
+
+.motivation-section {
+  margin-top: var(--spacing-xl);
+}
+
+.carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.carousel-nav-button {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  padding: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.carousel-nav-button:hover {
+  background: var(--color-primary);
+  color: var(--bg-white);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(7, 89, 133, 0.3);
+}
+
+.carousel-nav-left {
+  left: 10px;
+}
+
+.carousel-nav-right {
+  right: 10px;
+}
+
+.carousel-container {
+  flex: 1;
+  background: var(--bg-white);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.carousel-content {
+  min-height: 400px;
+  display: flex;
+  align-items: stretch;
+}
+
+.slide {
+  width: 100%;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.slide-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.icon-problem {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.icon-context {
+  background-color: #fef9c3;
+  color: #ca8a04;
+}
+
+.icon-solution {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.slide-header h3 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+/* Slide Problem */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+  border: 2px solid #fecaca;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  color: #dc2626;
+  margin-bottom: var(--spacing-xs);
+  line-height: 1;
+}
+
+.stat-description {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+  min-height: 60px;
+}
+
+.stat-source {
+  display: block;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Slide Context */
+.challenges-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.challenge-item {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #fef9c3 0%, #fff 100%);
+  border: 2px solid #fde68a;
+  border-radius: var(--border-radius);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.challenge-item:hover {
+  transform: translateX(8px);
+  box-shadow: 0 4px 12px rgba(202, 138, 4, 0.15);
+}
+
+.challenge-icon {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  background: #fef3c7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #ca8a04;
+}
+
+.challenge-content h4 {
+  font-size: 1.1rem;
+  color: #ca8a04;
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.challenge-content p {
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* Slide Solution */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.feature-card {
+  background: linear-gradient(135deg, #dcfce7 0%, #fff 100%);
+  border: 2px solid #bbf7d0;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: #f0fdf4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #16a34a;
+  margin: 0 auto var(--spacing-sm);
+}
+
+.feature-card h4 {
+  font-size: 1.1rem;
+  color: #16a34a;
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.feature-card p {
+  color: var(--color-text);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: var(--bg-white);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.indicator.active {
+  background: var(--color-primary);
+  width: 32px;
+  border-radius: 6px;
+}
+
+.indicator:hover:not(.active) {
+  background: var(--color-primary-light);
+}
+
+/* Responsive */
+@media (max-width: var(--breakpoint-tablet)) {
+  .carousel-wrapper {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .carousel-nav-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 1.5rem;
+  }
+
+  .carousel-nav-left,
+  .carousel-nav-right {
+    display: none;
+  }
+
+  .carousel-container {
+    padding: var(--spacing-md);
+    width: 100%;
+  }
+
+  .carousel-content {
+    min-height: 500px;
+  }
+
+  .slide-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .slide-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .stats-grid,
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+  }
+
+  .challenge-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .challenge-icon {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: var(--breakpoint-mobile)) {
+  .carousel-container {
+    padding: var(--spacing-sm);
+  }
+
+  .carousel-content {
+    min-height: 450px;
+  }
+
+  .slide-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-description {
+    min-height: auto;
+  }
+} 

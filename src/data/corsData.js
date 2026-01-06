@@ -29,6 +29,9 @@ export const corsData = {
         "Esencial para: Web API que son consumidas por un frontend (como una SPA en React/Angular/Vue) alojado en un dominio o puerto diferente.",
       warning:
         '¡Peligro! Nunca uses .AllowAnyOrigin() en producción. Especifica siempre la lista exacta de dominios de tu frontend con .WithOrigins("https://tu-frontend.com"). (Nota Importante: CORS es una política aplicada por el navegador. Si intentas probar tu API llamándola desde código del lado del servidor, como un controlador MVC o Razor usando HttpClient, la política CORS será ignorada, ya que no es una petición de navegador. La protección solo se activa cuando un script en el navegador del usuario, como una SPA, es el que realiza la llamada).',
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/CORS/EnableCORS",
+
       modalContent: {
         title: "Implementación de Políticas CORS Nombradas",
         practices: [
@@ -123,6 +126,9 @@ public IActionResult GetData()
 
       recommendation:
         "Requerido para: Web API que exponen métodos complejos (PUT, DELETE, PATCH) o que esperan encabezados personalizados (ej. Authorization) desde un frontend en un origen diferente.",
+      
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/CORS/Preflight",
+        
       modalContent: {
         title: "Configuración de Solicitudes Preflight",
         practices: [
@@ -205,6 +211,8 @@ public IActionResult PostCrear([FromBody] object data)
         "Esencial para: Web API que manejan autenticación y son consumidas desde un frontend en otro dominio.",
       warning:
         "Nunca combine .AllowCredentials() con .AllowAnyOrigin(). Es una vulnerabilidad grave, y los navegadores modernos bloquearán la solicitud por seguridad. Siempre use WithOrigins con dominios específicos si permite credenciales.",
+
+      githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/CORS/HeadersConfiguration",
 
       modalContent: {
         title: "Manejo de Encabezados y Credenciales en CORS",

@@ -1,11 +1,12 @@
 import "./Modal.css";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { BsLightbulbFill, BsExclamationTriangleFill } from "react-icons/bs";
+import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
 import CodeBlock from "../CodeBlock/CodeBlock";
 import Rubric from "../Rubric/Rubric";
 
 function Modal({ goodPractice }) {
-  const { recommendation, warning } = goodPractice || {};
+  const { recommendation, warning, githubUrl } = goodPractice || {};
   const { title, practices = [], rubric } = goodPractice?.modalContent || {};
 
   const closeModal = () => {
@@ -48,6 +49,31 @@ function Modal({ goodPractice }) {
             </button>
           </div>
           <div className="modal-body custom-modal-body">
+            {githubUrl && (
+              <div className="github-banner">
+                  <div className="github-banner-content">
+                  <div className="github-icon-container">
+                      <FaGithub className="github-icon" />
+                  </div>
+                  <div className="github-text">
+                      <h4>¿Listo para practicar?</h4>
+                      <p>
+                      Clona el repositorio de esta práctica para seguir paso a paso los ejemplos.
+                      </p>
+                  </div>
+                  
+                  <a 
+                      href={githubUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="github-link"
+                  >
+                      <span>Ir al repositorio</span>
+                      <FaExternalLinkAlt className="external-icon" />
+                  </a>
+                  </div>
+              </div>
+            )}
             <div className="info-boxes-container">
               {recommendation && (
                 <div className="info-box recommendation">

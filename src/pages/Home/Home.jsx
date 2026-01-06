@@ -1,4 +1,5 @@
 import "./Home.css";
+import MotivationSection from '../../components/MotivationSection/MotivationSection';
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -129,6 +130,8 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <MotivationSection />
 
       <section className="section" id="prerequisites">
         <h2>Prerrequisitos</h2>
