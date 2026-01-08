@@ -4,7 +4,7 @@ import Secrets from "../assets/Secrets.png";
 export const secretsManagementData = {
   securityMechanismTitle: "Manejo de secretos",
   definition:
-    "El manejo de secretos es importante aplicarlo en aquellos casos donde es necesario alojar las contraseñas y secretos en general. Es importante para reducir el riesgo de exponer datos sensibles o confidenciales.",
+    "El manejo de secretos es importante aplicarlo en aquellos casos donde es necesario alojar las contraseñas y secretos en general. Es importante para reducir el riesgo de exponer datos sensibles o confidenciales. ",
   interestingFacts: [
     {
       description:
@@ -34,21 +34,27 @@ export const secretsManagementData = {
 
       modalContent: {
         title: "Uso del Secret Manager y Azure Key Vault",
+        introduction: "Gestionar secretos es un equilibrio entre conveniencia y seguridad. En desarrollo, usamos User Secrets para que cada desarrollador tenga sus propias credenciales sin compartirlas en el repositorio (Git) y evitar filtraciones accidentales.  En producción, usamos una Bóveda Centralizada (como Azure Key Vault) para que la aplicación, y no una persona, sea quien tenga permiso de leer las claves reales. Nunca, bajo ninguna circunstancia, subas un archivo appsettings.json con contraseñas reales a tu repositorio.",
         practices: [
           {
             title: "1. Desarrollo: Uso del Secret Manager",
             description:
               "Para el entorno de desarrollo, inicializar el Secret Manager y almacenar los secretos localmente fuera del control de código fuente.",
-            code: `dotnet user-secrets init
-dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
-//Estos secretos se almacenan en un archivo JSON en la máquina local del desarrollador. 
-//En: %APPDATA%/Microsoft/UserSecrets/<user_secrets_id>/secrets.json`,
+            code: `// 1. Inicializa el almacenamiento de secretos para el proyecto
+dotnet user-secrets init
+
+// 2. Establece un secreto. La estructura "Clase:Propiedad" permite el mapeo automático luego.
+dotnet user-secrets set "ExampleName:ExampleApiKey" "VALOR_DEL_SECRETO_DEV"
+
+// Estos secretos NO están en la carpeta del proyecto, sino en: 
+// %APPDATA%/Microsoft/UserSecrets/<user_secrets_id>/secrets.json`,
           },
           {
             title: "2. Crear un Modelo (POCO) para los Secretos",
             description:
               "Definir una clase simple que represente la estructura de los secretos para habilitar el enlace de configuración fuertemente tipado.",
-            code: `public class ExampleClassName
+            code: `// Esta clase sirve como molde para leer la configuración de forma segura y tipada
+public class ExampleClassName
 {
     public string ExampleApiKey { get; set; }
     public string ExampleAddress { get; set; }
@@ -58,7 +64,9 @@ dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
             title: "3. Configurar el Patrón IOptions",
             description:
               "En Program.cs, usar builder.Services.Configure<T> para vincular la sección de configuración correspondiente a la clase del modelo POCO.",
-            code: `builder.Services.Configure<ExampleClassName>(builder.Configuration.GetSection("ExampleName"));`,
+            code: `// Vincula la sección "ExampleName" (del JSON o User Secrets) a la clase ExampleClassName
+// Esto permite que ASP.NET llene los datos automáticamente.
+builder.Services.Configure<ExampleClassName>(builder.Configuration.GetSection("ExampleName"));`,
           },
           {
             title: "4. Inyectar y Usar Secretos en un Servicio",
@@ -68,20 +76,31 @@ dotnet user-secrets set "ExampleName:SecretName" "VALOR_DEL_SECRETO"
 {
     private readonly ExampleClassName _secrets;
 
+    // Inyectamos IOptionsSnapshot o IOptionsMonitor si queremos detectar cambios en caliente
     public ExampleService(Microsoft.Extensions.Options.IOptions<ExampleClassName> secrets)
     {
+        // Accedemos a los valores ya cargados y validados
         _secrets = secrets.Value;
     }
-    // ...
+    
+    public void Connect()
+    {
+        var apiKey = _secrets.ExampleApiKey; 
+        // Usar apiKey...
+    }
 }`,
           },
           {
             title: "5. Producción: Integrar con un Almacén Externo",
             description:
               "Para producción, añadir un proveedor de configuración como Azure Key Vault en Program.cs para cargar los secretos desde un servicio centralizado y seguro.",
-            code: `if (builder.Environment.IsProduction())
+            code: `// Solo configuramos Key Vault si NO estamos en desarrollo
+if (builder.Environment.IsProduction())
 {
+    // La URL del Key Vault suele inyectarse como variable de entorno en el servidor
     var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
+    
+    // DefaultAzureCredential intenta autenticarse automáticamente usando la Identidad del Servidor
     builder.Configuration.AddAzureKeyVault(
         new Uri(keyVaultUrl), new DefaultAzureCredential());
 }`,

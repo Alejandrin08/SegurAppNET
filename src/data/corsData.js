@@ -8,12 +8,12 @@ export const corsData = {
   interestingFacts: [
     {
       description:
-        "No todas las solicitudes cross-origin son iguales. Las 'solicitudes simples' (como GET o POST con ciertos tipos de contenido) no requieren una verificación previa (preflight), mientras que las 'solicitudes complejas' (como PUT, DELETE o con encabezados personalizados) sí la necesitan.",
+        "No todas las solicitudes cross-origin son iguales. Las solicitudes simples (como GET o POST con ciertos tipos de contenido) no requieren una verificación previa (preflight), mientras que las solicitudes complejas (como PUT, DELETE o con encabezados personalizados) sí la necesitan.",
       image: CORS,
     },
     {
       description:
-        "Usar `Access-Control-Allow-Origin: *` es peligroso, especialmente si se combina con credenciales, ya que permite que cualquier sitio web del mundo realice solicitudes a tu API. La mejor práctica es siempre especificar una lista blanca (allow-list) de orígenes permitidos.",
+        "Usar Access-Control-Allow-Origin: * es peligroso, especialmente si se combina con credenciales, ya que permite que cualquier sitio web del mundo realice solicitudes a tu API. La mejor práctica es siempre especificar una lista blanca (allow-list) de orígenes permitidos.",
       image: Whitelist,
     },
   ],
@@ -34,6 +34,7 @@ export const corsData = {
 
       modalContent: {
         title: "Implementación de Políticas CORS Nombradas",
+        introduction: "En este ejemplo definimos una política llamada MyPolicyName. Este es un identificador interno arbitrario; en tu proyecto deberías usar un nombre descriptivo como PermitirFrontendReact. Asimismo, la URL https://dominio-cliente-permitido.com es solo un marcador de posición; debes reemplazarla por la URL real donde se aloja tu aplicación cliente (ej. http://localhost:3000 o https://mi-sitio.com).",
         practices: [
           {
             title: "1. Crear la Política CORS en Program.cs",
@@ -41,8 +42,10 @@ export const corsData = {
               "Usar AddCors y AddPolicy para definir una política con un nombre específico, estableciendo los orígenes, métodos y encabezados permitidos.",
             code: `builder.Services.AddCors(options =>
 {
+    // "MyPolicyName" es el nombre que usarás luego en el controlador.
     options.AddPolicy("MyPolicyName", policy =>
     {
+        // Reemplaza esta URL por la de TU frontend real
         policy.WithOrigins("https://dominio-cliente-permitido.com") 
               .AllowAnyMethod() 
               .AllowAnyHeader(); 
@@ -56,7 +59,8 @@ export const corsData = {
             code: `
 app.UseRouting();
 
-//Se llama a UseCors() sin una política para que el sistema pueda procesar las políticas aplicadas en los endpoints.
+// Se llama a UseCors() sin una política para que el sistema pueda procesar las políticas aplicadas en los endpoints.
+// IMPORTANTE: Debe ir entre UseRouting y UseAuthorization.
 app.UseCors();
 
 app.UseAuthorization();
@@ -67,6 +71,7 @@ app.UseAuthorization();
             description:
               'Usar el atributo [EnableCors("NombreDeLaPolitica")] directamente en los controladores o acciones que deban ser accesibles desde orígenes externos.',
             code: `[HttpGet("data")]
+// El nombre debe coincidir EXACTAMENTE con el definido en Program.cs
 [EnableCors("MyPolicyName")] 
 public IActionResult GetData()
 {
@@ -131,6 +136,7 @@ public IActionResult GetData()
         
       modalContent: {
         title: "Configuración de Solicitudes Preflight",
+        introduction: "Cuando configuras el Preflight Cache (MaxAge), estás decidiendo cuánto tiempo el navegador recordará los permisos antes de volver a preguntar. Hemos usado 10 minutos en este ejemplo, pero debes ajustarlo según tus necesidades: un tiempo muy corto aumenta el tráfico de red (muchas peticiones OPTIONS), mientras que un tiempo muy largo hace que los cambios en tu política tarden en reflejarse en los clientes.",
         practices: [
           {
             title: "1. Configurar Métodos Permitidos Explícitamente",
@@ -141,6 +147,7 @@ public IActionResult GetData()
     options.AddPolicy("PreflightPolicy", policy =>
     {
         policy.WithOrigins("https://dominio-cliente-permitido.com")
+              // Solo permite los verbos que tu API realmente soporta
               .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
               .AllowAnyHeader();
     });
@@ -151,6 +158,7 @@ public IActionResult GetData()
             description:
               "Usar SetPreflightMaxAge para indicarle al navegador que puede cachear el resultado de la solicitud preflight por un tiempo determinado, reduciendo el número de solicitudes OPTIONS.",
             code: `// ... dentro de la configuración de la política
+// El navegador no repetirá la solicitud OPTIONS por 10 minutos
 .SetPreflightMaxAge(TimeSpan.FromMinutes(10));`,
           },
           {
@@ -216,6 +224,7 @@ public IActionResult PostCrear([FromBody] object data)
 
       modalContent: {
         title: "Manejo de Encabezados y Credenciales en CORS",
+        introduction: "Los encabezados que configuramos aquí (X-Api-Key, X-Total-Paginas) son solo ejemplos de lo que una aplicación podría necesitar. No los copies ciegamente; identifica qué encabezados personalizados usa tu aplicación (por ejemplo, para paginación o tokens propios) y configura solo esos. Si usas headers estándar como Authorization, también debes declararlos explícitamente.",
         practices: [
           {
             title: "1. Configurar Encabezados Permitidos",
@@ -226,6 +235,7 @@ public IActionResult PostCrear([FromBody] object data)
     options.AddPolicy("HeadersPolicy", policy =>
     {
         policy.WithOrigins("https://dominio-cliente-permitido.com")
+              // Lista blanca: solo aceptamos estos headers del cliente
               .WithHeaders("Authorization", "Content-Type", "X-Api-Key")
               .AllowAnyMethod();
     });
@@ -236,6 +246,7 @@ public IActionResult PostCrear([FromBody] object data)
             description:
               "Si la API necesita recibir cookies o encabezados de autenticación del cliente, se debe usar AllowCredentials(). Al usar esta opción, es obligatorio especificar los orígenes con WithOrigins y no se puede usar AllowAnyOrigin().",
             code: `// ... dentro de la configuración de la política
+// Permite el envío de Cookies o Auth Headers en peticiones Fetch/XHR
 .AllowCredentials();`,
           },
           {
@@ -243,6 +254,7 @@ public IActionResult PostCrear([FromBody] object data)
             description:
               "Usar WithExposedHeaders para permitir que el cliente (JavaScript) pueda leer encabezados específicos que la API envía en la respuesta, como X-Total-Paginas para paginación.",
             code: `// ... dentro de la configuración de la política
+// Permite que el JS del navegador lea estos headers de la respuesta
 .WithExposedHeaders("X-Total-Paginas", "X-Token-Expirado");`,
           },
         ],

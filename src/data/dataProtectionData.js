@@ -31,6 +31,7 @@ export const dataProtectionData = {
 
       modalContent: {
         title: "Uso de la Data Protection API para Cifrado",
+        introduction: "A diferencia de usar algoritmos criptográficos crudos (como AES) donde debes administrar manualmente las claves y vectores de inicialización, la Data Protection API de ASP.NET Core maneja el ciclo de vida de las claves por ti.  Lo más importante aquí es el concepto de Purpose String (Cadena de Propósito), que garantiza que un dato cifrado para un propósito (ej. TarjetaDeCredito) no pueda ser descifrado en otro contexto (ej. TokenDeSesion), incluso si usan la misma clave maestra.",
         practices: [
           {
             title: "1. Registrar el Servicio de Data Protection",
@@ -49,7 +50,9 @@ builder.Services.AddDataProtection();`,
 
     public EncryptionService(IDataProtectionProvider provider)
     {
-        // La cadena de propósito aísla criptográficamente los datos.
+        // "MiApp.Proposito.Unico" es un identificador de aislamiento.
+        // En tu proyecto, usa algo descriptivo como "HospitalApp.HistorialMedico.V1".
+        // Si cambias este string, NO podrás descifrar los datos antiguos.
         _protector = provider.CreateProtector("MiApp.Proposito.Unico");
     }
     // ... métodos de cifrado y descifrado
@@ -61,6 +64,7 @@ builder.Services.AddDataProtection();`,
               "Dentro del servicio, crear métodos que usen _protector.Protect() para cifrar y _protector.Unprotect() para descifrar. Es crucial manejar la CryptographicException en el descifrado para gestionar casos de datos corruptos o manipulados.",
             code: `public string Encrypt(string plainText)
 {
+    // Cifra y firma digitalmente el texto
     return _protector.Protect(plainText);
 }
 
@@ -72,6 +76,7 @@ public string? Decrypt(string cipherText)
     }
     catch (System.Security.Cryptography.CryptographicException)
     {
+        // Esta excepción ocurre si la clave es incorrecta O si los datos fueron manipulados (Integridad).
         // Manejar el error: loggear, devolver null, etc.
         return null;
     }
@@ -153,6 +158,7 @@ public class MyController : ControllerBase
       
       modalContent: {
         title: "Uso de Data Protection para Cifrar appsettings.json",
+        introduction: "En entornos empresariales robustos, se suelen usar servicios como Azure Key Vault o AWS Secrets Manager. Sin embargo, para despliegues on-premise o proyectos más simples, cifrar el archivo de configuración es una excelente capa de defensa. La clave de esta técnica es que necesitamos dos aplicaciones (una consola para cifrar y la web para descifrar) que compartan el mismo Anillo de Claves (Key Ring). Por eso configuramos rutas físicas compartidas.",
         practices: [
           {
             title: "1. Preparar la Herramienta de Consola",
@@ -165,10 +171,10 @@ public class MyController : ControllerBase
             description:
               "En ambos proyectos (consola y app web), configura el servicio AddDataProtection en Program.cs. Es crucial que uses .PersistKeysToFileSystem() apuntando a la misma carpeta y .SetApplicationName() con el mismo nombre en ambos.",
             code: `// Esta configuración debe ser idéntica en ambos proyectos (consola y web API)
-// Asegúrate de que la carpeta exista y tenga permisos
+// Asegúrate de que la carpeta exista y tenga permisos de lectura/escritura para el usuario del IIS/Servidor
 services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\\Ruta\\Compartida\\Keys")) // Define una ruta accesible
-    .SetApplicationName("NombreDeAplicacionCompartido"); // Define un nombre único`,
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\\Ruta\\Compartida\\Keys")) // Ruta donde se guardan las llaves maestras XML
+    .SetApplicationName("NombreDeAplicacionCompartido"); // Identificador para compartir llaves entre apps distintas`,
           },
           {
             title: "3. Crear Herramienta de Cifrado",
@@ -176,7 +182,8 @@ services.AddDataProtection()
               "En el proyecto de consola, obtén el IDataProtectionProvider. Luego, crea un protector con CreateProtector usando una cadena de propósito única (ej. MyWebApp.Configuration.v1). Lee el JSON, cifra el valor sensible con protector.Protect() y guarda el archivo.",
             code: `// En el Program.cs de la consola
 var provider = services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
-var protector = provider.CreateProtector("MyWebApp.Configuration.v1"); // Cadena de propósito
+// El propósito debe ser EXACTAMENTE el mismo que usarás en la app web para descifrar
+var protector = provider.CreateProtector("MyWebApp.Configuration.v1"); 
 
 var configPath = @"RUTA_A_TU_APPSETTINGS.json"; // Ruta al archivo de la API
 var json = File.ReadAllText(configPath);
@@ -195,12 +202,13 @@ File.WriteAllText(configPath, jsonNode.ToJsonString(new JsonSerializerOptions { 
               "En el Program.cs de la aplicación web, justo después de configurar Data Protection, obtén una instancia del protector (usando la misma cadena de propósito). Lee el valor cifrado de la configuración, descífralo con protector.Unprotect(), y actualiza la configuración en memoria.",
             code: `// En Program.cs de la app web, después de AddDataProtection()
 var tempProvider = builder.Services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
-var protector = tempProvider.CreateProtector("MyWebApp.Configuration.v1"); // Misma cadena de propósito
+var protector = tempProvider.CreateProtector("MyWebApp.Configuration.v1"); // Misma cadena de propósito que la consola
 
 var encryptedConnString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (!string.IsNullOrEmpty(encryptedConnString))
 {
+    // Desciframos en tiempo de ejecución. El archivo en disco sigue cifrado.
     var decryptedConnString = protector.Unprotect(encryptedConnString);
     // Actualizar configuración en memoria
     builder.Configuration["ConnectionStrings:DefaultConnection"] = decryptedConnString;
@@ -269,6 +277,7 @@ if (!string.IsNullOrEmpty(encryptedConnString))
 
       modalContent: {
         title: "Uso de DataAnnotations para Validación de Modelos",
+        introduction: "Las DataAnnotations no son solo para mostrar errores bonitos en la interfaz. Son la primera línea de defensa contra ataques de Inyección y Desbordamiento de Búfer.  Al limitar la longitud de un string a 100 caracteres, impides que un atacante envíe 1 GB de datos para colapsar tu servidor (DoS). Al forzar un formato de Email, reduces vectores de ataque de inyección SQL o scripts.",
         practices: [
           {
             title: "1. Añadir Anotaciones a las Propiedades del Modelo",
@@ -281,11 +290,13 @@ public class LoginViewModel
 {
     [Required(ErrorMessage = "El correo electrónico es obligatorio")]
     [EmailAddress(ErrorMessage = "Formato de correo electrónico inválido")]
+    // MaxLength previene ataques de denegación de servicio por payload excesivo
     [MaxLength(100, ErrorMessage = "El email no puede exceder 100 caracteres")]
     public string Email { get; set; } = null!;
 
     [Required(ErrorMessage = "La contraseña es obligatoria")]
     [DataType(DataType.Password)]
+    // StringLength ayuda a cumplir políticas de seguridad de contraseñas
     [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres")]
     public string Password { get; set; } = null!;
 }`,
@@ -296,6 +307,8 @@ public class LoginViewModel
               "Añadir la sección de scripts con el archivo parcial _ValidationScriptsPartial en las vistas que contienen formularios. Esto habilita la validación del lado del cliente de forma no intrusiva, mejorando la experiencia de usuario.",
             code: `@* En una vista de Razor (ej: Login.cshtml) *@
 @section Scripts {
+    @* Esto habilita jQuery Validation para feedback inmediato (UX), 
+       pero recuerda que la seguridad real ocurre en el servidor *@
     <partial name="_ValidationScriptsPartial" />
 }`,
           },

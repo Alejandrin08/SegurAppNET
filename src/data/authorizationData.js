@@ -13,7 +13,7 @@ export const authorizationData = {
     },
     {
       description:
-        "Un principio fundamental de la autorización es el 'mínimo privilegio'. Esto significa que un usuario solo debe tener acceso a la información y a las acciones que son estrictamente necesarias para realizar su función. Negar el acceso por defecto y conceder permisos explícitamente es una de las prácticas más seguras en el diseño de software.",
+        "Un principio fundamental de la autorización es el mínimo privilegio. Esto significa que un usuario solo debe tener acceso a la información y a las acciones que son estrictamente necesarias para realizar su función. Negar el acceso por defecto y conceder permisos explícitamente es una de las prácticas más seguras en el diseño de software.",
       image: Authorization,
     },
   ],
@@ -34,6 +34,7 @@ export const authorizationData = {
 
       modalContent: {
         title: "Implementación de RBAC con ASP.NET Core Identity",
+        introduction: "Para este laboratorio hemos definido roles estáticos (Admin, Manager, User) para ilustrar el mecanismo de asignación y restricción. En tu proyecto real, estos roles deben derivarse estrictamente de tus requisitos funcionales o reglas de negocio (ej. Vendedor, Supervisor, Auditor). No estás obligado a usar los nombres que ves aquí.",
         practices: [
           {
             title: "1. Definir Roles en la Aplicación",
@@ -42,6 +43,7 @@ export const authorizationData = {
             code: `// En una carpeta /Services o /Constants
 public static class UserRoles
 {
+    // Estos valores son ejemplos. Define los que tu proyecto necesite.
     public const string Admin = "Administrador";
     public const string User = "Usuario";
     public const string Manager = "Gerente";
@@ -90,8 +92,9 @@ public async Task<IActionResult> Register(RegisterViewModel model)
     var result = await _userManager.CreateAsync(user, model.Password);
     if (result.Succeeded)
     {
-        // Asignar el rol después de crear el usuario
+        // Asignar el rol seleccionado por el usuario (o definido por lógica de negocio)
         await _userManager.AddToRoleAsync(user, model.Role);
+        
         if (roleResult.Succeeded)
         {
           await _signInManager.SignInAsync(user, isPersistent: false);
@@ -99,6 +102,7 @@ public async Task<IActionResult> Register(RegisterViewModel model)
         }
         else
         {
+          // Si falla la asignación de rol, borramos el usuario para evitar inconsistencias
           await _userManager.DeleteAsync(user);
           foreach (var error in roleResult.Errors)
              {
@@ -116,6 +120,8 @@ public async Task<IActionResult> Register(RegisterViewModel model)
               "Crear un método que verifique si los roles definidos existen en la base de datos y los cree si no es así. Invocar este método en un punto de entrada de la aplicación, como el método GET del Login.",
             code: `private async Task EnsureRolesExist()
 {
+    // Este ciclo asegura que tu Base de Datos tenga los roles necesarios
+    // para que la aplicación funcione la primera vez que se despliega.
     foreach (var roleName in UserRoles.GetAllRoles())
     {
         if (!await _roleManager.RoleExistsAsync(roleName))
@@ -125,7 +131,7 @@ public async Task<IActionResult> Register(RegisterViewModel model)
     }
 }
 
-// Invocar en el método GET del Login
+// Invocar en el método GET del Login (o en Program.cs al inicio)
 public async Task<IActionResult> Login()
 {
     await EnsureRolesExist();
@@ -137,6 +143,7 @@ public async Task<IActionResult> Login()
             description:
               'Usar el atributo [Authorize(Roles = "...")] en las acciones de los controladores para restringir el acceso por rol. En las vistas de Razor, usar User.IsInRole("...") para mostrar u ocultar elementos de la interfaz.',
             code: `// En un controlador
+// Solo usuarios con el rol "Administrador" pueden entrar aquí
 [Authorize(Roles = UserRoles.Admin)]
 public IActionResult ControlPanel()
 {
@@ -144,6 +151,7 @@ public IActionResult ControlPanel()
 }
 
 // En una vista (_Layout.cshtml)
+// Ocultamos el enlace si el usuario no es Admin
 @if (User.IsInRole(UserRoles.Admin))
 {
     <li class="nav-item">
@@ -171,7 +179,7 @@ public IActionResult ControlPanel()
                 {
                   description: "Modelo de datos e Interfaz de usuario (10%)",
                   achieved:
-                    "La propiedad 'Role' fue añadida al modelo de registro y el formulario incluye un <select> con iteración sobre roles.",
+                    "La propiedad Role fue añadida al modelo de registro y el formulario incluye un <select> con iteración sobre roles.",
                   notAchieved:
                     "Propiedad faltante en el modelo, o el <select> es inexistente o tiene roles hardcodeados.",
                 },
@@ -253,6 +261,7 @@ public IActionResult ControlPanel()
 
       modalContent: {
         title: "Implementación de Autorización con Políticas",
+        introduction: "A diferencia de los roles simples, las Políticas permiten evaluar reglas complejas combinando múltiples factores. En este laboratorio creamos una política que exige DOS condiciones: tener el rol de Manager Y pertenecer a un Area de Trabajo específica. En tu proyecto, podrías usar esto para verificar edad, suscripciones activas, o cualquier dato almacenado como Claim.",
         practices: [
           {
             title: "1. Definir Atributos para Claims",
@@ -261,6 +270,8 @@ public IActionResult ControlPanel()
             code: `// En una carpeta /Services o /Constants
 public static class WorkAreas
 {
+    // Definimos áreas específicas para ESTE ejemplo.
+    // Tú define las que necesites (ej. Ventas, Marketing, etc.)
     public const string HumanResources = "Recursos Humanos";
     public const string Technology = "Tecnología";
 
@@ -291,7 +302,8 @@ public string? WorkArea { get; set; }
 </div>
 
 
-// Script en Register.cshtml para mostrar/ocultar el campo, por ejemplo, añade un id al select de rol para que se active el claim solo si es 'Manager'
+// Script en Register.cshtml para mostrar/ocultar el campo
+// En este ejemplo, la lógica de negocio dice que solo los Manager tienen Área.
 document.getElementById("roleSelect").addEventListener("change", function () {
     if (this.value === "Manager") {
         document.getElementById("workAreaContainer").style.display = "block";
@@ -309,7 +321,9 @@ if (model.Role == UserRoles.Manager)
 {
     if (string.IsNullOrEmpty(model.WorkArea)) { /* Manejar error */ }
     
+    // "WorkArea" es el nombre (Key) del Claim. El valor viene del modelo.
     var claimResult = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("WorkArea", model.WorkArea));
+    
     if (claimResult.Succeeded)
     {
       await _signInManager.SignInAsync(user, isPersistent: false);
@@ -317,6 +331,7 @@ if (model.Role == UserRoles.Manager)
     }
     else
     {
+      // Rollback: Borrar usuario si falla el claim
       await _userManager.DeleteAsync(user);
       foreach (var error in claimResult.Errors)
       {
@@ -331,6 +346,8 @@ if (model.Role == UserRoles.Manager)
               "En Program.cs, registrar las políticas de autorización. Cada política define uno o más requisitos, como requerir un rol y un claim con un valor específico.",
             code: `builder.Services.AddAuthorization(options =>
 {
+    // Definimos una política llamada "TechnologyManagerOnly"
+    // Para cumplirla, el usuario debe ser Manager Y pertenecer a Tecnología.
     options.AddPolicy("TechnologyManagerOnly", policy =>
         policy.RequireRole("Manager")
               .RequireClaim("WorkArea", "Tecnología"));
@@ -345,6 +362,7 @@ if (model.Role == UserRoles.Manager)
             description:
               "Proteger las acciones de los controladores utilizando el atributo [Authorize] y especificando el nombre de la política a aplicar.",
             code: `// En un controlador
+// En lugar de Roles="...", usamos Policy="NombreDeLaPolitica"
 [Authorize(Policy = "TechnologyManagerOnly")]
 public IActionResult ManagementTI()
 {
@@ -377,7 +395,7 @@ public IActionResult ManagementTI()
                 {
                   description: "Registro con claims (10%)",
                   achieved:
-                    "El método de registro asigna el 'claim' al usuario y valida que el valor no sea nulo.",
+                    "El método de registro asigna el claim al usuario y valida que el valor no sea nulo.",
                   notAchieved:
                     "El claim no se registra o falta el manejo de errores y validaciones.",
                 },
@@ -410,7 +428,7 @@ public IActionResult ManagementTI()
                 {
                   description: "Validación contra acceso no autorizado (25%)",
                   achieved:
-                    "Un usuario que no cumple con todos los requisitos de una política es redirigido a 'Acceso Denegado'.",
+                    "Un usuario que no cumple con todos los requisitos de una política es redirigido a Acceso Denegado.",
                   notAchieved:
                     "El usuario tiene acceso directo a vistas restringidas sin cumplir con todos los requisitos de la política.",
                 },
@@ -433,6 +451,7 @@ public IActionResult ManagementTI()
       githubUrl: "https://github.com/SegurAppNet/SegurApp-labs/tree/main/Authorization/Identity",
       modalContent: {
         title: "Implementación de ASP.NET Core Identity",
+        introduction: "ASP.NET Core Identity ofrece opciones de seguridad robustas. En este laboratorio configuramos políticas como longitud de contraseña de 8 caracteres y bloqueo tras 5 intentos. Debes tener en cuenta que en un proyecto real, estos valores deben alinearse con las políticas de seguridad de la organización o estándares internacionales (como NIST).",
         practices: [
           {
             title: "1. Añadir Paquetes NuGet",
@@ -593,14 +612,14 @@ dotnet ef database update`,
                   achieved:
                     "Se agregaron correctamente los paquetes de Identity y Entity Framework Core en el archivo .csproj.",
                   notAchieved:
-                    "No se agregaron los paquetes necesarios, faltan paquetes o sus versiones no son compatibles.",
+                    "No se agregaron los paquetes necesarios, faltan paquetes o sus versiones son incorrectas.",
                 },
                 {
                   description: "Configurar base de datos (10%)",
                   achieved:
-                    "Se creó la clase ApplicationDbContext, la cual hereda de IdentityDbContext y configuró un constructor con DbContextOptions. Se añadió la cadena de conexión en appsettings.json con servidor y nombre de base de datos correctos.",
+                    "Se creó la clase ApplicationDbContext, hereda de IdentityDbContext y se configuró la cadena de conexión en appsettings.json.",
                   notAchieved:
-                    "No se creó ApplicationDbContext, no hereda de IdentityDbContext, falta el constructor apropiado, o no se configuró la cadena de conexión o solo se hizo parcialmente.",
+                    "No se creó ApplicationDbContext, no hereda de IdentityDbContext, o la cadena de conexión es incorrecta.",
                 },
                 {
                   description: "Configurar servicios en Program.cs (10%)",
@@ -619,7 +638,7 @@ dotnet ef database update`,
                 {
                   description: "Generar y aplicar migraciones (10%)",
                   achieved:
-                    "Se ejecutaron correctamente los comandos de migraciones 'add' y 'update', creando las tablas de Identity en la base de datos.",
+                    "Se ejecutaron correctamente los comandos de migraciones add y update, creando las tablas de Identity en la base de datos.",
                   notAchieved:
                     "No se generaron las migraciones, fallaron los comandos, o no se crearon las tablas.",
                 },
@@ -661,6 +680,7 @@ dotnet ef database update`,
 
       modalContent: {
         title: "Uso de AuthorizeView",
+        introduction: "El componente AuthorizeView es una herramienta de Experiencia de Usuario (UX). Permite que la aplicación reaccione visualmente al estado del usuario (mostrar Cerrar sesión en lugar de Ingresar). Sin embargo, recuerda siempre: ocultar un botón no impide que un atacante intente llamar a la acción que ese botón realizaba. La seguridad real siempre está en el servidor (Backend).",
         practices: [
           {
             title: "1. Modificar Vistas con <AuthorizeView>",

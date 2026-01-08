@@ -7,7 +7,7 @@ import Rubric from "../Rubric/Rubric";
 
 function Modal({ goodPractice }) {
   const { recommendation, warning, githubUrl } = goodPractice || {};
-  const { title, practices = [], rubric } = goodPractice?.modalContent || {};
+  const { title, introduction, practices = [], rubric } = goodPractice?.modalContent || {};
 
   const closeModal = () => {
     if (window.bootstrap) {
@@ -48,32 +48,33 @@ function Modal({ goodPractice }) {
               <RiCloseCircleLine className="icon-close" />
             </button>
           </div>
+
           <div className="modal-body custom-modal-body">
             {githubUrl && (
               <div className="github-banner">
-                  <div className="github-banner-content">
+                <div className="github-banner-content">
                   <div className="github-icon-container">
-                      <FaGithub className="github-icon" />
+                    <FaGithub className="github-icon" />
                   </div>
                   <div className="github-text">
-                      <h4>¿Listo para practicar?</h4>
-                      <p>
+                    <h4>¿Listo para practicar?</h4>
+                    <p>
                       Clona el repositorio de esta práctica para seguir paso a paso los ejemplos.
-                      </p>
+                    </p>
                   </div>
-                  
                   <a 
-                      href={githubUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="github-link"
+                    href={githubUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="github-link"
                   >
-                      <span>Ir al repositorio</span>
-                      <FaExternalLinkAlt className="external-icon" />
+                    <span>Ir al repositorio</span>
+                    <FaExternalLinkAlt className="external-icon" />
                   </a>
-                  </div>
+                </div>
               </div>
             )}
+
             <div className="info-boxes-container">
               {recommendation && (
                 <div className="info-box recommendation">
@@ -92,6 +93,14 @@ function Modal({ goodPractice }) {
                 </div>
               )}
             </div>
+
+            {introduction && (
+              <div style={{ width: "100%", maxWidth: "960px", marginBottom: "var(--spacing-lg)" }}>
+                <p style={{ lineHeight: "1.6", color: "var(--color-text)", margin: "0" }}>
+                  {introduction}
+                </p>
+              </div>
+            )}
 
             {practices.map((practice, index) => (
               <div key={index} className="goodpractice-container">
