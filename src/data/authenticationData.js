@@ -32,6 +32,7 @@ export const authenticationData = {
 
       modalContent: {
         title: "Implementación de 2FA con Google Authenticator",
+        introduction: "En este laboratorio utilizaremos el algoritmo TOTP (Time-based One-Time Password) siguiendo el estándar RFC 6238. Usamos Google Authenticator como ejemplo de cliente, pero al ser un estándar abierto, tu implementación funcionará con Microsoft Authenticator, Authy o cualquier app compatible. Los intervalos de tiempo y longitudes de código definidos en el servicio siguen las convenciones de seguridad estándar.",
         practices: [
           {
             title: "1. Añadir Paquetes NuGet Requeridos",
@@ -95,6 +96,8 @@ public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
 
     public string GenerateQRCode(string email, string secretKey)
     {
+        // "SegurAppNet" es el identificador de ESTE laboratorio. 
+        // En tu proyecto real, usa el nombre de tu empresa/app.
         var issuer = "SegurAppNet";
         var qrCodeData = $"otpauth://totp/{issuer}:{email}?secret={secretKey}&issuer={issuer}";
         
@@ -183,6 +186,8 @@ public static class Base32Encoding
 public class Totp
 {
     private readonly byte[] _secret;
+    // El paso de 30 segundos es el estándar de la industria (RFC 6238).
+    // Cambiar esto haría que apps como Google Authenticator fallen.
     private readonly int _step = 30;
     private readonly int _digits = 6;
 
@@ -199,6 +204,8 @@ public class Totp
 
         var currentTimeStep = GetCurrentTimeStepNumber();
         
+        // Verificamos paso actual, anterior y siguiente para tolerar 
+        // pequeñas desincronizaciones de reloj (+- 30 seg).
         for (int i = -1; i <= 1; i++)
         {
             var testCode = GenerateCode(currentTimeStep + i);
@@ -477,11 +484,11 @@ public class GoogleAuthenticatorTokenProvider : IUserTwoFactorTokenProvider<Iden
         }
     });
 
-    document.querySelector('input[name="TwoFactorCode"]').addEventListener('input', function(e) {
+    document.querySelector(input[name="TwoFactorCode"]).addEventListener(input, function(e) {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
 
-    document.querySelector('input[name="TwoFactorCode"]').addEventListener('input', function(e) {
+    document.querySelector(input[name="TwoFactorCode"]).addEventListener(input, function(e) {
         if (this.value.length === 6) {
             // Opcional: descomentar para auto-submit
             // this.form.submit();
@@ -498,7 +505,7 @@ public class GoogleAuthenticatorTokenProvider : IUserTwoFactorTokenProvider<Iden
           {
             title: "5. Modificar Controlador",
             description:
-              "Modificar el controlador para añadir los métodos GET y POST para 'EnableTwoFactor' y 'LoginWith2FA', y ajustar el flujo de Login para que redirija a la configuración o validación de 2FA según corresponda.",
+              "Modificar el controlador para añadir los métodos GET y POST para EnableTwoFactor y LoginWith2FA, y ajustar el flujo de Login para que redirija a la configuración o validación de 2FA según corresponda.",
             code: `// Inyección en el controlador de 2FA, agregar ITwoFactorAuthenticationService al constructor
 private readonly ITwoFactorAuthenticationService _twoFactorService;
 
@@ -530,6 +537,7 @@ public async Task<IActionResult> Login(LoginViewModel model)
     }
     else
     {
+      // Si el usuario no tiene 2FA, lo redirigimos para que lo configure.
       return RedirectToAction("EnableTwoFactor", "Account" );
     }
     // ... resto del flujo ...
@@ -542,7 +550,7 @@ public async Task<IActionResult> EnableTwoFactor()
     var user = await _userManager.GetUserAsync(User);
     if (user == null)
     {
-        return NotFound($"Incapaz de cargar la información del usuario con ID '{_userManager.GetUserId(User)}'.");
+        return NotFound($"Incapaz de cargar la información del usuario con ID {_userManager.GetUserId(User)}.");
     }
     var secretKey = _twoFactorService.GenerateSecretKey();
     var email = await _userManager.GetEmailAsync(user) ?? user.Email ?? string.Empty;
@@ -567,7 +575,7 @@ public async Task<IActionResult> EnableTwoFactor(Enable2FAViewModel model)
     var user = await _userManager.GetUserAsync(User);
     if (user == null)
     {
-        return NotFound($"Incapaz de cargar la información del usuario con ID '{_userManager.GetUserId(User)}'.");
+        return NotFound($"Incapaz de cargar la información del usuario con ID {_userManager.GetUserId(User)}.");
     }
     if (model == null || string.IsNullOrEmpty(model.Code))
     {
@@ -823,6 +831,7 @@ app.UseSession();`,
 
       modalContent: {
         title: "Implementación Segura de JSON Web Tokens (JWT)",
+        introduction: "Para este laboratorio usaremos un enfoque de firma simétrica (HS256) por simplicidad, donde el servidor y la API comparten la misma clave secreta. En entornos distribuidos más complejos, se suele preferir firmas asimétricas (RS256 con claves pública/privada). Los tiempos de expiración definidos aquí (30 min) son ejemplos; en producción, estos tiempos deben equilibrar la seguridad con la experiencia de usuario.",
         practices: [
           {
             title: "1. Configurar Autenticación JWT",
@@ -830,6 +839,8 @@ app.UseSession();`,
               "En appsettings.json, definir una clave secreta segura, emisor y audiencia. Luego, en Program.cs, registrar el servicio de autenticación JWT, configurando los parámetros de validación del token.",
             code: `// En appsettings.json
 "Jwt": {
+  // ¡IMPORTANTE! Esta clave debe ser de al menos 32 bytes (256 bits) para HMAC-SHA256
+  // En producción, usa un Secret Manager, nunca la dejes en código.
   "Key": "UNA_CLAVE_SECRETA_MUY_LARGA_Y_SEGURA_DE_MAS_DE_32_BYTES",
   "Issuer": "https://tu-dominio.com",
   "Audience": "https://tu-api.com"
@@ -867,6 +878,8 @@ var token = new JwtSecurityToken(
     issuer: _config["Jwt:Issuer"],
     audience: _config["Jwt:Audience"],
     claims: claims,
+    // La expiración es crucial. 30 min es un ejemplo común.
+    // Menos tiempo = más seguro, pero requiere implementar Refresh Tokens para buena UX.
     expires: DateTime.Now.AddMinutes(30),
     signingCredentials: credentials);
 
@@ -948,6 +961,7 @@ app.UseAuthorization();`,
 
       modalContent: {
         title: "Implementación de ASP.NET Core Identity",
+        introduction: "ASP.NET Core Identity ofrece opciones de seguridad robustas. En este laboratorio configuramos políticas como longitud de contraseña de 8 caracteres y bloqueo tras 5 intentos. Debes tener en cuenta que en un proyecto real, estos valores deben alinearse con las políticas de seguridad de la organización o estándares internacionales (como NIST).",
         practices: [
           {
             title: "1. Añadir Paquetes NuGet",
@@ -993,6 +1007,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Configurar Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
+    // Configuraciones de ejemplo para este laboratorio:
     options.Password.RequireDigit = true;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 8;
@@ -1134,7 +1149,7 @@ dotnet ef database update`,
                 {
                   description: "Generar y aplicar migraciones (10%)",
                   achieved:
-                    "Se ejecutaron correctamente los comandos de migraciones 'add' y 'update', creando las tablas de Identity.",
+                    "Se ejecutaron correctamente los comandos de migraciones add y update, creando las tablas de Identity.",
                   notAchieved:
                     "No se generaron las migraciones, fallaron los comandos, o no se crearon las tablas.",
                 },
@@ -1177,6 +1192,7 @@ dotnet ef database update`,
 
         modalContent: {
         title: "Implementación de Rate Limiting",
+        introduction: "El Rate Limiting es crucial para la estabilidad de la API. En este ejemplo usamos un límite de 10 peticiones/minuto para que puedas probar fácilmente el bloqueo. En un entorno real, este número debe basarse en la capacidad de tu servidor y el comportamiento esperado de tus usuarios (ej. 60-100 req/min).",
         practices: [
           {
             title: "1. Configurar Políticas en Program.cs",
@@ -1185,7 +1201,7 @@ dotnet ef database update`,
             code: `builder.Services.AddRateLimiter(options =>
 {
     // Política "PerIP": Limita a 10 peticiones por minuto POR CADA IP.
-    // Usa 'RateLimitPartition.GetFixedWindowLimiter' para particionar por IP.
+    // Usa RateLimitPartition.GetFixedWindowLimiter para particionar por IP.
     options.AddPolicy("PerIP", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -1307,6 +1323,7 @@ app.MapGet("/api/data", () => "Some data")
         
       modalContent: {
         title: "Configuración de Límites de Tamaño de Solicitud",
+        introduction: "Por defecto, Kestrel permite un cuerpo de solicitud de ~30MB. Reducir o limitar esto ayuda a prevenir que un atacante consuma tu memoria RAM o disco enviando archivos gigantes. Aquí configuramos un límite de 10MB globalmente y 100MB para subidas específicas, pero deberías ajustar estos valores al tamaño máximo real que tu negocio requiera.",
         practices: [
           {
             title: "1. Configuración Global",
@@ -1383,12 +1400,13 @@ public IActionResult UploadLargeFile(IFormFile file)
 
       modalContent: {
         title: "Implementación de Iniciar Sesión con Google",
+        introduction: "En este ejemplo configuramos Google como proveedor de identidad, pero el proceso es casi idéntico para Microsoft, Facebook o GitHub. La clave es delegar la gestión de contraseñas a un tercero confiable y solo recibir la confirmación de identidad (OpenID Connect). Recuerda: Las credenciales (ClientId y Secret) nunca deben estar escritas directamente en el código fuente (hardcoded).",
         practices: [
           {
             title: "1. Registrar la Aplicación en el Proveedor Externo",
             description:
               "Antes de escribir código, debes ir a la consola del proveedor (ej. Google Cloud Console). Allí, debes crear un nuevo ID de cliente de OAuth, configurar la pantalla de consentimiento y, lo más importante, registrar tus URIs de redireccionamiento autorizados (ej. https://localhost:PUERTO/signin-google). Al final, el proveedor te dará un ID de Cliente y un Secreto de Cliente.",
-            code: "/* Pasos en Google Cloud Console: \n 1. Ir a 'APIS y Servicios' -> 'Credenciales'.\n 2. 'Crear credenciales' -> 'ID de cliente de OAuth'.\n 3. Seleccionar 'Aplicación web'.\n 4. Añadir URI: https://localhost:PUERTO/signin-google \n 5. Guardar el ID de Cliente y el Secreto. */",
+            code: "/* Pasos en Google Cloud Console: \n 1. Ir a APIS y Servicios -> Credenciales.\n 2. Crear credenciales -> ID de cliente de OAuth.\n 3. Seleccionar Aplicación web.\n 4. Añadir URI: https://localhost:PUERTO/signin-google \n 5. Guardar el ID de Cliente y el Secreto. */",
           },
           {
             title: "2. Almacenar Secretos de Cliente",

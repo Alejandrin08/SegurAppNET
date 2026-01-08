@@ -13,7 +13,7 @@ export const httpsData = {
     },
     {
       description:
-        "El middleware 'UseHttpsRedirection' en ASP.NET Core redirige las solicitudes HTTP al puerto HTTPS correspondiente antes de que lleguen a la lógica de la aplicación, asegurando que toda la comunicación posterior esté cifrada desde el principio.",
+        "El middleware UseHttpsRedirection en ASP.NET Core redirige las solicitudes HTTP al puerto HTTPS correspondiente antes de que lleguen a la lógica de la aplicación, asegurando que toda la comunicación posterior esté cifrada desde el principio.",
       image: HTTPS,
     },
   ],
@@ -31,6 +31,7 @@ export const httpsData = {
 
       modalContent: {
         title: "Implementación de HSTS en ASP.NET Core",
+        introduction: "El protocolo HSTS no es una configuración del servidor, sino una instrucción para el navegador del usuario.  Al implementarlo, debes tener mucho cuidado con el valor MaxAge. En este laboratorio usamos 60 segundos para que, si cometes un error, el navegador olvide la obligación de usar HTTPS rápidamente. En un proyecto real en producción, este valor debe ser de al menos 1 año (31536000 segundos) para ser efectivo.",
         practices: [
           {
             title: "1. Habilitar HTTPS en el Proyecto",
@@ -44,9 +45,12 @@ export const httpsData = {
               "Registrar el servicio HSTS, especificando un MaxAge (tiempo que el navegador recordará la política). Para desarrollo, se usa un valor corto para evitar conflictos con otros proyectos en localhost.",
             code: `builder.Services.AddHsts(options =>
 {
-    // Para desarrollo, usar un valor corto. Para producción, usar 365 días.
+    // ¡CRÍTICO! En Desarrollo: usar segundos (ej. 60) para no bloquear localhost.
+    // En Producción: usar TimeSpan.FromDays(365).
     options.MaxAge = TimeSpan.FromSeconds(60); 
-    options.IncludeSubDomains = false; // Cambiar a true en producción si aplica
+    
+    // Si tienes subdominios (api.tuweb.com), actívalo. Si no, déjalo en false.
+    options.IncludeSubDomains = false; 
     options.Preload = false; 
 });`,
           },
@@ -55,11 +59,14 @@ export const httpsData = {
             description:
               "En el pipeline de la aplicación, añadir app.UseHsts() y app.UseHttpsRedirection(). La redirección fuerza la primera visita a ser HTTPS, y HSTS se encarga de las visitas subsecuentes.",
             code: `// En Program.cs
+// 1. Primero redirigimos cualquier petición HTTP a HTTPS
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseRouting();
 
-// HSTS debe ir después de la redirección y antes de la autorización/endpoints
+// 2. HSTS se añade aquí. Solo funciona si la petición YA es HTTPS.
+// Envía el header "Strict-Transport-Security" al cliente.
 app.UseHsts();
 
 app.UseAuthorization();
@@ -125,6 +132,7 @@ app.MapControllerRoute(
 
       modalContent: {
         title: "Implementación de Encabezados de Seguridad",
+        introduction: "Los navegadores modernos tienen mecanismos de seguridad integrados, pero a menudo están desactivados por defecto para mantener la compatibilidad con sitios antiguos.  Con este middleware, activamos explícitamente estas defensas. Aunque existen librerías como NWebsec que automatizan esto, implementarlo manualmente en un middleware personalizado te da control total y entendimiento de qué estás enviando al cliente.",
         practices: [
           {
             title: "1. Crear un Middleware Personalizado",
@@ -132,8 +140,16 @@ app.MapControllerRoute(
               "En Program.cs, usar app.Use() para crear un middleware que intercepte todas las respuestas y añada los encabezados de seguridad necesarios antes de enviarlas al cliente.",
             code: `app.Use(async (context, next) =>
 {
+    // Previene que el navegador "adivine" el tipo de archivo (MIME-Sniffing).
+    // Evita que un archivo subido como .txt se ejecute como .js
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    
+    // Evita el Clickjacking prohibiendo que tu sitio se cargue en un <iframe> 
+    // a menos que sea desde tu propio dominio (SAMEORIGIN).
     context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+    
+    // Protege la privacidad del usuario al no enviar la URL completa 
+    // cuando navegan desde tu sitio hacia un sitio externo.
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     
     await next();

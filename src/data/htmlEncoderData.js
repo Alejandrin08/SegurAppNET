@@ -4,7 +4,7 @@ import CSP from "../assets/CSP.png";
 export const htmlEncoderData = {
   securityMechanismTitle: "Codificador HTML (HTML Encoder)",
   definition:
-    "El HTML Encoder se asegura que los datos devueltos por la API estén correctamente codificados para evitar que se ejecuten como código malicioso en el navegador del usuario. ASP.NET Core provee del framework de Razor el cual se encarga de codificar automáticamente las variables para prevenir la ejecución de scripts maliciosos.",
+    "El HTML Encoder se asegura que los datos devueltos por la API estén correctamente codificados para evitar que se ejecuten como código malicioso en el navegador del usuario.  ASP.NET Core provee del framework de Razor el cual se encarga de codificar automáticamente las variables para prevenir la ejecución de scripts maliciosos.",
   interestingFacts: [
     {
       description:
@@ -38,45 +38,56 @@ export const htmlEncoderData = {
 
       modalContent: {
         title: "Implementación de Content Security Policy (CSP)",
+        introduction: "La CSP es tu última línea de defensa. Si un atacante logra inyectar un script (saltándose tu validación y encoder), la CSP le dice al navegador: No reconozco este script, no lo ejecutes.  En este laboratorio implementamos una técnica avanzada llamada Nonce (Number used Once). Esto genera un código único por cada petición, permitiendo que SOLO los scripts que tú firmes con ese código se ejecuten, bloqueando todo lo demás.",
         practices: [
           {
             title: "1. Configurar Middleware CSP en Program.cs",
             description:
-              "Añadir un middleware personalizado para interceptar todas las respuestas y adjuntar el encabezado 'Content-Security-Policy' con las directivas de seguridad adecuadas. Estas directivas definen las fuentes permitidas para diferentes tipos de recursos. Se hace uso de nonce para permitir scripts y/o estilos específicos si es necesario.",
+              "Añadir un middleware personalizado para interceptar todas las respuestas y adjuntar el encabezado Content-Security-Policy con las directivas de seguridad adecuadas. Estas directivas definen las fuentes permitidas para diferentes tipos de recursos. Se hace uso de nonce para permitir scripts y/o estilos específicos si es necesario.",
             code: `//En Program.cs
 
 //Ejemplo avanzado con nonce, si se usan scripts en línea y además recursos externos
 app.Use(async (context, next) =>
 {
+    // 1. Generamos un token criptográfico único para ESTA petición específica.
     var nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+    
+    // 2. Lo guardamos en el contexto para poder usarlo luego en la Vista (Razor).
     context.Items["csp-nonce"] = nonce;
 
+    // 3. Construimos el encabezado.
+    // self: permite recursos del mismo dominio.
+    // nonce-{nonce}: permite SOLO scripts/estilos que tengan este atributo exacto.
     context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; " +
         $"script-src 'self' 'nonce-{nonce}'; " +
+        // Aquí permitimos estilos propios, con nonce, y de Google Fonts externamente.
         $"style-src 'self' 'nonce-{nonce}' https://fonts.googleapis.com; " +
         "img-src 'self' data:; " +
         "font-src 'self' https://fonts.gstatic.com; " +
         "connect-src 'self'; " +
+        // frame-ancestors none previene ataques de Clickjacking (nadie puede ponerte en un iframe).
         "frame-ancestors 'none'; " +
         "base-uri 'self';");
 
     await next();
-});
-
-`,
+});`,
           },
           {
             title: "2. Usar nonce en Scripts y Estilos en línea",
             description:
               "Si tu aplicación utiliza scripts o estilos en línea, asegúrate de incluir el nonce generado en las etiquetas correspondientes para que no sean bloqueados por la CSP.",
-            code: `//En tus vistas en las que uses scripts o estilos inline añade nonce="@Context.Items["csp-nonce"]", por ejemplo:
+            code: `//En tus vistas (Views) en las que uses scripts o estilos inline 
+// añade el atributo nonce leyendo del contexto.
+
 <script nonce="@Context.Items["csp-nonce"]">
   // Código JavaScript inline
+  console.log("Este script es seguro porque tiene el nonce correcto");
 </script>
 
 <style nonce="@Context.Items["csp-nonce"]">
   /* Código CSS inline */
+  body { background-color: #f0f0f0; }
 </style>
             `,
           },
