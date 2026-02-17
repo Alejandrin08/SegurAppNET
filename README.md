@@ -1,6 +1,6 @@
 # SegurAppNet
 
-**SegurAppNet** es una guía interactiva que documenta de manera práctica y estructurada los mecanismos de seguridad que ofrece **ASP.NET Core**. Este sitio está diseñado para desarrolladores que desean comprender, aplicar y evaluar correctamente las prácticas de seguridad recomendadas en aplicaciones web desarrolladas con este framework.
+**SegurAppNet** es un recurso que documenta de manera práctica y estructurada los mecanismos de seguridad que ofrece **ASP.NET Core**. Este sitio está diseñado para desarrolladores que desean comprender, aplicar y evaluar correctamente las prácticas de seguridad recomendadas en aplicaciones web desarrolladas con este framework.
 
 ## ¿Qué ofrece SegurAppNet?
 
