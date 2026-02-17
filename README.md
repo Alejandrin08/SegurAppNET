@@ -8,7 +8,7 @@
 - Guía paso a paso de **cómo implementarlos** correctamente.
 - Información sobre las **amenazas que busca mitigar cada mecanismo**.
 - Conjunto de **prácticas de seguridad recomendadas** asociadas a cada mecanismo, con instrucciones claras de implementación.
-- **Rúbrica de evaluación** para validar si un mecanismo ha sido implementado correctamente.
+- **Checklist de verificación** para verificar si un mecanismo ha sido implementado correctamente.
 
 ## ¿Cómo ejecutar el sitio?
 

@@ -70,7 +70,7 @@ function MotivationSection() {
         {
           icon: <FaShieldAlt />,
           title: "Verificación objetiva",
-          description: "Rúbricas de evaluación que ayudan a validar la correcta implementación de prácticas seguras."
+          description: "Checklist de verificación que ayudan a validar la correcta implementación de prácticas seguras."
         }
       ]
     }

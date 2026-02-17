@@ -124,7 +124,7 @@ function Modal({ goodPractice }) {
             ))}
 
             <div className="rubric-section">
-              <h2>Rúbrica de evaluación</h2>
+              <h2>Checklist de verificación</h2>
               {rubric && <Rubric data={rubric.rubricData} />}
             </div>
           </div>
